@@ -13,6 +13,7 @@ class ShopManager {
                     baseCost: 20,
                     baseDps: 0.2,
                     icon: 'assets/helpers/shibes/shibes-idle-0.png',
+                    miningSprite: 'assets/helpers/shibes/shibes-mine-0.png',
                     description: 'Very kind shibe to mine much dogecoin.',
                     category: 'basic'
                 },
@@ -21,6 +22,7 @@ class ShopManager {
                     baseCost: 400,
                     baseDps: 2,
                     icon: 'assets/helpers/kennels/kennels-idle-0.png',
+                    miningSprite: 'assets/helpers/kennels/kennels-mine-0.png',
                     description: 'Wow very efficiency, entire kennels to mine dogecoin.',
                     category: 'basic'
                 },
@@ -29,6 +31,7 @@ class ShopManager {
                     baseCost: 1800,
                     baseDps: 4,
                     icon: 'assets/helpers/kittens/kittens-idle-0.png',
+                    miningSprite: 'assets/helpers/kittens/kittens-mine-0.png',
                     description: 'Kittens to stream cute videos to the internet for dogecoin.',
                     category: 'basic'
                 },
@@ -37,6 +40,7 @@ class ShopManager {
                     baseCost: 50000,
                     baseDps: 9,
                     icon: 'assets/helpers/rockets/rockets-idle-0.png',
+                    miningSprite: 'assets/helpers/rockets/rockets-mine-0.png',
                     description: 'A rocket to fly to the moon.',
                     category: 'advanced'
                 },
@@ -45,6 +49,7 @@ class ShopManager {
                     baseCost: 9999999,
                     baseDps: 66,
                     icon: 'assets/helpers/rigs/rigs-idle-0.png',
+                    miningSprite: 'assets/helpers/rigs/rigs-mine-0.png',
                     description: 'Mines into the future where infinite dogecoins exist.',
                     category: 'advanced'
                 },

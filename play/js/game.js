@@ -416,6 +416,13 @@ class DogeMinerGame {
         helperSprite.className = 'helper-sprite attached-to-mouse';
         helperSprite.style.opacity = '0.7';
         
+        // Add special classes for different helper types (same as in createHelperSprite)
+        if (helperType === 'spaceRocket') {
+            helperSprite.classList.add('rocket');
+        } else if (helperType === 'miningShibe') {
+            helperSprite.classList.add('shibe');
+        }
+        
         document.getElementById('helper-container').appendChild(helperSprite);
         
         this.helperBeingPlaced = {
@@ -435,9 +442,13 @@ class DogeMinerGame {
                 const leftPanel = document.getElementById('left-panel');
                 const rect = leftPanel.getBoundingClientRect();
                 
-                // Position relative to left panel
-                const x = e.clientX - rect.left - 30; // Center the sprite
-                const y = e.clientY - rect.top - 30;
+                // Get helper size based on type
+                const helperSize = this.helperSpriteBeingPlaced.classList.contains('shibe') ? 30 : 60;
+                const offset = helperSize / 2; // Center the sprite
+                
+                // Position relative to left panel, centered on cursor
+                const x = e.clientX - rect.left - offset;
+                const y = e.clientY - rect.top - offset;
                 
                 this.helperSpriteBeingPlaced.style.left = x + 'px';
                 this.helperSpriteBeingPlaced.style.top = y + 'px';
@@ -449,11 +460,16 @@ class DogeMinerGame {
                 const leftPanel = document.getElementById('left-panel');
                 const rect = leftPanel.getBoundingClientRect();
                 
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
+                // Get helper size based on type
+                const helperSize = this.helperSpriteBeingPlaced.classList.contains('shibe') ? 30 : 60;
+                const offset = helperSize / 2; // Center the sprite
+                
+                // Use the same positioning logic as mouse move
+                const x = e.clientX - rect.left - offset;
+                const y = e.clientY - rect.top - offset;
                 
                 // Check if position is valid (not overlapping with existing helpers or mining area)
-                if (this.isValidHelperPosition(x, y)) {
+                if (this.isValidHelperPosition(x, y, helperSize)) {
                     this.placeHelper(x, y);
                 }
             }
@@ -477,8 +493,7 @@ class DogeMinerGame {
         };
     }
     
-    isValidHelperPosition(x, y) {
-        const helperSize = 60;
+    isValidHelperPosition(x, y, helperSize = 60) {
         const margin = 10;
         
         // Check bounds of left panel
@@ -554,6 +569,13 @@ class DogeMinerGame {
         helperSprite.style.top = placedHelper.y + 'px';
         helperSprite.dataset.helperId = placedHelper.id;
         
+        // Add special classes for different helper types
+        if (placedHelper.type === 'spaceRocket') {
+            helperSprite.classList.add('rocket');
+        } else if (placedHelper.type === 'miningShibe') {
+            helperSprite.classList.add('shibe');
+        }
+        
         document.getElementById('helper-container').appendChild(helperSprite);
         
         // Start mining animation after a short delay
@@ -565,10 +587,32 @@ class DogeMinerGame {
     startHelperMining(placedHelper) {
         const helperSprite = document.querySelector(`[data-helper-id="${placedHelper.id}"]`);
         if (helperSprite) {
-            // For now, keep using the same sprite but add mining animation
-            // TODO: Add mining sprite support to shop data
-            helperSprite.classList.add('mining');
+            // Start 3fps animation between idle and mining sprites
+            this.startHelperAnimation(placedHelper, helperSprite);
             placedHelper.isMining = true;
+        }
+    }
+    
+    startHelperAnimation(placedHelper, helperSprite) {
+        let isIdle = true;
+        const animationInterval = setInterval(() => {
+            if (isIdle) {
+                helperSprite.src = placedHelper.helper.miningSprite || placedHelper.helper.icon;
+            } else {
+                helperSprite.src = placedHelper.helper.icon;
+            }
+            isIdle = !isIdle;
+        }, 333); // 3fps = 333ms per frame
+        
+        // Store interval ID for cleanup
+        helperSprite.dataset.animationInterval = animationInterval;
+    }
+    
+    stopHelperAnimation(helperSprite) {
+        const intervalId = helperSprite.dataset.animationInterval;
+        if (intervalId) {
+            clearInterval(parseInt(intervalId));
+            helperSprite.dataset.animationInterval = '';
         }
     }
     

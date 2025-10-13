@@ -152,6 +152,8 @@ body {
     pointer-events: none;
     z-index: 5;
     transition: transform 0.1s ease;
+    object-fit: contain; /* Prevent stretching, maintain aspect ratio */
+    image-rendering: pixelated; /* Keep pixel art crisp */
 }
 
 .helper-sprite.attached-to-mouse {
@@ -160,12 +162,23 @@ body {
 }
 
 .helper-sprite.mining {
-    animation: helperMining 0.5s ease-in-out infinite alternate;
+    /* Mining animation will be handled by sprite cycling */
 }
 
-@keyframes helperMining {
-    0% { transform: scale(1) rotate(0deg); }
-    100% { transform: scale(1.1) rotate(2deg); }
+/* Helper size variations */
+.helper-sprite.shibe {
+    width: 30px; /* 2x smaller than default 60px */
+    height: 30px;
+}
+
+/* Rocket floating animation */
+.helper-sprite.rocket {
+    animation: rocketFloat 2s ease-in-out infinite;
+}
+
+@keyframes rocketFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
 }
 
 /* Rock Setup */
@@ -430,9 +443,29 @@ body {
 
 #panel-content {
     height: calc(100% - 35px);
-    overflow: hidden;
+    overflow-y: auto; /* Allow vertical scrolling */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
     padding: 0px;
     margin-top: -5px; /* Tighter spacing with tabs */
+}
+
+/* Custom scrollbar styling for settings */
+#panel-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+#panel-content::-webkit-scrollbar-track {
+    background: rgba(212, 175, 55, 0.1);
+    border-radius: 4px;
+}
+
+#panel-content::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 4px;
+}
+
+#panel-content::-webkit-scrollbar-thumb:hover {
+    background: #b8941f;
 }
 
 #shop-content {
