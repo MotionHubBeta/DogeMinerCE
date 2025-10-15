@@ -461,6 +461,8 @@ class DogeMinerGame {
                 helperSprite.classList.add('rocket');
             } else if (helperData.type === 'miningShibe') {
                 helperSprite.classList.add('shibe');
+            } else if (helperData.type === 'infiniteDogebility') {
+                helperSprite.classList.add('dogebility');
             }
             
             document.getElementById('helper-container').appendChild(helperSprite);
@@ -490,12 +492,17 @@ class DogeMinerGame {
                     const helperSize = sprite.classList.contains('shibe') ? 30 : 60;
                     const offset = helperSize / 2; // Center the sprite
                     
-                    // Add stacking offset - each sprite is offset by 8px
-                    const stackOffset = index * 8;
+                    // Create bunch formation for cursor sprites to match placement
+                    const angle = (index / cursorSprites.length) * Math.PI * 2; // Distribute in a circle
+                    const radius = Math.min(15 + (index * 3), 30); // Start small, grow outward
+                    const randomOffset = (Math.random() - 0.5) * 8; // Add some randomness
                     
-                    // Position relative to left panel, centered on cursor with stack offset
-                    const x = e.clientX - rect.left - offset + stackOffset;
-                    const y = e.clientY - rect.top - offset + stackOffset;
+                    const stackOffsetX = Math.cos(angle) * radius + randomOffset;
+                    const stackOffsetY = Math.sin(angle) * radius + randomOffset;
+                    
+                    // Position relative to left panel, centered on cursor with bunch offset
+                    const x = e.clientX - rect.left - offset + stackOffsetX;
+                    const y = e.clientY - rect.top - offset + stackOffsetY;
                     
                     sprite.style.left = x + 'px';
                     sprite.style.top = y + 'px';
@@ -545,10 +552,13 @@ class DogeMinerGame {
     placeAllHelpersOnCursor(x, y) {
         // Place all helpers on cursor at the specified position with stacking offset
         this.helpersOnCursor.forEach((helperData, index) => {
-            // Add stacking offset for each helper
-            const stackOffset = index * 8;
-            const placeX = x + stackOffset;
-            const placeY = y + stackOffset;
+            // Create a more natural "bunch" formation
+            const angle = (index / this.helpersOnCursor.length) * Math.PI * 2; // Distribute in a circle
+            const radius = Math.min(15 + (index * 3), 30); // Start small, grow outward
+            const randomOffset = (Math.random() - 0.5) * 8; // Add some randomness
+            
+            const placeX = x + Math.cos(angle) * radius + randomOffset;
+            const placeY = y + Math.sin(angle) * radius + randomOffset;
             
             // Create the placed helper object
             const placedHelper = {
@@ -575,7 +585,7 @@ class DogeMinerGame {
         
         // Update UI and DPS
         this.updateDPS();
-        this.updateUI();
+            this.updateUI();
         this.updateShopPrices();
     }
     
@@ -600,8 +610,8 @@ class DogeMinerGame {
         
         if (x + helperSize > miningX && x < miningX + miningRect.width &&
             y + helperSize > miningY && y < miningY + miningRect.height) {
-            return false;
-        }
+        return false;
+    }
         
         // Check if overlapping with existing helpers
         for (const placedHelper of this.placedHelpers) {
@@ -655,6 +665,8 @@ class DogeMinerGame {
             helperSprite.classList.add('rocket');
         } else if (placedHelper.type === 'miningShibe') {
             helperSprite.classList.add('shibe');
+        } else if (placedHelper.type === 'infiniteDogebility') {
+            helperSprite.classList.add('dogebility');
         }
         
         // Add bounce animation class
@@ -684,17 +696,23 @@ class DogeMinerGame {
     
     startHelperAnimation(placedHelper, helperSprite) {
         let isIdle = true;
-        const animationInterval = setInterval(() => {
+        
+        // Use 1fps for time machine rig and dogebility drive (less eye strain)
+        // Use 3fps for all other helpers
+        const isSlowAnimation = placedHelper.type === 'timeMachineRig' || placedHelper.type === 'infiniteDogebility';
+        const animationInterval = isSlowAnimation ? 1000 : 333; // 1fps = 1000ms, 3fps = 333ms
+        
+        const intervalId = setInterval(() => {
             if (isIdle) {
                 helperSprite.src = placedHelper.helper.miningSprite || placedHelper.helper.icon;
             } else {
                 helperSprite.src = placedHelper.helper.icon;
             }
             isIdle = !isIdle;
-        }, 333); // 3fps = 333ms per frame
+        }, animationInterval);
         
         // Store interval ID for cleanup
-        helperSprite.dataset.animationInterval = animationInterval;
+        helperSprite.dataset.animationInterval = intervalId;
     }
     
     stopHelperAnimation(helperSprite) {
@@ -1095,7 +1113,7 @@ class DogeMinerGame {
         
         // Update shop prices and quantities without rebuilding the entire shop (unless skipped)
         if (!skipShopPrices) {
-            this.updateShopPrices();
+        this.updateShopPrices();
         }
         
         document.getElementById('total-mined').textContent = this.formatNumber(Math.floor(this.totalMined));

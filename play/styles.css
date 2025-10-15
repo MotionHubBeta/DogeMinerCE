@@ -190,6 +190,12 @@ body {
     height: 30px;
 }
 
+/* Dogebility drive is 15% bigger */
+.helper-sprite.dogebility {
+    width: 69px; /* 60px * 1.15 = 69px */
+    height: 69px; /* 60px * 1.15 = 69px */
+}
+
 /* Rocket floating animation */
 .helper-sprite.rocket {
     animation: rocketFloat 2s ease-in-out infinite;
@@ -198,6 +204,16 @@ body {
 @keyframes rocketFloat {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-8px); }
+}
+
+/* Cursor helper floating animation */
+.helper-sprite.attached-to-mouse {
+    animation: cursorFloat 2.5s ease-in-out infinite;
+}
+
+@keyframes cursorFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
 }
 
 /* Rock Setup */

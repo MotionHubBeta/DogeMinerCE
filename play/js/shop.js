@@ -58,6 +58,7 @@ class ShopManager {
                     baseCost: 9999999999,
                     baseDps: 999,
                     icon: 'assets/helpers/dogebility/dogebility-idle-0.png',
+                    miningSprite: 'assets/helpers/dogebility/dogebility-mine-0.png',
                     description: 'A ship that instantaneously travels to any place in the Universe. Result? Many Dogecoins.',
                     category: 'advanced'
                 },
