@@ -492,13 +492,19 @@ class DogeMinerGame {
                     const helperSize = sprite.classList.contains('shibe') ? 30 : 60;
                     const offset = helperSize / 2; // Center the sprite
                     
-                    // Create bunch formation for cursor sprites to match placement
-                    const angle = (index / cursorSprites.length) * Math.PI * 2; // Distribute in a circle
-                    const radius = Math.min(15 + (index * 3), 30); // Start small, grow outward
-                    const randomOffset = (Math.random() - 0.5) * 8; // Add some randomness
+                    let stackOffsetX = 0;
+                    let stackOffsetY = 0;
                     
-                    const stackOffsetX = Math.cos(angle) * radius + randomOffset;
-                    const stackOffsetY = Math.sin(angle) * radius + randomOffset;
+                    // Only add stacking offset for helpers beyond the first one
+                    if (index > 0) {
+                        // Create bunch formation for cursor sprites to match placement
+                        const angle = (index / cursorSprites.length) * Math.PI * 2; // Distribute in a circle
+                        const radius = Math.min(15 + (index * 3), 30); // Start small, grow outward
+                        const randomOffset = (Math.random() - 0.5) * 8; // Add some randomness
+                        
+                        stackOffsetX = Math.cos(angle) * radius + randomOffset;
+                        stackOffsetY = Math.sin(angle) * radius + randomOffset;
+                    }
                     
                     // Position relative to left panel, centered on cursor with bunch offset
                     const x = e.clientX - rect.left - offset + stackOffsetX;
@@ -552,13 +558,19 @@ class DogeMinerGame {
     placeAllHelpersOnCursor(x, y) {
         // Place all helpers on cursor at the specified position with stacking offset
         this.helpersOnCursor.forEach((helperData, index) => {
-            // Create a more natural "bunch" formation
-            const angle = (index / this.helpersOnCursor.length) * Math.PI * 2; // Distribute in a circle
-            const radius = Math.min(15 + (index * 3), 30); // Start small, grow outward
-            const randomOffset = (Math.random() - 0.5) * 8; // Add some randomness
+            let placeX = x;
+            let placeY = y;
             
-            const placeX = x + Math.cos(angle) * radius + randomOffset;
-            const placeY = y + Math.sin(angle) * radius + randomOffset;
+            // Only add stacking offset for helpers beyond the first one
+            if (index > 0) {
+                // Create a more natural "bunch" formation
+                const angle = (index / this.helpersOnCursor.length) * Math.PI * 2; // Distribute in a circle
+                const radius = Math.min(15 + (index * 3), 30); // Start small, grow outward
+                const randomOffset = (Math.random() - 0.5) * 8; // Add some randomness
+                
+                placeX = x + Math.cos(angle) * radius + randomOffset;
+                placeY = y + Math.sin(angle) * radius + randomOffset;
+            }
             
             // Create the placed helper object
             const placedHelper = {
