@@ -176,7 +176,10 @@ class UIManager {
         
         if (helperType && window.game) {
             const success = window.game.buyHelper(helperType);
-            if (!success) {
+            if (success) {
+                // Trigger chromatic aberration effect on successful purchase
+                window.game.createChromaticAberrationEffect(button);
+            } else {
                 console.log('Failed to buy helper - insufficient funds');
             }
         } else {

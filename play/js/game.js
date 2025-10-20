@@ -680,6 +680,83 @@ class DogeMinerGame {
         this.updateUI();
     }
     
+    // Chromatic aberration effect for buy helper buttons
+    createChromaticAberrationEffect(button) {
+        // Create a timeline for the chromatic aberration effect
+        const tl = gsap.timeline();
+        
+        // Create multiple colored layers for the effect
+        const originalButton = button;
+        const buttonRect = button.getBoundingClientRect();
+        
+        // Create red, green, and blue offset layers
+        const layers = ['red', 'green', 'blue'];
+        const offsets = [
+            { x: 3, y: -1 },   // Red layer offset
+            { x: 0, y: 0 },    // Green layer (center)
+            { x: -3, y: 1 }    // Blue layer offset
+        ];
+        
+        const layerElements = [];
+        
+        layers.forEach((color, index) => {
+            const layer = originalButton.cloneNode(true);
+            layer.style.position = 'absolute';
+            layer.style.top = '0';
+            layer.style.left = '0';
+            layer.style.pointerEvents = 'none';
+            layer.style.zIndex = '1000';
+            layer.style.mixBlendMode = 'screen';
+            
+            // Apply color filter
+            if (color === 'red') {
+                layer.style.filter = 'hue-rotate(0deg) saturate(2) brightness(0.5)';
+            } else if (color === 'green') {
+                layer.style.filter = 'hue-rotate(120deg) saturate(2) brightness(0.5)';
+            } else if (color === 'blue') {
+                layer.style.filter = 'hue-rotate(240deg) saturate(2) brightness(0.5)';
+            }
+            
+            originalButton.parentNode.appendChild(layer);
+            layerElements.push(layer);
+            
+            // Set initial position with offset
+            gsap.set(layer, {
+                x: offsets[index].x,
+                y: offsets[index].y,
+                opacity: 0
+            });
+        });
+        
+        // Animate the chromatic aberration effect
+        tl.to(layerElements, {
+            opacity: 0.8,
+            duration: 0.05,
+            ease: "power2.out"
+        })
+        .to(layerElements, {
+            opacity: 0,
+            duration: 0.15,
+            ease: "power2.in"
+        }, 0.05)
+        .to(layerElements, {
+            x: 0,
+            y: 0,
+            duration: 0.2,
+            ease: "power2.out"
+        }, 0)
+        .call(() => {
+            // Clean up the layer elements
+            layerElements.forEach(layer => {
+                if (layer.parentNode) {
+                    layer.parentNode.removeChild(layer);
+                }
+            });
+        });
+        
+        return tl;
+    }
+    
     getRandomMiningShibeName() {
         return this.miningShibeNames[Math.floor(Math.random() * this.miningShibeNames.length)];
     }
