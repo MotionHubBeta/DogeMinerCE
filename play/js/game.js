@@ -20,13 +20,10 @@ class DogeMinerGame {
         
         this.helperNames = {
             'miningShibe': 'Mining Shibe',
-            'kennel': 'Kennel',
-            'dogeKennels': 'Kennel',
-            'spaceRocket': 'Moon Rocket',
-            'kitten': 'Streamer Kittens',
-            'dogeKittens': 'Streamer Kittens',
-            'rig': 'Mining Rig',
-            'dogeRigs': 'Mining Rig',
+            'dogeKennels': 'Doge Kennels',
+            'streamerKittens': 'Streamer Kittens',
+            'spaceRocket': 'Space Rocket',
+            'timeMachineRig': 'Time Machine Mining Rig',
             'infiniteDogebility': 'Infinite Dogebility Drive'
         };
         
@@ -724,12 +721,35 @@ class DogeMinerGame {
         nameTooltip.textContent = helperName;
         nameTooltip.dataset.helperId = placedHelper.id;
         
-        // Position tooltip relative to helper
-        nameTooltip.style.left = (placedHelper.x + 20) + 'px'; // Center horizontally (moved left)
-        nameTooltip.style.top = (placedHelper.y - 25) + 'px'; // Above the helper
+        // Position tooltip relative to helper with dynamic centering
+        const helperWidth = 60; // Standard helper width
+        let centerOffset = 20; // Default centering offset
+        
+        // Adjust centering for different helper types
+        if (placedHelper.type === 'infiniteDogebility') {
+            centerOffset = 33; // Dogebility drive: unchanged
+        } else if (placedHelper.type === 'timeMachineRig') {
+            centerOffset = 28; // Mining Rig: moved right by 10 (18 + 10)
+        } else if (placedHelper.type === 'streamerKittens') {
+            centerOffset = 29; // Streamer Kittens: moved right by 2 (27 + 2)
+        } else if (placedHelper.type === 'spaceRocket') {
+            centerOffset = 25; // Space Rocket horizontal unchanged
+        } else if (placedHelper.type === 'dogeKennels') {
+            centerOffset = 30; // Doge Kennels: moved right by 2 (28 + 2)
+        }
+        
+        // Adjust vertical positioning for specific helper types
+        let verticalOffset = 22; // Default vertical offset
+        if (placedHelper.type === 'spaceRocket') {
+            verticalOffset = 10; // Space Rocket: moved up by 5 more (15 - 5)
+        } else if (placedHelper.type === 'streamerKittens') {
+            verticalOffset = 25; // Streamer Kittens: down by 3 (22 + 3)
+        }
+        
+        nameTooltip.style.left = (placedHelper.x + centerOffset) + 'px'; // Center horizontally
+        nameTooltip.style.top = (placedHelper.y - verticalOffset) + 'px'; // Above the helper
         nameTooltip.style.transform = 'translateX(-50%)'; // Center the tooltip text
         
-        console.log('Created tooltip for', placedHelper.type, 'with name:', helperName, 'at position:', nameTooltip.style.left, nameTooltip.style.top);
         
         document.getElementById('helper-container').appendChild(nameTooltip);
         
@@ -751,13 +771,12 @@ class DogeMinerGame {
         
         // Start mining animation after a short delay
         setTimeout(() => {
-            console.log('Starting helper mining for:', placedHelper.type, 'at position:', placedHelper.x, placedHelper.y);
             this.startHelperMining(placedHelper);
         }, 1000);
     }
     
     startHelperMining(placedHelper) {
-        const helperSprite = document.querySelector(`[data-helper-id="${placedHelper.id}"]`);
+        const helperSprite = document.querySelector(`img[data-helper-id="${placedHelper.id}"]`);
         if (helperSprite) {
             // Start 3fps animation between idle and mining sprites
             this.startHelperAnimation(placedHelper, helperSprite);
@@ -773,7 +792,6 @@ class DogeMinerGame {
         const isSlowAnimation = placedHelper.type === 'timeMachineRig' || placedHelper.type === 'infiniteDogebility';
         const animationInterval = isSlowAnimation ? 1000 : 333; // 1fps = 1000ms, 3fps = 333ms
         
-        console.log('Starting animation for', placedHelper.type, 'with interval:', animationInterval, 'isSlowAnimation:', isSlowAnimation);
         
         const intervalId = setInterval(() => {
             if (isIdle) {

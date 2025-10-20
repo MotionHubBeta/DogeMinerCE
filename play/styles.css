@@ -191,7 +191,7 @@ body {
     white-space: nowrap;
     pointer-events: none;
     z-index: 1000;
-    opacity: 1;
+    opacity: 0;
     transition: opacity 0.2s ease;
     text-shadow: 
         -1px -1px 0 #ff8c00,
