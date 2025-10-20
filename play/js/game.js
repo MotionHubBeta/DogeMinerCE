@@ -40,6 +40,10 @@ class DogeMinerGame {
         this.isSpaceDown = false;
         this.swingTimeout = null;
         
+        // Mouse position tracking
+        this.mouseX = window.innerWidth / 2;
+        this.mouseY = window.innerHeight / 2;
+        
         // Click rate limiting (max 15 CPS like original DogeMiner 2)
         this.maxCPS = 15;
         this.clickTimes = [];
@@ -678,80 +682,112 @@ class DogeMinerGame {
         // Update DPS and UI
         this.updateDPS();
         this.updateUI();
+        
+        // Add mouse tracking for fly effect
+        document.addEventListener('mousemove', (e) => {
+            this.mouseX = e.clientX;
+            this.mouseY = e.clientY;
+        });
     }
     
     // Chromatic aberration effect for buy helper buttons
     createChromaticAberrationEffect(button) {
-        // Create a timeline for the chromatic aberration effect
+        // Simple and compatible chromatic aberration effect
         const tl = gsap.timeline();
         
-        // Create multiple colored layers for the effect
-        const originalButton = button;
-        const buttonRect = button.getBoundingClientRect();
+        // Get all elements within the button (including dogecoin logo and price text)
+        const buttonElements = [button, ...button.querySelectorAll('*')];
         
-        // Create red, green, and blue offset layers
-        const layers = ['red', 'green', 'blue'];
-        const offsets = [
-            { x: 3, y: -1 },   // Red layer offset
-            { x: 0, y: 0 },    // Green layer (center)
-            { x: -3, y: 1 }    // Blue layer offset
-        ];
-        
-        const layerElements = [];
-        
-        layers.forEach((color, index) => {
-            const layer = originalButton.cloneNode(true);
-            layer.style.position = 'absolute';
-            layer.style.top = '0';
-            layer.style.left = '0';
-            layer.style.pointerEvents = 'none';
-            layer.style.zIndex = '1000';
-            layer.style.mixBlendMode = 'screen';
-            
-            // Apply color filter
-            if (color === 'red') {
-                layer.style.filter = 'hue-rotate(0deg) saturate(2) brightness(0.5)';
-            } else if (color === 'green') {
-                layer.style.filter = 'hue-rotate(120deg) saturate(2) brightness(0.5)';
-            } else if (color === 'blue') {
-                layer.style.filter = 'hue-rotate(240deg) saturate(2) brightness(0.5)';
-            }
-            
-            originalButton.parentNode.appendChild(layer);
-            layerElements.push(layer);
-            
-            // Set initial position with offset
-            gsap.set(layer, {
-                x: offsets[index].x,
-                y: offsets[index].y,
-                opacity: 0
-            });
-        });
-        
-        // Animate the chromatic aberration effect
-        tl.to(layerElements, {
-            opacity: 0.8,
-            duration: 0.05,
+        // Create the chromatic aberration effect using CSS filters and transforms
+        tl.to(buttonElements, {
+            filter: "hue-rotate(20deg) saturate(2) brightness(1.3) contrast(1.2)",
+            transform: "scale(1.02)",
+            duration: 0.08,
             ease: "power2.out"
         })
-        .to(layerElements, {
-            opacity: 0,
-            duration: 0.15,
-            ease: "power2.in"
-        }, 0.05)
-        .to(layerElements, {
-            x: 0,
-            y: 0,
-            duration: 0.2,
+        .to(buttonElements, {
+            filter: "hue-rotate(-20deg) saturate(1.5) brightness(1.1)",
+            transform: "scale(0.98) translateX(2px)",
+            duration: 0.06,
+            ease: "power2.inOut"
+        })
+        .to(buttonElements, {
+            filter: "hue-rotate(0deg) saturate(1) brightness(1)",
+            transform: "scale(1) translateX(0px)",
+            duration: 0.1,
             ease: "power2.out"
-        }, 0)
+        });
+        
+        return tl;
+    }
+    
+    // Helper fly animation from shop button to cursor
+    createHelperFlyEffect(button, helperType) {
+        const tl = gsap.timeline();
+        
+        // Find the helper image in the shop item (not in the button)
+        const shopItem = button.closest('.shop-item');
+        const helperImage = shopItem ? shopItem.querySelector('.shop-item-sprite img') : null;
+        if (!helperImage) {
+            console.log('No helper image found in shop item');
+            return tl;
+        }
+        
+        // Get helper image position and cursor position
+        const helperRect = helperImage.getBoundingClientRect();
+        const helperCenterX = helperRect.left + helperRect.width / 2;
+        const helperCenterY = helperRect.top + helperRect.height / 2;
+        
+        // Get cursor position (use tracked mouse position)
+        const cursorX = this.mouseX;
+        const cursorY = this.mouseY;
+        
+        // Calculate distance and angle for the fly animation
+        const deltaX = cursorX - helperCenterX;
+        const deltaY = cursorY - helperCenterY;
+        
+        // Store original styles
+        const originalPosition = helperImage.style.position;
+        const originalZIndex = helperImage.style.zIndex;
+        const originalTransform = helperImage.style.transform;
+        
+        // Make the helper image fly
+        helperImage.style.position = 'fixed';
+        helperImage.style.zIndex = '10000';
+        helperImage.style.left = helperCenterX + 'px';
+        helperImage.style.top = helperCenterY + 'px';
+        helperImage.style.transform = 'translate(-50%, -50%)';
+        
+        // Create the fly animation
+        tl.to(helperImage, {
+            x: deltaX,
+            y: deltaY,
+            scaleX: 1.2,
+            scaleY: 0.8,
+            rotation: Math.atan2(deltaY, deltaX) * (180 / Math.PI),
+            duration: 0.3,
+            ease: "power2.out"
+        })
+        .to(helperImage, {
+            scaleX: 0.8,
+            scaleY: 1.2,
+            duration: 0.1,
+            ease: "power2.inOut"
+        })
+        .to(helperImage, {
+            scaleX: 1,
+            scaleY: 1,
+            rotation: 0,
+            duration: 0.1,
+            ease: "power2.out"
+        })
         .call(() => {
-            // Clean up the layer elements
-            layerElements.forEach(layer => {
-                if (layer.parentNode) {
-                    layer.parentNode.removeChild(layer);
-                }
-            });
+            // Reset the helper image to its original state
+            helperImage.style.position = originalPosition;
+            helperImage.style.zIndex = originalZIndex;
+            helperImage.style.left = '';
+            helperImage.style.top = '';
+            helperImage.style.transform = originalTransform;
         });
         
         return tl;

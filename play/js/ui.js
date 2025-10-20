@@ -179,11 +179,42 @@ class UIManager {
             if (success) {
                 // Trigger chromatic aberration effect on successful purchase
                 window.game.createChromaticAberrationEffect(button);
+                
+                // Trigger helper fly effect
+                window.game.createHelperFlyEffect(button, helperType);
+                
+                // Update shop display with fade-in effect
+                this.updateShopDisplay();
             } else {
                 console.log('Failed to buy helper - insufficient funds');
             }
         } else {
             console.error('Helper type or game not found:', helperType, !!window.game);
+        }
+    }
+    
+    updateShopDisplay() {
+        // Update shop prices and refresh display with fade-in effect
+        const shopContainer = document.getElementById('shop-container');
+        if (shopContainer) {
+            // Add fade-out effect
+            gsap.to(shopContainer, {
+                opacity: 0.3,
+                duration: 0.1,
+                ease: "power2.out"
+            });
+            
+            // Update shop content
+            setTimeout(() => {
+                this.renderShop();
+                
+                // Add fade-in effect
+                gsap.to(shopContainer, {
+                    opacity: 1,
+                    duration: 0.2,
+                    ease: "power2.out"
+                });
+            }, 100);
         }
     }
     
