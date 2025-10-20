@@ -743,7 +743,7 @@ class DogeMinerGame {
         if (placedHelper.type === 'spaceRocket') {
             verticalOffset = 10; // Space Rocket: moved up by 5 more (15 - 5)
         } else if (placedHelper.type === 'streamerKittens') {
-            verticalOffset = 25; // Streamer Kittens: down by 3 (22 + 3)
+            verticalOffset = 18; // Streamer Kittens: moved down (25 - 7)
         }
         
         nameTooltip.style.left = (placedHelper.x + centerOffset) + 'px'; // Center horizontally
