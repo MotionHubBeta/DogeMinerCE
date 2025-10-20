@@ -418,9 +418,9 @@ body {
 }
 
 .stat-item span {
-    background: rgb(255, 240, 190);
+    background: rgb(250, 235, 185);
     padding: 8px 15px;
-    border-radius: 13px;
+    border-radius: 10px;
     margin-left: -22px;
     z-index: 1;
     position: relative;
@@ -430,6 +430,7 @@ body {
     font-size: 16px;
     color: #8b4513;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    opacity: 0.8;
 }
 
 /* Specific colors for dogecoin and DPS amounts */
@@ -445,7 +446,8 @@ body {
 
 .stat-item:nth-child(2) span {
     padding: 4px 8px;
-    margin-left: -15px;
+    margin-left: -20px;
+    border-radius: 6px;
 }
 
 /* Floating Coins - moved to DogeCoin Effects section */

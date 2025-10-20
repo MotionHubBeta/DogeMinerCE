@@ -105,7 +105,7 @@ class UIManager {
             if (i < helperEntries.length) {
                 const [type, helper] = helperEntries[i];
                 const owned = this.game.helpers.filter(h => h.type === type).length;
-                const cost = Math.floor(helper.baseCost * Math.pow(1.2, owned));
+                const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned));
                 const canAfford = this.game.dogecoins >= cost;
                 
                 
@@ -180,10 +180,7 @@ class UIManager {
                 // Trigger chromatic aberration effect on successful purchase
                 window.game.createChromaticAberrationEffect(button);
                 
-                // Trigger helper fly effect
-                window.game.createHelperFlyEffect(button, helperType);
-                
-                // Update shop display with fade-in effect
+                // Update shop display immediately
                 this.updateShopDisplay();
             } else {
                 console.log('Failed to buy helper - insufficient funds');
@@ -199,8 +196,8 @@ class UIManager {
         if (shopContainer) {
             // Add fade-out effect
             gsap.to(shopContainer, {
-                opacity: 0.3,
-                duration: 0.1,
+                opacity: 0,
+                duration: 0.15,
                 ease: "power2.out"
             });
             
@@ -208,13 +205,13 @@ class UIManager {
             setTimeout(() => {
                 this.renderShop();
                 
-                // Add fade-in effect
+                // Add smooth fade-in effect
                 gsap.to(shopContainer, {
                     opacity: 1,
-                    duration: 0.2,
+                    duration: 0.3,
                     ease: "power2.out"
                 });
-            }, 100);
+            }, 150);
         }
     }
     

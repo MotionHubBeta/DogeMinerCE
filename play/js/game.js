@@ -44,6 +44,7 @@ class DogeMinerGame {
         this.mouseX = window.innerWidth / 2;
         this.mouseY = window.innerHeight / 2;
         
+        
         // Click rate limiting (max 15 CPS like original DogeMiner 2)
         this.maxCPS = 15;
         this.clickTimes = [];
@@ -412,7 +413,7 @@ class DogeMinerGame {
         }
         
         const owned = this.helpers.filter(h => h.type === helperType).length;
-        const cost = Math.floor(helper.baseCost * Math.pow(1.2, owned));
+        const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned));
         
         if (this.dogecoins >= cost) {
             this.dogecoins -= cost;
@@ -721,77 +722,6 @@ class DogeMinerGame {
         return tl;
     }
     
-    // Helper fly animation from shop button to cursor
-    createHelperFlyEffect(button, helperType) {
-        const tl = gsap.timeline();
-        
-        // Find the helper image in the shop item (not in the button)
-        const shopItem = button.closest('.shop-item');
-        const helperImage = shopItem ? shopItem.querySelector('.shop-item-sprite img') : null;
-        if (!helperImage) {
-            console.log('No helper image found in shop item');
-            return tl;
-        }
-        
-        // Get helper image position and cursor position
-        const helperRect = helperImage.getBoundingClientRect();
-        const helperCenterX = helperRect.left + helperRect.width / 2;
-        const helperCenterY = helperRect.top + helperRect.height / 2;
-        
-        // Get cursor position (use tracked mouse position)
-        const cursorX = this.mouseX;
-        const cursorY = this.mouseY;
-        
-        // Calculate distance and angle for the fly animation
-        const deltaX = cursorX - helperCenterX;
-        const deltaY = cursorY - helperCenterY;
-        
-        // Store original styles
-        const originalPosition = helperImage.style.position;
-        const originalZIndex = helperImage.style.zIndex;
-        const originalTransform = helperImage.style.transform;
-        
-        // Make the helper image fly
-        helperImage.style.position = 'fixed';
-        helperImage.style.zIndex = '10000';
-        helperImage.style.left = helperCenterX + 'px';
-        helperImage.style.top = helperCenterY + 'px';
-        helperImage.style.transform = 'translate(-50%, -50%)';
-        
-        // Create the fly animation
-        tl.to(helperImage, {
-            x: deltaX,
-            y: deltaY,
-            scaleX: 1.2,
-            scaleY: 0.8,
-            rotation: Math.atan2(deltaY, deltaX) * (180 / Math.PI),
-            duration: 0.3,
-            ease: "power2.out"
-        })
-        .to(helperImage, {
-            scaleX: 0.8,
-            scaleY: 1.2,
-            duration: 0.1,
-            ease: "power2.inOut"
-        })
-        .to(helperImage, {
-            scaleX: 1,
-            scaleY: 1,
-            rotation: 0,
-            duration: 0.1,
-            ease: "power2.out"
-        })
-        .call(() => {
-            // Reset the helper image to its original state
-            helperImage.style.position = originalPosition;
-            helperImage.style.zIndex = originalZIndex;
-            helperImage.style.left = '';
-            helperImage.style.top = '';
-            helperImage.style.transform = originalTransform;
-        });
-        
-        return tl;
-    }
     
     getRandomMiningShibeName() {
         return this.miningShibeNames[Math.floor(Math.random() * this.miningShibeNames.length)];
@@ -951,7 +881,7 @@ class DogeMinerGame {
         this.helpersOnCursor.forEach(helperData => {
             const helper = window.shopManager.shopData.helpers[helperData.type];
             const owned = this.helpers.filter(h => h.type === helperData.type).length;
-            const cost = Math.floor(helper.baseCost * Math.pow(1.2, owned - 1));
+            const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned - 1));
             this.dogecoins += cost;
             
             // Remove the helper from the helpers array
@@ -998,7 +928,7 @@ class DogeMinerGame {
                     const helper = window.shopManager.shopData.helpers[helperType];
                     if (helper) {
                         const owned = this.helpers.filter(h => h.type === helperType).length;
-                        const cost = Math.floor(helper.baseCost * Math.pow(1.2, owned));
+                        const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned));
                         const canAfford = this.dogecoins >= cost;
                         
                         // Update quantity
