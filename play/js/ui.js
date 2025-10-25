@@ -22,23 +22,59 @@ class UIManager {
             const currentTab = this.activePanel.replace('-tab', '');
             const isTabAlreadyActive = currentTab === tabName;
             
+            if (isTabAlreadyActive) return;
+            
+            // Define tab order for swipe direction
+            const tabOrder = ['shop', 'upgrades', 'achievements', 'settings'];
+            const currentIndex = tabOrder.indexOf(currentTab);
+            const targetIndex = tabOrder.indexOf(tabName);
+            const isMovingRight = targetIndex > currentIndex;
+            
+            // Get current and target tab elements
+            const currentTabElement = document.getElementById(currentTab + '-tab');
+            const targetTabElement = document.getElementById(tabName + '-tab');
+            
+            if (!currentTabElement || !targetTabElement) return;
+            
             // Update tab buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
             
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(tabName + '-tab').classList.add('active');
+            // Add slide-out animation to current tab
+            if (isMovingRight) {
+                currentTabElement.classList.add('slide-out-left');
+            } else {
+                currentTabElement.classList.add('slide-out-right');
+            }
+            
+            // After animation, switch tabs
+            setTimeout(() => {
+                // Remove all active classes and animation classes
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active', 'slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right');
+                });
+                
+                // Add new active tab with slide-in animation
+                targetTabElement.classList.add('active');
+                if (isMovingRight) {
+                    targetTabElement.classList.add('slide-in-right');
+                } else {
+                    targetTabElement.classList.add('slide-in-left');
+                }
+                
+                // Remove animation classes after animation completes
+                setTimeout(() => {
+                    targetTabElement.classList.remove('slide-in-right', 'slide-in-left');
+                }, 300);
+            }, 50); // Small delay to let slide-out start
             
             // Set active panel
             this.activePanel = tabName + '-tab';
             
-            // Only play sound if switching to a different tab
-            if (!isTabAlreadyActive && window.audioManager) {
+            // Play sound
+            if (window.audioManager) {
                 audioManager.playSound('swipe');
             }
             

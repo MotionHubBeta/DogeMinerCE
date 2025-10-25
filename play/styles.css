@@ -843,10 +843,79 @@ body {
 
 .tab-content {
     display: none;
+    position: relative;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .tab-content.active {
     display: block;
+    opacity: 1;
+}
+
+.tab-content.slide-out-left {
+    animation: slideOutLeft 0.3s ease forwards;
+}
+
+.tab-content.slide-in-right {
+    animation: slideInRight 0.3s ease forwards;
+}
+
+.tab-content.slide-out-right {
+    animation: slideOutRight 0.3s ease forwards;
+}
+
+.tab-content.slide-in-left {
+    animation: slideInLeft 0.3s ease forwards;
+}
+
+@keyframes slideOutLeft {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+#panel-content {
+    position: relative;
+    overflow: hidden;
 }
 
 /* Shop Styles - DogeMiner Style */
