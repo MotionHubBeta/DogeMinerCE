@@ -445,7 +445,11 @@ class DogeMinerGame {
             
             // Update UI but skip shop prices since we already updated them
             this.updateUI(true); // Pass true to skip shop price updates
-            this.playSound('check.wav');
+            
+            // Play purchase sound
+            if (window.audioManager) {
+                audioManager.playSound('ching');
+            }
             
             return true;
         }

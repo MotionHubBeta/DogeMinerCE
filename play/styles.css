@@ -1241,12 +1241,12 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #f5f5dc, #fffacd);
+    background: rgb(57, 57, 57);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10000;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.8s ease;
 }
 
 #loading-screen.hidden {
@@ -1254,50 +1254,63 @@ body {
     pointer-events: none;
 }
 
+#loading-screen.fade-out {
+    animation: loadingFadeOut 1.5s ease-out forwards;
+}
+
+@keyframes loadingFadeOut {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 1;
+        clip-path: circle(100%);
+    }
+    100% {
+        opacity: 0;
+        clip-path: circle(0% at center);
+    }
+}
+
 .loading-content {
     text-align: center;
-    color: #8b4513;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    transform: translateY(-150px);
+}
+
+.loading-title {
+    font-size: 32px;
+    font-weight: 900;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    transition: opacity 0.5s ease;
+}
+
+.loading-spinner {
+    width: 200px;
+    height: 200px;
+    transition: opacity 0.5s ease;
+}
+
+.loading-info {
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    transition: opacity 0.5s ease;
 }
 
 .loading-logo {
-    width: 200px;
+    width: 300px;
     height: auto;
-    margin-bottom: 20px;
-    filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.5));
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-}
-
-.loading-text {
-    font-size: 20px;
-    margin-bottom: 20px;
-    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
-    color: #8b4513;
-}
-
-.loading-bar {
-    width: 250px;
-    height: 8px;
-    background: rgba(212, 175, 55, 0.2);
-    border-radius: 4px;
-    overflow: hidden;
-    border: 2px solid #d4af37;
-}
-
-.loading-progress {
-    height: 100%;
-    background: linear-gradient(90deg, #d4af37, #b8941f);
-    width: 0%;
-    transition: width 0.3s ease;
-    border-radius: 4px;
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+    transition: opacity 0.5s ease;
 }
 
 /* Animations */

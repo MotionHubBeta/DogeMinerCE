@@ -18,6 +18,10 @@ class UIManager {
     setupPanels() {
         // Main tab switching functionality
         window.switchMainTab = (tabName) => {
+            // Check if this tab is already active
+            const currentTab = this.activePanel.replace('-tab', '');
+            const isTabAlreadyActive = currentTab === tabName;
+            
             // Update tab buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
@@ -32,6 +36,11 @@ class UIManager {
             
             // Set active panel
             this.activePanel = tabName + '-tab';
+            
+            // Only play sound if switching to a different tab
+            if (!isTabAlreadyActive && window.audioManager) {
+                audioManager.playSound('swipe');
+            }
             
             // Update shop content if switching to shop
             if (tabName === 'shop') {
@@ -476,6 +485,10 @@ class UIManager {
     }
     
     switchToTab(tabName) {
+        // Check if this tab is already active
+        const currentTab = this.activePanel.replace('-tab', '');
+        const isTabAlreadyActive = currentTab === tabName;
+        
         // Update tab buttons - find the correct button by data attribute or onclick
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('active');
@@ -497,6 +510,11 @@ class UIManager {
         
         // Set active panel
         this.activePanel = tabName + '-tab';
+        
+        // Only play sound if switching to a different tab
+        if (!isTabAlreadyActive && window.audioManager) {
+            audioManager.playSound('swipe');
+        }
         
         // Update shop content if switching to shop
         if (tabName === 'shop') {

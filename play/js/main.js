@@ -6,26 +6,31 @@ document.addEventListener('DOMContentLoaded', () => {
 async function initializeGame() {
     try {
         showLoadingScreen();
-        updateLoadingProgress(10);
+        updateLoadingInfo('Initializing game engine...');
         
         // Initialize game instance
         game = new DogeMinerGame();
-        updateLoadingProgress(30);
+        updateLoadingInfo('Setting up shop system...');
         
         // Initialize shop manager first (needed by UI manager)
         shopManager = new ShopManager(game);
         window.shopManager = shopManager; // Make available immediately
-        updateLoadingProgress(50);
+        updateLoadingInfo('Building user interface...');
         
         // Initialize UI manager (depends on shop manager)
         uiManager = new UIManager(game);
-        updateLoadingProgress(70);
+        updateLoadingInfo('Loading audio system...');
+        
+        // Initialize audio manager
+        audioManager = new AudioManager();
+        audioManager.init();
+        updateLoadingInfo('Initializing save system...');
         
         saveManager = new SaveManager(game);
-        updateLoadingProgress(80);
+        updateLoadingInfo('Preparing notifications...');
         
         notificationManager = new NotificationManager(game);
-        updateLoadingProgress(90);
+        updateLoadingInfo('Loading game data...');
         
         // Try to load existing save
         if (!saveManager.loadGame()) {
@@ -34,9 +39,9 @@ async function initializeGame() {
         }
         
         // CloudSaveManager will be initialized by cloud-save.js
-        updateLoadingProgress(95);
+        updateLoadingInfo('Finalizing...');
         
-        updateLoadingProgress(100);
+        updateLoadingInfo('Ready!');
         
         // Hide loading screen after a short delay
         setTimeout(() => {
@@ -48,7 +53,12 @@ async function initializeGame() {
             // window.shopManager already assigned above
             window.saveManager = saveManager;
             window.notificationManager = notificationManager;
+            window.audioManager = audioManager;
             
+            // Start background music
+            if (audioManager) {
+                audioManager.playBackgroundMusic();
+            }
             
             notificationManager.showSuccess('Game loaded successfully!');
         }, 500);
@@ -117,17 +127,19 @@ function showLoadingScreen() {
 function hideLoadingScreen() {
     const loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen) {
-        loadingScreen.classList.add('hidden');
+        // Trigger fade-out animation
+        loadingScreen.classList.add('fade-out');
+        
         setTimeout(() => {
             loadingScreen.style.display = 'none';
-        }, 500);
+        }, 1500);
     }
 }
 
-function updateLoadingProgress(progress) {
-    const progressBar = document.getElementById('loading-progress');
-    if (progressBar) {
-        progressBar.style.width = progress + '%';
+function updateLoadingInfo(info) {
+    const loadingInfo = document.getElementById('loading-info');
+    if (loadingInfo) {
+        loadingInfo.textContent = info;
     }
 }
 
