@@ -1118,6 +1118,7 @@ class DogeMinerGame {
     
     addDragAndDropToHelper(helperSprite, placedHelper, nameTooltip) {
         let isDragging = false;
+        let hasMoved = false;
         
         // Make helper draggable
         helperSprite.style.cursor = 'grab';
@@ -1125,19 +1126,26 @@ class DogeMinerGame {
         helperSprite.addEventListener('mousedown', (e) => {
             e.preventDefault();
             isDragging = true;
+            hasMoved = false;
             helperSprite.style.cursor = 'grabbing';
             
             // Stop mining animation
             this.stopHelperMining(placedHelper);
         });
         
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging && !hasMoved) {
+                // First movement - pick up the helper immediately
+                hasMoved = true;
+                this.pickupHelper(placedHelper, helperSprite, nameTooltip);
+            }
+        });
+        
         document.addEventListener('mouseup', (e) => {
             if (isDragging) {
                 isDragging = false;
+                hasMoved = false;
                 helperSprite.style.cursor = 'grab';
-                
-                // Pick up the helper and add it back to cursor stack
-                this.pickupHelper(placedHelper, helperSprite, nameTooltip);
             }
         });
     }
@@ -1153,8 +1161,13 @@ class DogeMinerGame {
         helperSprite.remove();
         nameTooltip.remove();
         
-        // Add helper back to cursor stack
-        this.addHelperToCursor(placedHelper.type, placedHelper.helper);
+        // Preserve the helper's name and add it back to cursor stack
+        const helperWithPreservedName = {
+            ...placedHelper.helper,
+            name: placedHelper.name // Preserve the original name
+        };
+        
+        this.addHelperToCursor(placedHelper.type, helperWithPreservedName);
         
         // Update UI
         this.updateDPS();
