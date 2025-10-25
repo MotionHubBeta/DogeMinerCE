@@ -304,8 +304,8 @@ function removeDebugConsole() {
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
-    // Toggle debug mode with F12
-    if (e.key === 'F12') {
+    // Toggle debug mode with Ctrl+\
+    if (e.ctrlKey && e.key === '\\') {
         e.preventDefault();
         toggleDebugMode();
     }

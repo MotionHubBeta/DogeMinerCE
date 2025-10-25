@@ -676,10 +676,19 @@ class DogeMinerGame {
         // Check if the entire stack collides with Doge and find the best direction to move
         const stackAdjustment = this.adjustStackForDogeCollision(helperPositions);
         
-        // Place all helpers with the stack adjustment applied
+        // Apply stack adjustment to all helper positions
+        helperPositions.forEach((pos, index) => {
+            pos.x += stackAdjustment.x;
+            pos.y += stackAdjustment.y;
+        });
+
+        // Check boundaries and adjust positions to keep helpers within the panel
+        this.adjustStackForBoundaries(helperPositions);
+        
+        // Place all helpers with adjustments applied
         this.helpersOnCursor.forEach((helperData, index) => {
-            let placeX = helperPositions[index].x + stackAdjustment.x;
-            let placeY = helperPositions[index].y + stackAdjustment.y;
+            let placeX = helperPositions[index].x;
+            let placeY = helperPositions[index].y;
             
             // Create the placed helper object
             const placedHelper = {
@@ -787,6 +796,68 @@ class DogeMinerGame {
         }
         // No collision, no adjustment needed
         return { x: 0, y: 0 };
+    }
+
+    adjustStackForBoundaries(helperPositions) {
+        // Get the left panel dimensions
+        const leftPanel = document.getElementById('left-panel');
+        const panelRect = leftPanel.getBoundingClientRect();
+        
+        // Panel boundaries with some padding
+        const panelLeft = 10; // 10px padding from left edge
+        const panelRight = panelRect.width - 10; // 10px padding from right edge
+        const panelTop = 10; // 10px padding from top edge
+        const panelBottom = panelRect.height - 10; // 10px padding from bottom edge
+        
+        console.log('Panel boundaries:', { panelLeft, panelRight, panelTop, panelBottom, panelWidth: panelRect.width, panelHeight: panelRect.height });
+        
+        // Find the minimum adjustment needed to keep all helpers within bounds
+        let minAdjustX = 0;
+        let minAdjustY = 0;
+        let maxNegativeAdjustX = 0; // Track the most negative adjustment needed
+        
+        helperPositions.forEach((pos, index) => {
+            const helperSize = pos.type === 'miningShibe' ? 30 : 60;
+            const helperLeft = pos.x;
+            const helperRight = pos.x + helperSize;
+            const helperTop = pos.y;
+            const helperBottom = pos.y + helperSize;
+            
+            // Check if helper is outside panel boundaries
+            if (helperLeft < panelLeft) {
+                // Helper is too far left, need to move right
+                const adjustRight = panelLeft - helperLeft;
+                minAdjustX = Math.max(minAdjustX, adjustRight);
+            }
+            
+            if (helperRight > panelRight) {
+                // Helper is too far right, need to move left
+                const adjustLeft = helperRight - panelRight;
+                console.log(`Helper ${index} too far right:`, { helperRight, panelRight, adjustLeft });
+                maxNegativeAdjustX = Math.min(maxNegativeAdjustX, -adjustLeft);
+            }
+            
+            if (helperTop < panelTop) {
+                // Helper is too far up, need to move down
+                const adjustDown = panelTop - helperTop;
+                minAdjustY = Math.max(minAdjustY, adjustDown);
+            }
+            
+            if (helperBottom > panelBottom) {
+                // Helper is too far down, need to move up
+                const adjustUp = helperBottom - panelBottom;
+                minAdjustY = Math.max(minAdjustY, -adjustUp);
+            }
+        });
+        
+        // Apply the boundary adjustment to all helpers
+        const finalAdjustX = minAdjustX + maxNegativeAdjustX;
+        helperPositions.forEach((pos, index) => {
+            pos.x += finalAdjustX;
+            pos.y += minAdjustY;
+        });
+        
+        console.log('Final boundary adjustments:', { minAdjustX, maxNegativeAdjustX, finalAdjustX, minAdjustY });
     }
     
     adjustPositionForDogeCollision(x, y, helperType) {
