@@ -1796,6 +1796,91 @@ class DogeMinerGame {
             location.reload();
         }
     }
+    
+    getHelperData(helperType) {
+        // Return complete helper data based on type - match shop system types
+        const helperTypes = {
+            'miningShibe': { 
+                baseDps: 0.2, 
+                icon: 'assets/helpers/shibes/shibes-idle-0.png',
+                miningSprite: 'assets/helpers/shibes/shibes-mine-0.png',
+                name: 'Mining Shibe'
+            },
+            'dogeKennels': { 
+                baseDps: 2, 
+                icon: 'assets/helpers/kennels/kennels-idle-0.png',
+                miningSprite: 'assets/helpers/kennels/kennels-mine-0.png',
+                name: 'Doge Kennels'
+            },
+            'streamerKittens': { 
+                baseDps: 4, 
+                icon: 'assets/helpers/kittens/kittens-idle-0.png',
+                miningSprite: 'assets/helpers/kittens/kittens-mine-0.png',
+                name: 'Streamer Kittens'
+            },
+            'spaceRocket': { 
+                baseDps: 9, 
+                icon: 'assets/helpers/rockets/rockets-idle-0.png',
+                miningSprite: 'assets/helpers/rockets/rockets-mine-0.png',
+                name: 'Space Rocket'
+            },
+            'timeMachineRig': { 
+                baseDps: 20, 
+                icon: 'assets/helpers/rigs/rigs-idle-0.png',
+                miningSprite: 'assets/helpers/rigs/rigs-mine-0.png',
+                name: 'Time Machine Mining Rig'
+            },
+            'infiniteDogebility': { 
+                baseDps: 50, 
+                icon: 'assets/helpers/dogebility/dogebility-idle-0.png',
+                miningSprite: 'assets/helpers/dogebility/dogebility-mine-0.png',
+                name: 'Infinite Dogebility'
+            }
+        };
+        
+        return helperTypes[helperType] || helperTypes['miningShibe'];
+    }
+    
+    recreateHelperSprites() {
+        // Clear existing helper sprites
+        const existingSprites = document.querySelectorAll('.helper-sprite');
+        existingSprites.forEach(sprite => sprite.remove());
+        
+        const existingTooltips = document.querySelectorAll('.helper-tooltip');
+        existingTooltips.forEach(tooltip => tooltip.remove());
+        
+        // Recreate all helper sprites
+        this.placedHelpers.forEach(placedHelper => {
+            this.createHelperSprite(placedHelper);
+        });
+        
+        // Restart animations for all helpers
+        this.startAllHelperAnimations();
+    }
+    
+    startAllHelperAnimations() {
+        // Start animations for all placed helpers
+        this.placedHelpers.forEach(placedHelper => {
+            if (placedHelper.isMining && placedHelper.helper) {
+                const helperSprite = document.querySelector(`img[data-helper-id="${placedHelper.id}"]`);
+                if (helperSprite && placedHelper.helper.miningSprite) {
+                    this.startHelperAnimation(placedHelper, helperSprite);
+                }
+            }
+        });
+    }
+    
+    clearAllHelperSprites() {
+        // Clear all helper sprites from the DOM
+        const existingSprites = document.querySelectorAll('.helper-sprite');
+        existingSprites.forEach(sprite => sprite.remove());
+        
+        const existingTooltips = document.querySelectorAll('.helper-tooltip');
+        existingTooltips.forEach(tooltip => tooltip.remove());
+        
+        const existingNameTooltips = document.querySelectorAll('.helper-name-tooltip');
+        existingNameTooltips.forEach(tooltip => tooltip.remove());
+    }
 }
 
 // Global game instance

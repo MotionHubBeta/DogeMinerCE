@@ -112,6 +112,24 @@ class SaveManager {
     }
     
     createSaveData() {
+        // Create helper data for save - only save positions and mining shibe names
+        const helperData = this.game.placedHelpers ? this.game.placedHelpers.map(helper => {
+            const saveHelper = {
+                type: helper.type,
+                x: helper.x,
+                y: helper.y,
+                id: helper.id,
+                isMining: helper.isMining
+            };
+            
+            // Only save name for mining shibes to save space
+            if (helper.type === 'miningShibe' && helper.name) {
+                saveHelper.name = helper.name;
+            }
+            
+            return saveHelper;
+        }) : [];
+
         return {
             version: '1.0.0',
             timestamp: Date.now(),
@@ -129,6 +147,9 @@ class SaveManager {
             pickaxes: this.game.pickaxes,
             currentPickaxe: this.game.currentPickaxe,
             upgrades: this.game.upgrades || {},
+            
+            // Helper positions and names
+            placedHelpers: helperData,
             
             // Statistics
             statistics: {
@@ -169,6 +190,33 @@ class SaveManager {
         this.game.pickaxes = saveData.pickaxes || ['standard'];
         this.game.currentPickaxe = saveData.currentPickaxe || 'standard';
         this.game.upgrades = saveData.upgrades || {};
+        
+        // Load helper positions and names
+        if (saveData.placedHelpers && Array.isArray(saveData.placedHelpers)) {
+            this.game.placedHelpers = saveData.placedHelpers.map(savedHelper => {
+                const helper = {
+                    type: savedHelper.type,
+                    x: savedHelper.x || 0,
+                    y: savedHelper.y || 0,
+                    id: savedHelper.id || Date.now() + Math.random(),
+                    isMining: savedHelper.isMining || false,
+                    helper: this.game.getHelperData(savedHelper.type),
+                    dps: this.game.getHelperData(savedHelper.type).baseDps
+                };
+                
+                // Restore name for mining shibes
+                if (savedHelper.type === 'miningShibe' && savedHelper.name) {
+                    helper.name = savedHelper.name;
+                }
+                
+                return helper;
+            });
+            
+            // Recreate helper sprites after loading
+            this.game.recreateHelperSprites();
+        } else {
+            this.game.placedHelpers = [];
+        }
         
         // Apply statistics
         this.game.totalPlayTime = saveData.statistics?.totalPlayTime || 0;
@@ -322,6 +370,11 @@ class SaveManager {
                 this.game.pickaxes = [];
                 this.game.currentPickaxe = 'standard';
                 this.game.currentLevel = 'earth';
+                this.game.placedHelpers = [];
+                this.game.helpersOnCursor = [];
+                
+                // Clear all helper sprites from the DOM
+                this.game.clearAllHelperSprites();
                 
                 // Update UI immediately
                 this.game.updateUI();
