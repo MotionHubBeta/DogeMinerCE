@@ -696,7 +696,8 @@ class DogeMinerGame {
                 x: placeX,
                 y: placeY,
                 id: Date.now() + Math.random() + index, // Unique ID
-                isMining: false
+                isMining: false,
+                name: this.getHelperName(helperData.type) // Always generate the name here
             };
             
             // Add to placed helpers array
@@ -1055,7 +1056,7 @@ class DogeMinerGame {
         // Add name tooltip as a separate element
         const nameTooltip = document.createElement('div');
         nameTooltip.className = 'helper-name-tooltip';
-        const helperName = this.getHelperName(placedHelper.type);
+        const helperName = placedHelper.name || this.getHelperName(placedHelper.type);
         nameTooltip.textContent = helperName;
         nameTooltip.dataset.helperId = placedHelper.id;
         
