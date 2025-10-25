@@ -30,6 +30,31 @@
             box-sizing: border-box;
         }
 
+        /* Prevent image dragging throughout the game */
+        img {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+            pointer-events: none; /* Prevent dragging but allow click events */
+        }
+
+        /* Re-enable pointer events for interactive images */
+        .helper-sprite,
+        .helper-tooltip,
+        .helper-name-tooltip,
+        button img,
+        .clickable img,
+        .draggable img,
+        .shop-helper img,
+        .helper-icon,
+        .pickaxe-icon,
+        .doge-character,
+        .character-sprite {
+            pointer-events: auto;
+        }
+
         body {
             font-family: 'DogeSans', sans-serif;
             color: #fff;
