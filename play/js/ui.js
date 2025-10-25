@@ -84,6 +84,28 @@ class UIManager {
             }
         };
         
+        // Planet tab switching
+        window.switchPlanet = (planetName) => {
+            // Don't allow switching if already on this planet
+            const currentPlanet = document.querySelector('.planet-tab.active')?.textContent?.toLowerCase();
+            if (currentPlanet === planetName) return;
+            
+            // Update planet tab buttons
+            document.querySelectorAll('.planet-tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.planet-tab').classList.add('active');
+            
+            // Update game state to reflect planet change
+            // This is where you would implement actual planet switching logic
+            console.log(`Switched to ${planetName}`);
+            
+            // Play sound
+            if (window.audioManager) {
+                audioManager.playSound('swipe');
+            }
+        };
+        
         // Scroll wheel functionality for tab switching (shop and upgrade only)
         this.setupScrollWheelTabs();
         

@@ -14,7 +14,7 @@ A modern, open-source Dogecoin mining simulator built with JavaScript and HTML5.
 ## 🚀 Quick Start
 
 ### Play Online
-Visit [https://dogeminerce.github.io/DogeMinerCE/](https://dogeminerce.com) to play instantly in your browser.
+Visit [https://dogeminerce.com](https://dogeminerce.com) to play instantly in your browser.
 
 ### Run Locally (Cloud Saves will not work)
 1. Clone the repository:
