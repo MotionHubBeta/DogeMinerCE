@@ -1102,6 +1102,9 @@ class DogeMinerGame {
             nameTooltip.style.opacity = '0';
         });
         
+        // Add drag-and-drop functionality
+        this.addDragAndDropToHelper(helperSprite, placedHelper, nameTooltip);
+        
         // Remove bounce animation class after animation completes
         setTimeout(() => {
             helperSprite.classList.remove('place-bounce');
@@ -1113,12 +1116,68 @@ class DogeMinerGame {
         }, 1000);
     }
     
+    addDragAndDropToHelper(helperSprite, placedHelper, nameTooltip) {
+        let isDragging = false;
+        
+        // Make helper draggable
+        helperSprite.style.cursor = 'grab';
+        
+        helperSprite.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isDragging = true;
+            helperSprite.style.cursor = 'grabbing';
+            
+            // Stop mining animation
+            this.stopHelperMining(placedHelper);
+        });
+        
+        document.addEventListener('mouseup', (e) => {
+            if (isDragging) {
+                isDragging = false;
+                helperSprite.style.cursor = 'grab';
+                
+                // Pick up the helper and add it back to cursor stack
+                this.pickupHelper(placedHelper, helperSprite, nameTooltip);
+            }
+        });
+    }
+    
+    pickupHelper(placedHelper, helperSprite, nameTooltip) {
+        // Remove helper from placed helpers array
+        const helperIndex = this.placedHelpers.findIndex(helper => helper.id === placedHelper.id);
+        if (helperIndex !== -1) {
+            this.placedHelpers.splice(helperIndex, 1);
+        }
+        
+        // Remove sprite and tooltip from DOM
+        helperSprite.remove();
+        nameTooltip.remove();
+        
+        // Add helper back to cursor stack
+        this.addHelperToCursor(placedHelper.type, placedHelper.helper);
+        
+        // Update UI
+        this.updateDPS();
+        this.updateUI();
+        this.updateShopPrices();
+    }
+    
     startHelperMining(placedHelper) {
         const helperSprite = document.querySelector(`img[data-helper-id="${placedHelper.id}"]`);
         if (helperSprite) {
             // Start 3fps animation between idle and mining sprites
             this.startHelperAnimation(placedHelper, helperSprite);
             placedHelper.isMining = true;
+        }
+    }
+    
+    stopHelperMining(placedHelper) {
+        const helperSprite = document.querySelector(`img[data-helper-id="${placedHelper.id}"]`);
+        if (helperSprite) {
+            // Stop animation and reset to idle sprite
+            this.stopHelperAnimation(helperSprite);
+            helperSprite.src = placedHelper.helper.icon;
+            placedHelper.isMining = false;
         }
     }
     
