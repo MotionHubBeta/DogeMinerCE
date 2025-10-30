@@ -899,6 +899,19 @@ body {
     opacity: 1;
 }
 
+/* Ensure upgrades tab and container take full height */
+#upgrades-tab.active {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#upgrades-tab.active #upgrades-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 .tab-content.slide-out-left {
     animation: slideOutLeft 0.3s ease forwards;
 }
@@ -1546,4 +1559,84 @@ body {
         opacity: 0;
         transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.3) rotate(360deg);
     }
+}
+
+/* Upgrades Tab Styling */
+#upgrades-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 6px;
+    padding: 10px;
+}
+
+.upgrade-section {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #d4af37;
+    border-radius: 10px;
+    padding: 15px;
+    overflow: hidden;
+    position: relative;
+    min-height: 0;
+}
+
+/* Searchdog Container - Positioned at top left of each section */
+.searchdog-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 5;
+}
+
+.searchdog {
+    width: 80px;
+    height: auto;
+    pointer-events: auto;
+}
+
+.section-title {
+    color: #8b4513;
+    margin: 0 0 15px 90px; /* Add left margin to account for searchdog */
+    font-size: 16px;
+    font-weight: 600;
+    border-bottom: 2px solid #d4af37;
+    padding-bottom: 5px;
+}
+
+.upgrades-grid {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.upgrades-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.upgrades-grid::-webkit-scrollbar-track {
+    background: rgba(212, 175, 55, 0.1);
+    border-radius: 3px;
+}
+
+.upgrades-grid::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 3px;
+}
+
+.upgrades-grid::-webkit-scrollbar-thumb:hover {
+    background: #b8941f;
+}
+
+.upgrade-placeholder {
+    text-align: center;
+    color: #8b4513;
+    font-size: 14px;
+    padding: 20px;
+    opacity: 0.7;
 }

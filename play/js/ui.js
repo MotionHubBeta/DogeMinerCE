@@ -523,8 +523,8 @@ class UIManager {
     }
     
     setupScrollWheelTabs() {
-        // Define the scrollable tabs (shop and upgrade only)
-        this.scrollableTabs = ['shop', 'upgrade'];
+        // Define the scrollable tabs (shop and upgrades only)
+        this.scrollableTabs = ['shop', 'upgrades'];
         
         // Add wheel event listener to the right panel
         const rightPanel = document.getElementById('right-panel');
@@ -594,6 +594,24 @@ class UIManager {
         if (tabName === 'shop') {
             this.updateShopContent();
         }
+        
+        // Update upgrade content if switching to upgrade
+        if (tabName === 'upgrades') {
+            this.updateUpgradeContent();
+        }
+    }
+    
+    updateUpgradeContent() {
+        // This will be populated later with actual upgrade content
+        // For now, just ensure the sections are visible
+        const upgradeSections = document.querySelectorAll('.upgrade-section');
+        upgradeSections.forEach(section => {
+            const grid = section.querySelector('.upgrades-grid');
+            if (grid && grid.children.length === 0) {
+                // Add placeholder content if empty
+                grid.innerHTML = '<div class="upgrade-placeholder">Upgrade content coming soon!</div>';
+            }
+        });
     }
     
     showMoonLocked() {

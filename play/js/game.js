@@ -30,6 +30,7 @@ class DogeMinerGame {
         
         // Game state
         this.isPlaying = false;
+        this.isPlacingHelpers = false;
         this.lastSave = Date.now();
         this.autoSaveInterval = 30000; // 30 seconds
         this.startTime = Date.now();
@@ -103,6 +104,7 @@ class DogeMinerGame {
         this.startBackgroundRotation();
         this.startBlinking();
         this.startRickSpawn();
+        this.startSearchdogAnimation();
         
         // Track global mouse position
         this.addGlobalMouseTracking();
@@ -417,6 +419,18 @@ class DogeMinerGame {
     }
     
     buyHelper(helperType) {
+        console.log('=== buyHelper called ===');
+        console.log('Helper type:', helperType);
+        console.log('isPlacingHelpers:', this.isPlacingHelpers);
+        console.log('Current placementQueue length:', this.placementQueue?.length || 0);
+        console.log('helpersOnCursor length:', this.helpersOnCursor?.length || 0);
+        console.log('Stack trace:', new Error().stack);
+        
+        // Allow buying multiple helpers - only block if actively clicking to place
+        // isPlacingHelpers is true when placement is actively happening, which is ok for buying more
+        // We just need to prevent buying during drag-and-drop, which doesn't set isPlacingHelpers
+        // Actually, let's just allow all purchases - placement and drag-and-drop handle blocking
+        
         // Get helper data from shop system
         const helper = window.shopManager.shopData.helpers[helperType];
         if (!helper) {
@@ -456,7 +470,7 @@ class DogeMinerGame {
         return false;
     }
     
-    addHelperToCursor(helperType, helper) {
+    addHelperToCursor(helperType, helper, shouldStartPlacement = true) {
         // Calculate random offsets for this helper's position in the stack
         const index = this.helpersOnCursor.length;
         let randomOffsetX = 0;
@@ -478,7 +492,9 @@ class DogeMinerGame {
         });
         
         // If this is the first helper, start the placement system
-        if (this.helpersOnCursor.length === 1) {
+        // But only if shouldStartPlacement is true (not for drag-and-drop)
+        console.log('helpersOnCursor.length:', this.helpersOnCursor.length, 'isPlacingHelpers:', this.isPlacingHelpers, 'shouldStartPlacement:', shouldStartPlacement);
+        if (this.helpersOnCursor.length === 1 && shouldStartPlacement) {
             this.startHelperPlacement();
         } else {
             // Update the existing cursor sprites to show the new stack
@@ -487,6 +503,13 @@ class DogeMinerGame {
     }
     
     startHelperPlacement() {
+        // Set flag to prevent drag-and-drop during placement
+        console.log('=== Starting helper placement ===');
+        console.log('Queue length before placement:', this.placementQueue?.length || 0);
+        console.log('helpersOnCursor length:', this.helpersOnCursor?.length || 0);
+        console.log('Setting isPlacingHelpers to true');
+        this.isPlacingHelpers = true;
+        
         // Create sprites for all helpers on cursor
         this.createCursorSprites();
         
@@ -712,11 +735,16 @@ class DogeMinerGame {
         });
         
         // Clear the cursor stack
+        console.log('Clearing helpersOnCursor after successful placement, length was:', this.helpersOnCursor.length);
         this.helpersOnCursor = [];
         this.clearCursorSprites();
         
         // Clean up placement listeners
         this.finishHelperPlacement();
+        
+        // Clear placement flag
+        console.log('Clearing isPlacingHelpers flag after successful placement (first)');
+        // Don't clear here - let finishHelperPlacement handle it
         
         // Update UI and DPS
         this.updateDPS();
@@ -975,6 +1003,10 @@ class DogeMinerGame {
         // Clean up placement
         this.finishHelperPlacement();
         
+        // Clear placement flag
+        console.log('Clearing isPlacingHelpers flag after successful placement (second)');
+        // Don't clear here - let finishHelperPlacement handle it
+        
         // Update DPS and UI
         this.updateDPS();
         this.updateUI();
@@ -1125,6 +1157,17 @@ class DogeMinerGame {
         helperSprite.style.cursor = 'grab';
         
         helperSprite.addEventListener('mousedown', (e) => {
+            // Prevent drag-and-drop ONLY during helper placement (buy mode)
+            // Don't block during normal drag-and-drop (helpers can be on cursor for dragging)
+            console.log('Drag mousedown - isPlacingHelpers:', this.isPlacingHelpers);
+            if (this.isPlacingHelpers) {
+                console.log('BLOCKED: Drag attempt during placement');
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            }
+            
             e.preventDefault();
             isDragging = true;
             hasMoved = false;
@@ -1186,7 +1229,54 @@ class DogeMinerGame {
             name: originalName // Preserve the original name
         };
         
-        this.addHelperToCursor(placedHelper.type, helperWithPreservedName);
+        // Add to cursor but DON'T start placement mode (drag-and-drop handles placement)
+        this.addHelperToCursor(placedHelper.type, helperWithPreservedName, false);
+        
+        // Still need to create cursor sprites for drag-and-drop to work
+        this.createCursorSprites();
+        
+        // Add mousemove listener to make the helper follow the cursor during drag
+        const mousemoveHandler = (e) => {
+            const leftPanel = document.getElementById('left-panel');
+            const rect = leftPanel.getBoundingClientRect();
+            this.mouseX = e.clientX;
+            this.mouseY = e.clientY;
+            
+            // Update cursor sprites position
+            const cursorSprites = document.querySelectorAll('.helper-sprite.attached-to-mouse');
+            cursorSprites.forEach((sprite, index) => {
+                const helperData = this.helpersOnCursor[index];
+                const helperSize = sprite.classList.contains('shibe') ? 30 : 60;
+                const offset = helperSize / 2;
+                
+                let stackOffsetX = 0;
+                let stackOffsetY = 0;
+                
+                if (index > 0) {
+                    const randomOffsetX = helperData.randomOffsetX;
+                    const randomOffsetY = helperData.randomOffsetY;
+                    const helpersPerRow = 8;
+                    const row = Math.floor(index / helpersPerRow);
+                    const col = index % helpersPerRow;
+                    const spacing = 15;
+                    const rowSpacing = 20;
+                    
+                    stackOffsetX = (col - (helpersPerRow - 1) / 2) * spacing + randomOffsetX;
+                    stackOffsetY = row * rowSpacing + randomOffsetY;
+                }
+                
+                const x = e.clientX - rect.left - offset + stackOffsetX;
+                const y = e.clientY - rect.top - offset + stackOffsetY;
+                
+                sprite.style.left = x + 'px';
+                sprite.style.top = y + 'px';
+            });
+        };
+        
+        document.addEventListener('mousemove', mousemoveHandler);
+        
+        // Store the handler so we can remove it later
+        this.dragMousemoveHandler = mousemoveHandler;
         
         // Update UI
         this.updateDPS();
@@ -1202,6 +1292,12 @@ class DogeMinerGame {
     }
     
     dropPickedUpHelper(pickedUpHelper, x, y) {
+        // Remove the mousemove handler if it exists
+        if (this.dragMousemoveHandler) {
+            document.removeEventListener('mousemove', this.dragMousemoveHandler);
+            this.dragMousemoveHandler = null;
+        }
+        
         // Clear the cursor stack since we're placing the picked up helper
         this.helpersOnCursor = [];
         this.clearCursorSprites();
@@ -1299,6 +1395,11 @@ class DogeMinerGame {
     }
     
     finishHelperPlacement() {
+        console.log('=== Finishing helper placement ===');
+        console.log('Remaining queue length:', this.placementQueue?.length || 0);
+        console.log('helpersOnCursor length:', this.helpersOnCursor?.length || 0);
+        console.log('isPlacingHelpers before clear:', this.isPlacingHelpers);
+        
         // Remove placement sprite
         if (this.helperSpriteBeingPlaced) {
             this.helperSpriteBeingPlaced.remove();
@@ -1315,6 +1416,18 @@ class DogeMinerGame {
         
         // Clear placement state
         this.helperBeingPlaced = null;
+        
+        // SOLUTION 2: Clear all state after placement
+        console.log('Clearing all placement state');
+        this.isPlacingHelpers = false;
+        this.placementQueue = [];
+        this.currentPlacementType = null;
+        this.currentPlacementIndex = 0;
+        
+        // Remove any lingering click handlers
+        document.body.style.cursor = 'default';
+        
+        console.log('Placement state cleared - isPlacingHelpers:', this.isPlacingHelpers);
     }
     
     cancelHelperPlacement() {
@@ -1335,6 +1448,10 @@ class DogeMinerGame {
         // Clear the cursor stack
         this.helpersOnCursor = [];
         this.clearCursorSprites();
+        
+        // Clear the placement flag
+        console.log('Clearing isPlacingHelpers flag after cancellation');
+        this.isPlacingHelpers = false;
         
         this.finishHelperPlacement();
         this.updateUI();
@@ -1485,6 +1602,25 @@ class DogeMinerGame {
         setTimeout(() => {
             doge.src = originalSrc;
         }, 200);
+    }
+    
+    startSearchdogAnimation() {
+        const searchdogs = document.querySelectorAll('.searchdog');
+        if (searchdogs.length === 0) return;
+        
+        let isFrame1 = true;
+        
+        // Alternate between the two frames every 1000ms (1 second) for all searchdogs
+        setInterval(() => {
+            searchdogs.forEach(searchdog => {
+                if (searchdog) {
+                    searchdog.src = isFrame1 
+                        ? 'assets/general/searchdog_2.png' 
+                        : 'assets/general/searchdog_1.png';
+                }
+            });
+            isFrame1 = !isFrame1;
+        }, 1000);
     }
     
     startRickSpawn() {
