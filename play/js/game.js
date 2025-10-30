@@ -36,6 +36,12 @@ class DogeMinerGame {
         this.startTime = Date.now();
         this.totalPlayTime = 0;
         
+        // Settings
+        this.soundEnabled = true;
+        this.musicEnabled = true;
+        this.notificationsEnabled = true;
+        this.autoSaveEnabled = true;
+        
         
         // Input state tracking
         this.isMouseDown = false;
@@ -1863,6 +1869,11 @@ class DogeMinerGame {
     }
     
     showNotification(message) {
+        // Check if notifications are enabled
+        if (this.notificationsEnabled === false) {
+            return;
+        }
+        
         const notification = document.createElement('div');
         notification.className = 'notification';
         notification.textContent = message;

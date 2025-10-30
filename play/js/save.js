@@ -9,6 +9,7 @@ class SaveManager {
         
         this.setupAutoSave();
         this.setupSaveFunctions();
+        this.setupSettingsListeners();
     }
     
     setupAutoSave() {
@@ -44,7 +45,29 @@ class SaveManager {
         };
     }
     
-    saveGame() {
+    setupSettingsListeners() {
+        // Listen for notifications setting changes
+        const notificationsCheckbox = document.getElementById('notifications-enabled');
+        if (notificationsCheckbox) {
+            notificationsCheckbox.addEventListener('change', (e) => {
+                this.game.notificationsEnabled = e.target.checked;
+                // Trigger auto-save to save settings (don't show notification)
+                this.saveGame(false);
+            });
+        }
+        
+        // Listen for auto-save setting changes
+        const autoSaveCheckbox = document.getElementById('auto-save-enabled');
+        if (autoSaveCheckbox) {
+            autoSaveCheckbox.addEventListener('change', (e) => {
+                this.game.autoSaveEnabled = e.target.checked;
+                // Trigger auto-save to save settings (don't show notification)
+                this.saveGame(false);
+            });
+        }
+    }
+    
+    saveGame(showNotification = true) {
         try {
             const saveData = this.createSaveData();
             const saveString = JSON.stringify(saveData);
@@ -56,13 +79,19 @@ class SaveManager {
             localStorage.setItem(this.backupKey, saveString);
             
             this.lastSave = Date.now();
-            this.game.showNotification('Game saved successfully!');
+            
+            // Only show notification if requested and notifications are enabled
+            if (showNotification && this.game.notificationsEnabled) {
+                this.game.showNotification('Game saved successfully!');
+            }
             
             console.log('Game saved:', saveData);
             return true;
         } catch (error) {
             console.error('Error saving game:', error);
-            this.game.showNotification('Error saving game!');
+            if (this.game.notificationsEnabled) {
+                this.game.showNotification('Error saving game!');
+            }
             return false;
         }
     }
@@ -231,6 +260,32 @@ class SaveManager {
         this.game.musicEnabled = saveData.settings?.musicEnabled !== false;
         this.game.notificationsEnabled = saveData.settings?.notificationsEnabled !== false;
         this.game.autoSaveEnabled = saveData.settings?.autoSaveEnabled !== false;
+        
+        // Sync settings to AudioManager and UI checkboxes
+        if (window.audioManager) {
+            window.audioManager.soundEnabled = this.game.soundEnabled;
+            window.audioManager.musicEnabled = this.game.musicEnabled;
+        }
+        
+        // Update checkbox states
+        const soundCheckbox = document.getElementById('sound-enabled');
+        const musicCheckbox = document.getElementById('music-enabled');
+        const notificationsCheckbox = document.getElementById('notifications-enabled');
+        const autoSaveCheckbox = document.getElementById('auto-save-enabled');
+        
+        if (soundCheckbox) soundCheckbox.checked = this.game.soundEnabled;
+        if (musicCheckbox) musicCheckbox.checked = this.game.musicEnabled;
+        if (notificationsCheckbox) notificationsCheckbox.checked = this.game.notificationsEnabled;
+        if (autoSaveCheckbox) autoSaveCheckbox.checked = this.game.autoSaveEnabled;
+        
+        // Start/stop music based on loaded setting
+        if (window.audioManager) {
+            if (this.game.musicEnabled) {
+                window.audioManager.playBackgroundMusic();
+            } else {
+                window.audioManager.stopMusic();
+            }
+        }
         
         // Update game state
         this.game.updateDPS();

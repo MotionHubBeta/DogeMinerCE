@@ -55,10 +55,18 @@ class AudioManager {
         if (musicCheckbox) {
             musicCheckbox.addEventListener('change', (e) => {
                 this.musicEnabled = e.target.checked;
+                // Sync with game settings
+                if (window.game) {
+                    window.game.musicEnabled = e.target.checked;
+                }
                 if (!this.musicEnabled) {
                     this.stopMusic();
                 } else {
                     this.playBackgroundMusic();
+                }
+                // Trigger auto-save to save settings (don't show notification)
+                if (window.saveManager) {
+                    window.saveManager.saveGame(false);
                 }
             });
         }
@@ -68,6 +76,14 @@ class AudioManager {
         if (soundCheckbox) {
             soundCheckbox.addEventListener('change', (e) => {
                 this.soundEnabled = e.target.checked;
+                // Sync with game settings
+                if (window.game) {
+                    window.game.soundEnabled = e.target.checked;
+                }
+                // Trigger auto-save to save settings (don't show notification)
+                if (window.saveManager) {
+                    window.saveManager.saveGame(false);
+                }
             });
         }
     }

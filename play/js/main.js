@@ -24,6 +24,7 @@ async function initializeGame() {
         // Initialize audio manager
         audioManager = new AudioManager();
         audioManager.init();
+        window.audioManager = audioManager; // Make available for SaveManager
         updateLoadingInfo('Initializing save system...');
         
         saveManager = new SaveManager(game);
@@ -53,10 +54,10 @@ async function initializeGame() {
             // window.shopManager already assigned above
             window.saveManager = saveManager;
             window.notificationManager = notificationManager;
-            window.audioManager = audioManager;
+            // window.audioManager already assigned above
             
-            // Start background music
-            if (audioManager) {
+            // Start background music only if enabled
+            if (audioManager && game && game.musicEnabled) {
                 audioManager.playBackgroundMusic();
             }
             

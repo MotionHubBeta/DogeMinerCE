@@ -27,6 +27,11 @@ class NotificationManager {
     }
     
     show(message, type = 'info', duration = this.defaultDuration) {
+        // Check if notifications are enabled
+        if (this.game && this.game.notificationsEnabled === false) {
+            return null;
+        }
+        
         const notification = this.createNotification(message, type, duration);
         this.addNotification(notification);
         return notification;
