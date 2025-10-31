@@ -115,11 +115,6 @@ class UIManager {
             // Update game state to reflect planet change
             // This is where you would implement actual planet switching logic
             console.log(`Switched to ${planetName}`);
-            
-            // Play sound
-            if (window.audioManager) {
-                audioManager.playSound('swipe');
-            }
         };
         
         // Scroll wheel functionality for tab switching (shop and upgrade only)
