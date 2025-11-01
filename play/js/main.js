@@ -3,6 +3,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeGame();
 });
 
+// Prevent context menu on right click everywhere
+document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+});
+
 async function initializeGame() {
     try {
         showLoadingScreen();
@@ -55,6 +60,9 @@ async function initializeGame() {
             window.saveManager = saveManager;
             window.notificationManager = notificationManager;
             // window.audioManager already assigned above
+            
+            // Play doge intro animation
+            game.playDogeIntro();
             
             // Start background music only if enabled
             if (audioManager && game && game.musicEnabled) {

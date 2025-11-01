@@ -393,7 +393,7 @@ body {
     position: relative;
     z-index: 2;
     order: 2; /* Middle in flex order */
-    animation: float 3s ease-in-out infinite; /* Floating animation */
+    /* Float animation will start after intro */
 }
 
 #main-character.bounce {
@@ -419,6 +419,54 @@ body {
     100% {
         transform: translateY(0px);
     }
+}
+
+/* Doge Intro Animation - Drop Down and Squash */
+#character-container.doge-intro {
+    animation: 
+        dogeDrop 2.2s ease-in forwards,
+        dogeSquash 0.35s 2.2s ease-out forwards;
+}
+
+@keyframes dogeDrop {
+    0% {
+        transform: translateY(-400px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+@keyframes dogeSquash {
+    0% {
+        transform: scaleY(1) scaleX(1);
+    }
+    30% {
+        transform: scaleY(0.9) scaleX(1.05); /* Squash */
+    }
+    75% {
+        transform: scaleY(1.08) scaleX(0.97); /* Stretch */
+    }
+    100% {
+        transform: scaleY(1) scaleX(1); /* Return to normal */
+    }
+}
+
+#pickaxe.pickaxe-intro {
+    animation: pickaxeDrop 2.2s ease-in forwards;
+}
+
+@keyframes pickaxeDrop {
+    0% {
+        transform: rotate(30deg) translateY(-400px);
+    }
+    100% {
+        transform: rotate(30deg) translateY(0px);
+    }
+}
+
+#main-character.float {
+    animation: float 3s ease-in-out infinite;
 }
 
 

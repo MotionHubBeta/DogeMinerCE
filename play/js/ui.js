@@ -52,9 +52,9 @@ class UIManager {
             // After animation, switch tabs
             setTimeout(() => {
                 // Remove all active classes and animation classes
-                document.querySelectorAll('.tab-content').forEach(content => {
+            document.querySelectorAll('.tab-content').forEach(content => {
                     content.classList.remove('active', 'slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right');
-                });
+            });
                 
                 // Add new active tab with slide-in animation
                 targetTabElement.classList.add('active');
