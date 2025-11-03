@@ -424,16 +424,37 @@ body {
 /* Doge Intro Animation - Drop Down and Squash */
 #character-container.doge-intro {
     animation: 
-        dogeDrop 2.2s ease-in forwards,
-        dogeSquash 0.35s 2.2s ease-out forwards;
+        dogeDrop 1s ease-in 0.5s forwards,
+        dogeSquash 0.35s ease-out 1.5s forwards;
+    animation-fill-mode: both, forwards;
 }
 
 @keyframes dogeDrop {
     0% {
-        transform: translateY(-400px);
+        transform: translateY(-520px);
     }
     100% {
         transform: translateY(0px);
+    }
+}
+
+#character-container.doge-intro #character-shadow {
+    animation: shadowGrow 1s ease-in-out 0.5s forwards;
+    animation-fill-mode: both;
+}
+
+@keyframes shadowGrow {
+    0% {
+        transform: translateY(520px) scale(0.4, 0.4);
+        opacity: 0.2;
+    }
+    50% {
+        transform: translateY(260px) scale(0.7, 0.5);
+        opacity: 0.35;
+    }
+    100% {
+        transform: translateY(0) scale(1, 1);
+        opacity: 0.5;
     }
 }
 
@@ -453,15 +474,19 @@ body {
 }
 
 #pickaxe.pickaxe-intro {
-    animation: pickaxeDrop 2.2s ease-in forwards;
+    animation: pickaxeDrop 1s ease-in 0.5s forwards;
+    animation-fill-mode: both;
 }
 
 @keyframes pickaxeDrop {
     0% {
-        transform: rotate(30deg) translate(-200px, -346px);
+        transform: rotate(30deg) translate(-140px, -540px);
+    }
+    60% {
+        transform: rotate(30deg) translate(-50px, -160px);
     }
     100% {
-        transform: rotate(30deg) translateY(0px);
+        transform: rotate(30deg) translate(0px, 0px);
     }
 }
 
