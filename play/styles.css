@@ -439,7 +439,7 @@ body {
 }
 
 #character-container.doge-intro #character-shadow {
-    animation: shadowGrow 1s ease-in-out 0.5s forwards;
+    animation: shadowGrow 1s ease-in 0.5s forwards;
     animation-fill-mode: both;
 }
 
@@ -447,10 +447,6 @@ body {
     0% {
         transform: translateY(520px) scale(0.4, 0.4);
         opacity: 0.2;
-    }
-    50% {
-        transform: translateY(260px) scale(0.7, 0.5);
-        opacity: 0.35;
     }
     100% {
         transform: translateY(0) scale(1, 1);
