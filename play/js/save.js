@@ -204,6 +204,9 @@ class SaveManager {
                 musicEnabled: this.game.musicEnabled !== false,
                 notificationsEnabled: this.game.notificationsEnabled !== false,
                 autoSaveEnabled: this.game.autoSaveEnabled !== false
+            },
+            cutscenes: {
+                moonLaunch: !!this.game.hasPlayedMoonLaunch
             }
         };
     }
@@ -268,6 +271,7 @@ class SaveManager {
         this.game.musicEnabled = saveData.settings?.musicEnabled !== false;
         this.game.notificationsEnabled = saveData.settings?.notificationsEnabled !== false;
         this.game.autoSaveEnabled = saveData.settings?.autoSaveEnabled !== false;
+        this.game.hasPlayedMoonLaunch = saveData.cutscenes?.moonLaunch || false;
         
         // Sync settings to AudioManager and UI checkboxes
         if (window.audioManager) {
@@ -435,6 +439,8 @@ class SaveManager {
                 this.game.currentLevel = 'earth';
                 this.game.placedHelpers = [];
                 this.game.helpersOnCursor = [];
+                this.game.hasPlayedMoonLaunch = false;
+                this.game.isCutscenePlaying = false;
                 
                 // Clear all helper sprites from the DOM
                 this.game.clearAllHelperSprites();

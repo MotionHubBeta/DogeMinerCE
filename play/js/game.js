@@ -42,7 +42,14 @@ class DogeMinerGame {
         this.notificationsEnabled = true;
         this.autoSaveEnabled = true;
         
-        
+        // Cutscenes
+        this.hasPlayedMoonLaunch = false;
+        this.isCutscenePlaying = false;
+        this.cutsceneOverlay = null;
+        this.cutsceneVideo = null;
+        this.cutsceneSkipButton = null;
+        this.cutsceneSkipTimeout = null;
+
         // Input state tracking
         this.isMouseDown = false;
         this.isSpaceDown = false;
@@ -117,6 +124,112 @@ class DogeMinerGame {
 
         // Intro animation state
         this.isIntroPlaying = false;
+        
+        // Cutscene DOM bindings
+        this.setupCutsceneSystem();
+    }
+    
+    setupCutsceneSystem() {
+        this.cutsceneOverlay = document.getElementById('cutscene-overlay');
+        this.cutsceneVideo = document.getElementById('cutscene-video');
+        this.cutsceneSkipButton = document.getElementById('cutscene-skip');
+        
+        if (!this.cutsceneOverlay || !this.cutsceneVideo || !this.cutsceneSkipButton) {
+            console.warn('Cutscene elements not found in DOM. Creating fallback overlay.');
+            this.cutsceneOverlay = document.createElement('div');
+            this.cutsceneOverlay.id = 'cutscene-overlay';
+            this.cutsceneOverlay.className = 'cutscene-overlay';
+            
+            this.cutsceneVideo = document.createElement('video');
+            this.cutsceneVideo.id = 'cutscene-video';
+            this.cutsceneVideo.className = 'cutscene-video';
+            this.cutsceneVideo.setAttribute('playsinline', '');
+            
+            this.cutsceneSkipButton = document.createElement('button');
+            this.cutsceneSkipButton.id = 'cutscene-skip';
+            this.cutsceneSkipButton.className = 'cutscene-skip hidden';
+            this.cutsceneSkipButton.textContent = 'SKIP';
+            
+            this.cutsceneOverlay.appendChild(this.cutsceneVideo);
+            this.cutsceneOverlay.appendChild(this.cutsceneSkipButton);
+            document.body.appendChild(this.cutsceneOverlay);
+        }
+        
+        this.cutsceneSkipButton.addEventListener('click', () => {
+            this.closeCutscene();
+        });
+        
+        this.cutsceneVideo.addEventListener('ended', () => {
+            this.closeCutscene();
+        });
+    }
+    
+    playMoonLaunchCutscene() {
+        if (this.hasPlayedMoonLaunch || this.isCutscenePlaying) return;
+        if (!this.cutsceneOverlay || !this.cutsceneVideo) return;
+        
+        this.isCutscenePlaying = true;
+        this.hasPlayedMoonLaunch = true;
+        this.isMouseDown = false;
+        this.isSpaceDown = false;
+        
+        console.log('[Cutscene] Starting Moon Launch cutscene');
+        console.log('[Cutscene] Audio manager available:', !!window.audioManager);
+        if (window.audioManager) {
+            audioManager.suspendAllAudio();
+        }
+        
+        this.cutsceneVideo.src = '../assets/The Moon Launch.mp4';
+        this.cutsceneVideo.currentTime = 0;
+        this.cutsceneVideo.pause();
+        console.log('[Cutscene] Overlay active');
+        this.cutsceneOverlay.classList.add('active');
+        document.body.classList.add('cutscene-active');
+        
+        if (this.cutsceneSkipTimeout) {
+            clearTimeout(this.cutsceneSkipTimeout);
+            this.cutsceneSkipTimeout = null;
+        }
+        this.cutsceneSkipButton.classList.add('hidden');
+        this.cutsceneSkipTimeout = setTimeout(() => {
+            this.cutsceneSkipButton.classList.remove('hidden');
+            console.log('[Cutscene] Skip button shown');
+        }, 5000);
+        
+        const playPromise = this.cutsceneVideo.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(() => {
+                console.warn('Cutscene playback was blocked, showing skip button immediately.');
+                this.cutsceneSkipButton.classList.remove('hidden');
+            });
+        }
+    }
+    
+    closeCutscene() {
+        if (!this.isCutscenePlaying) return;
+        this.isCutscenePlaying = false;
+        console.log('[Cutscene] Closing Moon Launch cutscene');
+        
+        if (this.cutsceneVideo) {
+            this.cutsceneVideo.pause();
+            this.cutsceneVideo.currentTime = 0;
+        }
+        if (this.cutsceneOverlay) {
+            this.cutsceneOverlay.classList.remove('active');
+        }
+        document.body.classList.remove('cutscene-active');
+        
+        if (this.cutsceneSkipTimeout) {
+            clearTimeout(this.cutsceneSkipTimeout);
+            this.cutsceneSkipTimeout = null;
+        }
+        this.cutsceneSkipButton?.classList.add('hidden');
+        
+        if (window.audioManager) {
+            audioManager.resumeAudio();
+        }
+        
+        this.updateUI();
     }
     
     addGlobalMouseTracking() {
@@ -169,7 +282,7 @@ class DogeMinerGame {
     }
     
     handleRockClick(event = null) {
-        if (!this.isPlaying || this.isIntroPlaying) return;
+        if (!this.isPlaying || this.isIntroPlaying || this.isCutscenePlaying) return;
         
         this.totalClicks++;
         
@@ -206,7 +319,7 @@ class DogeMinerGame {
     
     processClick(event = null) {
         const now = Date.now();
-        if (this.isIntroPlaying) {
+        if (this.isIntroPlaying || this.isCutscenePlaying) {
             return;
         }
         
@@ -244,7 +357,7 @@ class DogeMinerGame {
     }
     
     bounceDoge() {
-        if (this.isIntroPlaying) return;
+        if (this.isIntroPlaying || this.isCutscenePlaying) return;
         const doge = document.getElementById('main-character');
         if (!doge) return;
         
@@ -292,7 +405,7 @@ class DogeMinerGame {
     }
     
     startSwing() {
-        if (this.isIntroPlaying) return;
+        if (this.isIntroPlaying || this.isCutscenePlaying) return;
         const pickaxe = document.getElementById('pickaxe');
         if (!pickaxe) return;
         
@@ -467,6 +580,7 @@ class DogeMinerGame {
     }
     
     buyHelper(helperType) {
+        if (this.isCutscenePlaying) return false;
         console.log('=== buyHelper called ===');
         console.log('Helper type:', helperType);
         console.log('isPlacingHelpers:', this.isPlacingHelpers);
@@ -720,6 +834,7 @@ class DogeMinerGame {
     placeAllHelpersOnCursor(x, y) {
         // First, calculate all helper positions in the stack
         const helperPositions = [];
+        let shouldPlayMoonLaunch = false;
         this.helpersOnCursor.forEach((helperData, index) => {
             let placeX = x;
             let placeY = y;
@@ -746,6 +861,9 @@ class DogeMinerGame {
                 y: placeY,
                 type: helperData.type
             });
+            if (helperData.type === 'spaceRocket' && !this.hasPlayedMoonLaunch) {
+                shouldPlayMoonLaunch = true;
+            }
         });
         
         // Check if the entire stack collides with Doge and find the best direction to move
@@ -798,6 +916,13 @@ class DogeMinerGame {
         this.updateDPS();
             this.updateUI();
         this.updateShopPrices();
+        
+        if (shouldPlayMoonLaunch) {
+            // Allow placement animations/UI updates to settle before playing the cutscene
+            setTimeout(() => {
+                this.playMoonLaunchCutscene();
+            }, 200);
+        }
     }
     
     adjustStackForDogeCollision(helperPositions) {

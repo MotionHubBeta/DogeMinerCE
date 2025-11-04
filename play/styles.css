@@ -1426,6 +1426,66 @@ body {
     pointer-events: none;
 }
 
+/* Cutscene Overlay */
+.cutscene-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.94);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+    z-index: 12000;
+}
+
+.cutscene-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.cutscene-video {
+    width: 100%;
+    height: 100%;
+    max-width: 1280px;
+    max-height: 720px;
+    object-fit: contain;
+    background: #000;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.cutscene-skip {
+    position: absolute;
+    bottom: 60px;
+    right: 80px;
+    padding: 14px 28px;
+    font-family: 'DogeSans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: linear-gradient(to bottom, rgb(255, 220, 115) 50%, rgb(255, 210, 70) 50%);
+    border: 1px solid rgb(185, 150, 65);
+    border-radius: 18px;
+    color: rgb(43, 27, 15);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    opacity: 1;
+}
+
+.cutscene-skip:hover {
+    transform: scale(1.05);
+    background: linear-gradient(to bottom, rgb(255, 230, 125) 50%, rgb(255, 220, 80) 50%);
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.45);
+}
+
+.cutscene-skip.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
 .notification {
     background: rgba(255, 255, 255, 0.95);
     border: 2px solid #d4af37;

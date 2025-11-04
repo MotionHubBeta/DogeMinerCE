@@ -173,6 +173,43 @@ class AudioManager {
             }
         }
     }
+
+    suspendAllAudio() {
+        this._wasMusicEnabled = this.musicEnabled;
+        this._wasSoundEnabled = this.soundEnabled;
+        this.stopMusic();
+        this.musicEnabled = false;
+        this.soundEnabled = false;
+        this.stopAllSoundEffects();
+    }
+
+    resumeAudio() {
+        if (typeof this._wasMusicEnabled === 'boolean') {
+            this.musicEnabled = this._wasMusicEnabled;
+        }
+        if (typeof this._wasSoundEnabled === 'boolean') {
+            this.soundEnabled = this._wasSoundEnabled;
+        }
+        delete this._wasMusicEnabled;
+        delete this._wasSoundEnabled;
+        if (this.musicEnabled) {
+            this.playBackgroundMusic();
+        }
+    }
+
+    stopAllSoundEffects() {
+        Object.values(this.soundEffects).forEach(effect => {
+            if (Array.isArray(effect)) {
+                effect.forEach(sound => {
+                    if (sound && typeof sound.stop === 'function') {
+                        sound.stop();
+                    }
+                });
+            } else if (effect && typeof effect.stop === 'function') {
+                effect.stop();
+            }
+        });
+    }
 }
 
 // Global audio manager instance
