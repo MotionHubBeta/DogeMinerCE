@@ -423,10 +423,8 @@ body {
 
 /* Doge Intro Animation - Drop Down and Squash */
 #character-container.doge-intro {
-    animation: 
-        dogeDrop 1s ease-in 0.5s forwards,
-        dogeSquash 0.35s ease-out 1.5s forwards;
-    animation-fill-mode: both, forwards;
+    animation: dogeDrop 1s ease-in 0.5s forwards;
+    animation-fill-mode: both;
 }
 
 @keyframes dogeDrop {
@@ -441,6 +439,11 @@ body {
 #character-container.doge-intro #character-shadow {
     animation: shadowGrow 1s ease-in 0.5s forwards;
     animation-fill-mode: both;
+}
+
+#character-container.doge-intro #main-character {
+    animation: dogeSquash 0.35s ease-out 1.5s forwards;
+    animation-fill-mode: forwards;
 }
 
 @keyframes shadowGrow {
@@ -470,19 +473,45 @@ body {
 }
 
 #pickaxe.pickaxe-intro {
-    animation: pickaxeDrop 1s ease-in 0.5s forwards;
-    animation-fill-mode: both;
+    animation: 
+        pickaxeDrop 1s linear 0.5s forwards,
+        pickaxeSquash 0.35s ease-out 1.5s forwards;
+    animation-fill-mode: both, forwards;
 }
 
 @keyframes pickaxeDrop {
     0% {
-        transform: rotate(30deg) translate(-140px, -540px);
+        transform: rotate(30deg) translate(-160px, -560px);
+    }
+    20% {
+        transform: rotate(30deg) translate(-140px, -500px);
+    }
+    40% {
+        transform: rotate(30deg) translate(-110px, -380px);
     }
     60% {
-        transform: rotate(30deg) translate(-50px, -160px);
+        transform: rotate(30deg) translate(-70px, -240px);
+    }
+    80% {
+        transform: rotate(30deg) translate(-35px, -120px);
     }
     100% {
         transform: rotate(30deg) translate(0px, 0px);
+    }
+}
+
+@keyframes pickaxeSquash {
+    0% {
+        transform: rotate(30deg) scale(1, 1);
+    }
+    30% {
+        transform: rotate(30deg) scaleX(1.05) scaleY(0.9);
+    }
+    75% {
+        transform: rotate(30deg) scaleX(0.97) scaleY(1.08);
+    }
+    100% {
+        transform: rotate(30deg) scale(1, 1);
     }
 }
 
@@ -499,6 +528,8 @@ body {
     margin-top: -5px; /* Move shadow up slightly */
     margin-left: 10px; /* Move shadow to the right */
     order: 3; /* Ensure it comes last in flex order */
+    opacity: 0.5;
+    transform: translateY(0) scale(1, 1);
 }
 
 #pickaxe {
