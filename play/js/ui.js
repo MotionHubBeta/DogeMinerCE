@@ -333,6 +333,7 @@ class UIManager {
         }
         
         const helperEntries = Object.entries(window.shopManager.shopData[helperCategory]);
+        const moonBaseOwned = this.game.moonHelpers?.some(helper => helper.type === 'moonBase');
         
         // Create 6 helper items (2x3 grid)
         for (let i = 0; i < 6; i++) {
@@ -346,6 +347,7 @@ class UIManager {
                 const owned = helperArray.filter(h => h.type === type).length;
                 const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned));
                 const canAfford = this.game.dogecoins >= cost;
+                const isLocked = this.game.currentLevel === 'moon' && type !== 'moonBase' && !moonBaseOwned;
                 
                 
                 // Calculate button width based on price length
@@ -368,6 +370,15 @@ class UIManager {
                     buttonWidth = '45%'; // Short prices (hundreds)
                 }
                 
+                const buttonDisabled = (!canAfford || isLocked) ? 'disabled' : '';
+                const lockOverlayHtml = isLocked ? `
+                    <div class="helper-lock-overlay">
+                        <div class="helper-lock-icon" aria-hidden="true"></div>
+                        <div class="helper-lock-text">LOCKED</div>
+                        <div class="helper-lock-subtext">REQUIRES MOON BASE</div>
+                    </div>
+                ` : '';
+
                 item.innerHTML = `
                     <div class="shop-item-quantity">#${owned}</div>
                     <div class="shop-item-title">${helper.name}</div>
@@ -376,12 +387,17 @@ class UIManager {
                         <img src="${helper.icon}" alt="${helper.name}">
                     </div>
                     <div class="shop-item-description">${helper.description}</div>
-                    <button class="shop-buy-btn" data-helper-type="${type}" 
-                            ${!canAfford ? 'disabled' : ''} style="width: ${buttonWidth};">
+                    <button class="shop-buy-btn${isLocked ? ' locked' : ''}" data-helper-type="${type}" 
+                            ${buttonDisabled} style="width: ${buttonWidth};">
                         <img src="assets/general/dogecoin_70x70.png" alt="DogeCoin" class="buy-btn-icon">
                         <span class="buy-btn-price">${priceText}</span>
                     </button>
+                    ${lockOverlayHtml}
                 `;
+
+                if (isLocked) {
+                    item.classList.add('helper-locked');
+                }
             } else {
                 // Empty slot
                 item.innerHTML = `

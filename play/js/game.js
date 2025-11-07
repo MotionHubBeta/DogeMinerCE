@@ -411,9 +411,9 @@ class DogeMinerGame {
         }, 200);
     }
     
-    playDogeIntro(force = false) {
+    playDogeIntro() {
         // Don't play intro if transitioning between planets or cutscene is playing
-        if (!force && (this.isTransitioning || this.isCutscenePlaying)) return;
+        if (this.isTransitioning || this.isCutscenePlaying) return;
         const characterContainer = document.getElementById('character-container');
         const pickaxe = document.getElementById('pickaxe');
         if (!characterContainer) return;
@@ -422,9 +422,7 @@ class DogeMinerGame {
         characterContainer.style.visibility = 'hidden';
         characterContainer.style.transform = 'translateY(-520px)';
 
-        if (!force || !this.isIntroPlaying) {
-            this.isIntroPlaying = true;
-        }
+        this.isIntroPlaying = true;
 
         // Ensure character sprite is set correctly before animation
         const doge = document.getElementById('main-character');
@@ -442,14 +440,15 @@ class DogeMinerGame {
         characterContainer.classList.remove('doge-intro');
         if (pickaxe) pickaxe.classList.remove('pickaxe-intro');
         
-        const startAnimation = () => {
+        // Short delay to ensure everything is reset
+        setTimeout(() => {
             characterContainer.style.visibility = 'visible';
             const restartAnimation = (element, className) => {
                 element.classList.remove(className);
+                // Force reflow so animation can replay even if class was already present
                 void element.offsetWidth;
                 element.classList.add(className);
             };
-
             restartAnimation(characterContainer, 'doge-intro');
             setTimeout(() => {
                 characterContainer.classList.remove('doge-intro');
@@ -473,13 +472,7 @@ class DogeMinerGame {
                     idleDoge.classList.add('float');
                 }
             }, startDelay + introDuration + squashDuration);
-        };
-
-        if (force) {
-            startAnimation();
-        } else {
-            setTimeout(startAnimation, 50);
-        }
+        }, 50);
     }
 
     startSwing() {
@@ -661,6 +654,7 @@ class DogeMinerGame {
     
     buyHelper(helperType) {
         if (this.isCutscenePlaying) return false;
+
         console.log('=== buyHelper called ===');
         console.log('Helper type:', helperType);
         console.log('isPlacingHelpers:', this.isPlacingHelpers);
@@ -668,68 +662,63 @@ class DogeMinerGame {
         console.log('helpersOnCursor length:', this.helpersOnCursor?.length || 0);
         console.log('Current level:', this.currentLevel);
         console.log('Stack trace:', new Error().stack);
-        
-        // Allow buying multiple helpers - only block if actively clicking to place
-        // isPlacingHelpers is true when placement is actively happening, which is ok for buying more
-        // We just need to prevent buying during drag-and-drop, which doesn't set isPlacingHelpers
-        // Actually, let's just allow all purchases - placement and drag-and-drop handle blocking
-        
-        // Get helper data from shop system based on current planet
+
         const helperCategory = this.currentLevel === 'earth' ? 'helpers' : 'moonHelpers';
-        const helper = window.shopManager.shopData[helperCategory][helperType];
-        if (!helper) {
+        const helperData = window.shopManager?.shopData?.[helperCategory]?.[helperType];
+        if (!helperData) {
             console.error('Helper type not found:', helperType, 'in category', helperCategory);
             return false;
         }
-        
-        // Use the correct helper array based on current planet
+
+        if (this.currentLevel === 'moon' && helperType !== 'moonBase') {
+            const hasMoonBase = (this.moonHelpers || []).some(h => h.type === 'moonBase');
+            if (!hasMoonBase) {
+                this.showNotification?.('LOCKED: Requires Moon Base');
+                return false;
+            }
+        }
+
         const helperArray = this.currentLevel === 'earth' ? this.helpers : this.moonHelpers;
         const owned = helperArray.filter(h => h.type === helperType).length;
-        const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned));
-        
-        if (this.dogecoins >= cost) {
-            this.dogecoins -= cost;
-            
-            // Play purchase sound
-            if (window.audioManager) {
-                window.audioManager.playSound('ching');
-            }
-            
-            // Add helper to the correct array immediately so price updates correctly
-            helperArray.push({
-                type: helperType,
-                helper: helper,
-                dps: helper.baseDps
-            });
-            
-            // Add helper to cursor stack before triggering any UI redraws
-            this.addHelperToCursor(helperType, helper);
+        const cost = Math.floor(helperData.baseCost * Math.pow(1.15, owned));
 
-            // Update shop prices immediately after deducting dogecoins and adding helper
-            this.updateShopPrices();
-
-            // Update UI while the rock is still visible, then refresh shop
-            this.updateUI();
-
-            if (window.uiManager) {
-                const level = this.currentLevel;
-                const hasPlayedMoonLaunch = this.hasPlayedMoonLaunch;
-
-                uiManager.updateBackground?.(level);
-                uiManager.initializePlanetTabs?.();
-
-                if (hasPlayedMoonLaunch) {
-                    uiManager.hideMoonLocked?.();
-                }
-
-                // Defer the heaviest redraw (shop content) slightly to avoid flicker
-                requestAnimationFrame(() => {
-                    uiManager.updateShopContent?.();
-                });
-            }
+        if (this.dogecoins < cost) {
             return false;
         }
-        return false;
+
+        this.dogecoins -= cost;
+
+        if (window.audioManager) {
+            window.audioManager.playSound('ching');
+        }
+
+        helperArray.push({
+            type: helperType,
+            helper: helperData,
+            dps: helperData.baseDps
+        });
+
+        this.addHelperToCursor(helperType, helperData);
+        this.updateShopPrices();
+        this.updateUI();
+
+        if (window.uiManager) {
+            const level = this.currentLevel;
+            const hasPlayedMoonLaunch = this.hasPlayedMoonLaunch;
+
+            uiManager.updateBackground?.(level);
+            uiManager.initializePlanetTabs?.();
+
+            if (hasPlayedMoonLaunch) {
+                uiManager.hideMoonLocked?.();
+            }
+
+            requestAnimationFrame(() => {
+                uiManager.updateShopContent?.();
+            });
+        }
+
+        return true;
     }
     
     addHelperToCursor(helperType, helper, shouldStartPlacement = true) {
