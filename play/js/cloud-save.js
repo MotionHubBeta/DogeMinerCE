@@ -6,6 +6,22 @@ class CloudSaveManager {
         this.init();
     }
 
+    waitForGameReady(callback, attempts = 0) {
+        const isGameReady = typeof window.game !== 'undefined' && window.game !== null;
+
+        if (isGameReady) {
+            callback?.();
+            return;
+        }
+
+        if (attempts > 100) {
+            console.warn('Game failed to initialize in time for cloud load.');
+            return;
+        }
+
+        setTimeout(() => this.waitForGameReady(callback, attempts + 1), 100);
+    }
+
     async init() {
         // Wait for Firebase to be available
         if (typeof window.firebase === 'undefined') {
@@ -20,8 +36,8 @@ class CloudSaveManager {
             this.updateUI();
             
             // Automatically load from cloud when user signs in
-            if (user && window.game) {
-                this.loadFromCloudSilent();
+            if (user) {
+                this.waitForGameReady(() => this.loadFromCloudSilent());
             }
         });
 
@@ -87,6 +103,9 @@ class CloudSaveManager {
             if (window.notificationManager) {
                 window.notificationManager.showSuccess(`Welcome, ${this.currentUser.displayName}!`);
             }
+            
+            // Refresh the page to ensure correct planet UI state
+            window.location.reload();
             
         } catch (error) {
             console.error('Sign in error:', error);
@@ -313,15 +332,54 @@ class CloudSaveManager {
                 window.game.autoSaveEnabled = gameData.settings.autoSaveEnabled !== undefined ? gameData.settings.autoSaveEnabled : true;
             }
 
+            // Apply planet-specific visuals
+            const body = document.body;
+            if (body) {
+                if (window.game.currentLevel === 'moon') {
+                    body.classList.add('moon-theme');
+                } else {
+                    body.classList.remove('moon-theme');
+                }
+            }
+
+            const mainCharacter = document.getElementById('main-character');
+            const mainRock = document.getElementById('main-rock');
+            const platform = document.getElementById('platform');
+
+            if (mainCharacter && mainRock) {
+                if (window.game.currentLevel === 'moon') {
+                    mainCharacter.src = 'assets/general/character/spacehelmet.png';
+                    mainRock.src = 'assets/general/rocks/moon.png';
+                    if (platform) {
+                        platform.src = '../assets/quickUI/dogeplatformmoon.png';
+                    }
+                } else {
+                    mainCharacter.src = 'assets/general/character/standard.png';
+                    mainRock.src = 'assets/general/rocks/earth.png';
+                    if (platform) {
+                        platform.src = '../assets/quickUI/dogeplatform.png';
+                    }
+                }
+            }
+
             // Update UI
             window.game.updateUI();
             window.game.updateDPS();
-            
+
             // Update settings checkboxes
             document.getElementById('sound-enabled').checked = window.game.soundEnabled;
             document.getElementById('music-enabled').checked = window.game.musicEnabled;
             document.getElementById('notifications-enabled').checked = window.game.notificationsEnabled;
             document.getElementById('auto-save-enabled').checked = window.game.autoSaveEnabled;
+
+            if (window.uiManager) {
+                window.uiManager.updateBackground(window.game.currentLevel);
+                window.uiManager.initializePlanetTabs?.();
+                if (window.game.currentLevel === 'moon') {
+                    window.uiManager.hideMoonLocked?.();
+                    window.uiManager.updateShopContent?.();
+                }
+            }
         }
     }
 }

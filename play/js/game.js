@@ -695,13 +695,15 @@ class DogeMinerGame {
                 dps: helper.baseDps
             });
             
+            // Add helper to cursor stack before triggering any UI redraws
+            this.addHelperToCursor(helperType, helper);
+
             // Update shop prices immediately after deducting dogecoins and adding helper
             this.updateShopPrices();
-            
-            // Add helper to cursor stack instead of starting placement immediately
-            this.addHelperToCursor(helperType, helper);
-            
-            // Update UI but skip shop prices since we already updated them
+
+            // Update UI while the rock is still visible, then refresh shop
+            this.updateUI();
+
             if (window.uiManager) {
                 const level = this.currentLevel;
                 const hasPlayedMoonLaunch = this.hasPlayedMoonLaunch;
@@ -713,7 +715,10 @@ class DogeMinerGame {
                     uiManager.hideMoonLocked?.();
                 }
 
-                uiManager.updateShopContent?.();
+                // Defer the heaviest redraw (shop content) slightly to avoid flicker
+                requestAnimationFrame(() => {
+                    uiManager.updateShopContent?.();
+                });
             }
             return false;
         }

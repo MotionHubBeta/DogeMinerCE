@@ -112,13 +112,11 @@
 }
 
 .moon-theme #settings-tab .setting-item {
-    padding-bottom: 10px;
     margin-bottom: 10px;
 }
 
 .moon-theme #settings-tab .setting-item:last-child {
     margin-bottom: 0;
-    padding-bottom: 0;
 }
 
 .moon-theme .setting-btn.danger,
@@ -170,7 +168,7 @@
 }
 
 .moon-theme .tab-btn.active {
-    background: linear-gradient(to bottom, rgb(205, 230, 245) 50%, rgb(185, 220, 245) 50%);
+    background: white;
     border-color: rgb(120, 185, 235);
     color: rgb(40, 95, 155);
 }
@@ -875,6 +873,12 @@ body {
     display: flex;
     gap: 1px;
     margin-right: 10px; /* Move tabs 10px to the left */
+}
+
+.moon-theme .tabs-left,
+.moon-theme .tabs-right {
+    gap: 1px;
+    margin: 0 10px;
 }
 
     .tab-btn {

@@ -339,6 +339,13 @@ class SaveManager {
         this.game.updateUI();
 
         if (window.uiManager) {
+            if (this.game.currentLevel === 'moon') {
+                document.body.classList.add('moon-theme');
+                uiManager.initializePlanetTabs?.();
+            } else {
+                document.body.classList.remove('moon-theme');
+            }
+
             uiManager.updateBackground(this.game.currentLevel);
             uiManager.initializePlanetTabs?.();
 

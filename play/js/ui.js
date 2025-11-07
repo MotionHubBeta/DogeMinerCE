@@ -635,18 +635,22 @@ class UIManager {
     
     updateBackground(levelName) {
         const rockImage = document.getElementById('main-rock');
-        
-        if (this.game.levels[levelName]) {
-            const level = this.game.levels[levelName];
-            rockImage.src = level.rock;
-            
-            // Add transition effect for rock
-            rockImage.style.opacity = '0';
-            
-            setTimeout(() => {
-                rockImage.style.opacity = '1';
-            }, 100);
+        if (!rockImage) return;
+
+        const level = this.game.levels[levelName];
+        if (!level) return;
+
+        const targetSrc = level.rock;
+        const currentAttr = rockImage.getAttribute('src') || '';
+
+        // If the rock is already displaying this image, skip any fade to avoid flicker
+        if (currentAttr === targetSrc || rockImage.src.endsWith(targetSrc)) {
+            rockImage.style.opacity = '1';
+            return;
         }
+
+        rockImage.src = targetSrc;
+        rockImage.style.opacity = '1';
     }
     
     updateCharacter(characterType = 'standard') {
