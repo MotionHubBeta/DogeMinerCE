@@ -865,19 +865,19 @@ body {
 
 .tabs-left {
     display: flex;
-    gap: 4px; /* Increased spacing between Shop and Upgrade tabs */
+    gap: 4px; /* Consistent spacing between Shop and Upgrade tabs */
     margin-left: 10px; /* Move tabs 10px to the right */
 }
 
 .tabs-right {
     display: flex;
-    gap: 1px;
+    gap: 4px;
     margin-right: 10px; /* Move tabs 10px to the left */
 }
 
 .moon-theme .tabs-left,
 .moon-theme .tabs-right {
-    gap: 1px;
+    gap: 4px;
     margin: 0 10px;
 }
 
