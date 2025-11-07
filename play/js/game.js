@@ -19,7 +19,7 @@ class DogeMinerGame {
             'Timmy', 'Mary', 'Martha', 'Linda', 'Jimothy', 'Scout', 'Barley', 'Cherry', 'Vader', 'Mochatitan',
             'Babylion122', 'rkn', 'Raspy', 'Melon', 'News', 'Rick', 'Sam', 'Josiah', 'Miya', 'Creedoo',
             'Cottage', 'Cheese', 'Bikini', 'Silver', 'Sorrel', 'Kyle', 'DwellingStars', 'Done', 'Peanut', 'Fry',
-            'Bruno', 'Charlie', 'Emmet', 'Lucy', 'Vincent'
+            'Bruno', 'Charlie', 'Emmet', 'Lucy', 'Vincent', 'tothestars693'
         ];
         
         this.helperNames = {
