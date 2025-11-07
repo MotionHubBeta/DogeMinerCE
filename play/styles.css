@@ -5,6 +5,209 @@
     box-sizing: border-box;
 }
 
+#left-panel,
+#right-panel,
+.shop-grid-item,
+.shop-item,
+.sub-tab-btn,
+.shop-item-icon,
+.shop-item-price,
+.buy-btn,
+.notification,
+.setting-btn,
+.stat-card,
+.settings-panel,
+.stats-panel,
+.upgrades-panel,
+.searchdog-panel {
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.moon-theme #left-panel,
+.moon-theme #right-panel {
+    background: linear-gradient(to bottom, rgba(225, 235, 240, 0.95) 20%, rgba(210, 230, 240, 0.95) 80%);
+    border: 1px solid rgb(160, 200, 225);
+}
+
+.moon-theme .shop-grid-item,
+.moon-theme .shop-item {
+    background: linear-gradient(to bottom, rgba(225, 235, 240, 0.95) 20%, rgba(210, 230, 240, 0.95) 80%);
+    border-color: rgb(160, 200, 225);
+}
+
+.moon-theme .sub-tab-btn,
+.moon-theme .shop-item-icon,
+.moon-theme .buy-btn,
+.moon-theme .notification,
+.moon-theme .setting-btn,
+.moon-theme .stat-card,
+.moon-theme .settings-panel,
+.moon-theme .stats-panel,
+.moon-theme .upgrades-panel,
+.moon-theme .searchdog-panel {
+    border-color: rgb(160, 200, 225);
+}
+
+.moon-theme .settings-section h3,
+.moon-theme .setting-item label,
+.moon-theme .setting-item span,
+.moon-theme .achievement-item h4,
+.moon-theme .achievement-item p,
+.moon-theme .stat-row span:first-child,
+.moon-theme .stat-row span:last-child {
+    color: rgb(40, 95, 155);
+}
+
+.moon-theme .setting-item input[type="checkbox"] {
+    accent-color: rgb(120, 185, 235);
+}
+
+.moon-theme .sub-tab-btn.active,
+.moon-theme .buy-btn,
+.moon-theme .notification,
+.moon-theme .setting-btn.active,
+.moon-theme .stat-row span:last-child {
+    color: rgb(35, 70, 95);
+}
+
+.moon-theme .setting-btn {
+    border-color: rgb(120, 185, 235);
+    color: rgb(40, 95, 155);
+}
+
+.moon-theme .setting-btn:hover {
+    background: rgba(120, 185, 235, 0.15);
+}
+
+.moon-theme .settings-section,
+.moon-theme .achievements-section {
+    border-top: 1px solid rgba(120, 185, 235, 0.4);
+    padding-top: 18px;
+}
+
+.moon-theme .settings-section:first-of-type,
+.moon-theme .achievements-section:first-of-type {
+    border-top: none;
+    padding-top: 0;
+}
+
+.moon-theme .settings-section h3 {
+    background: none;
+}
+
+.moon-theme .settings-panel,
+.moon-theme .achievements-panel,
+.moon-theme .stats-panel,
+.moon-theme .upgrades-panel {
+    background: linear-gradient(to bottom, rgba(240, 250, 250, 0.95) 0%, rgba(210, 230, 240, 0.95) 100%);
+}
+
+.moon-theme #achievements-content {
+    background: transparent;
+}
+
+.moon-theme .achievement-item {
+    border-color: rgb(120, 185, 235);
+    background: linear-gradient(to bottom, rgba(240, 250, 250, 0.9), rgba(210, 230, 240, 0.9));
+}
+
+.moon-theme #settings-tab .setting-item {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.moon-theme #settings-tab .setting-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.moon-theme .setting-btn.danger,
+.moon-theme #cloud-local-actions .setting-btn.danger {
+    border-color: #e27b7b;
+    color: #e27b7b;
+}
+
+.moon-theme .setting-btn.danger:hover,
+.moon-theme #cloud-local-actions .setting-btn.danger:hover {
+    background: rgba(226, 123, 123, 0.12);
+}
+
+.moon-theme .achievement-item .stat-row span:last-child {
+    color: rgb(120, 185, 235);
+}
+
+.moon-theme .achievement-item .stat-row {
+    border-color: rgba(120, 185, 235, 0.5);
+}
+
+.moon-theme .settings-section h3,
+.moon-theme .achievements-section h3 {
+    border-bottom: 2px solid rgba(120, 185, 235, 0.6);
+}
+
+.moon-theme .stat-item span {
+    background: rgb(190, 215, 235);
+}
+
+.moon-theme #achievements-content .stat-row {
+    border: 2px solid rgb(120, 185, 235);
+    background: rgba(240, 250, 250, 0.95);
+}
+
+.moon-theme #panel-tabs {
+    background: linear-gradient(to bottom, rgb(240, 250, 250) 50%, rgb(220, 235, 245) 50%);
+    border: 1px solid rgb(120, 185, 235);
+}
+
+.moon-theme .tab-btn {
+    background: linear-gradient(to bottom, rgb(185, 215, 240) 50%, rgb(165, 210, 240) 50%);
+    border: 1px solid rgb(120, 185, 235);
+    color: rgb(40, 95, 155);
+}
+
+.moon-theme .tab-btn:hover {
+    background: linear-gradient(to bottom, rgb(195, 225, 245) 50%, rgb(175, 215, 245) 50%);
+}
+
+.moon-theme .tab-btn.active {
+    background: linear-gradient(to bottom, rgb(205, 230, 245) 50%, rgb(185, 220, 245) 50%);
+    border-color: rgb(120, 185, 235);
+    color: rgb(40, 95, 155);
+}
+
+.moon-theme .tab-btn .tab-icon,
+.moon-theme .tab-btn.active .tab-icon {
+    filter: brightness(0) saturate(100%) invert(30%) sepia(13%) saturate(1698%) hue-rotate(178deg) brightness(90%) contrast(89%);
+}
+
+.moon-theme .tab-text {
+    color: rgb(40, 95, 155);
+}
+
+.moon-theme .shop-buy-btn {
+    background: linear-gradient(to bottom, rgb(185, 215, 240) 50%, rgb(165, 210, 240) 50%);
+    border: 1px solid rgb(120, 185, 235);
+    color: rgb(40, 95, 155);
+}
+
+.moon-theme .shop-buy-btn:hover:not(:disabled) {
+    background: linear-gradient(to bottom, rgb(195, 225, 245) 50%, rgb(175, 215, 245) 50%);
+}
+
+.moon-theme .shop-buy-btn:disabled {
+    background: linear-gradient(to bottom, rgb(200, 210, 220) 50%, rgb(185, 200, 215) 50%);
+    border: 1px solid rgb(150, 180, 210);
+    color: rgb(110, 130, 150);
+}
+
+.moon-theme .shop-buy-btn span {
+    color: rgb(40, 95, 155);
+}
+
+.moon-theme .shop-item-price {
+    color: rgb(40, 95, 155);
+}
+
 /* Prevent image dragging throughout the game */
 img {
     -webkit-user-drag: none;
@@ -341,6 +544,19 @@ body {
     50% { transform: translateY(-8px); }
 }
 
+/* Moon helper sizes */
+.helper-sprite.moon-base,
+.helper-sprite.lander-shibe {
+    width: 90px; /* 60px * 1.5 = 90px */
+    height: 90px;
+}
+
+/* Mars rocket and lander shibe animations (same as rocket) */
+.helper-sprite.mars-rocket,
+.helper-sprite.lander-shibe {
+    animation: rocketFloat 2s ease-in-out infinite;
+}
+
 /* Cursor helper floating animation */
 .helper-sprite.attached-to-mouse {
     animation: cursorFloat 2.5s ease-in-out infinite;
@@ -358,11 +574,11 @@ body {
     flex-direction: column;
     align-items: center;
     cursor: pointer;
-    margin-top: 60px; /* Move rock down 60 pixels total */
+    margin-top: 55px; /* Move rock up 5 pixels */
 }
 
 #main-rock {
-    width: 153px; /* 15% smaller than 180px */
+    width: 137px; /* 10% smaller than previous size */
     height: auto;
     filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.3));
 }
@@ -540,13 +756,24 @@ body {
     right: calc(20% - 50px); /* Moved right 20 more pixels (was -30px, now -50px) */
     transform: rotate(30deg); /* 30 degree resting angle */
     transform-origin: 50% 80%; /* Rotate from 80% down the handle instead of bottom */
-    transition: transform 0.1s ease; /* Faster swing animation */
     z-index: 3; /* Above Doge */
     order: 1; /* First in flex order */
 }
 
 #pickaxe.swinging {
-    transform: rotate(-65deg); /* Swing to -65 degrees */
+    animation: pickaxeSwing 0.18s ease-out forwards;
+}
+
+@keyframes pickaxeSwing {
+    0% {
+        transform: rotate(30deg);
+    }
+    45% {
+        transform: rotate(-65deg);
+    }
+    100% {
+        transform: rotate(30deg);
+    }
 }
 
 
@@ -660,10 +887,10 @@ body {
         transition: all 0.2s ease;
         font-family: inherit;
         font-weight: 700;
-        font-size: 17px; /* Increased by 3pts from 14px */
+        font-size: 18px; /* Bigger font */
         white-space: nowrap;
         /* More rounded top, flat bottom */
-        border-radius: 10px 10px 0 0; /* Increased from 6px to 10px */
+        border-radius: 10px 10px 0 0; /* Rounded corners on top only */
         text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
         display: flex;
         align-items: center;
@@ -684,13 +911,16 @@ body {
 }
 
 .tab-text {
-    font-weight: 900; /* Double the boldness (was 700, now 900) */
+    font-weight: 600; /* Slightly lighter base weight */
     text-transform: uppercase;
     letter-spacing: -0.5px; /* Tighter letter spacing */
     pointer-events: none; /* Allow clicks to pass through to button */
-    /* Force boldness with text-stroke since DogeSans might not have bold variants */
-    -webkit-text-stroke: 0.5px currentColor;
-    text-stroke: 0.5px currentColor;
+    color: inherit;
+    text-shadow:
+        0 0.35px 0 currentColor,
+        0 -0.35px 0 currentColor,
+        0.35px 0 0 currentColor,
+        -0.35px 0 0 currentColor;
 }
 
 .tab-btn:hover {
@@ -700,13 +930,17 @@ body {
 .tab-btn.active {
     background: white; /* White background when selected */
     border-color: rgb(185, 150, 65); /* Keep original border color */
-    color: rgb(10, 120, 200); /* Light blue text */
+    color: rgb(10, 120, 200); /* Highlighted blue */
     transform: translateY(1px);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .tab-btn.active .tab-icon {
-    filter: brightness(0) saturate(100%) invert(27%) sepia(89%) saturate(1686%) hue-rotate(204deg) brightness(95%) contrast(86%); /* Light blue filter for icon */
+    filter: brightness(0) saturate(100%) invert(34%) sepia(89%) saturate(1230%) hue-rotate(166deg) brightness(96%) contrast(91%);
+}
+
+.tab-btn .tab-icon {
+    filter: brightness(0) saturate(100%) invert(16%) sepia(100%) saturate(1000%) hue-rotate(30deg) brightness(90%) contrast(100%) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
 }
 
 #panel-content {
@@ -798,7 +1032,7 @@ body {
 .shop-item-price {
     font-weight: 600;
     font-size: 7px;
-    color: #d4af37;
+    color: rgb(80, 50, 0);
     margin-bottom: 1px;
     line-height: 1;
 }
@@ -933,9 +1167,9 @@ body {
     position: relative;
     z-index: 10;
     pointer-events: auto;
-    font-size: 10px;
+    font-size: 13px;
     white-space: nowrap;
-    border-radius: 6px; /* Rounded on all 4 corners */
+    border-radius: 8px; /* Rounded on all 4 corners */
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
     display: flex;
     align-items: center;
@@ -1232,6 +1466,19 @@ body {
     font-size: 14px;
 }
 
+.moon-theme #achievements-tab .stat-row {
+    border: 2px solid rgb(120, 185, 235);
+    background: rgba(240, 250, 250, 0.95);
+}
+
+.moon-theme #achievements-tab .stat-row span:first-child {
+    color: rgb(40, 95, 155);
+}
+
+.moon-theme #achievements-tab .stat-row span:last-child {
+    color: rgb(120, 185, 235);
+}
+
 /* Settings Tab */
 #settings-tab {
     padding: 10px;
@@ -1262,6 +1509,11 @@ body {
     padding-bottom: 5px;
 }
 
+.moon-theme .settings-section h3 {
+    color: rgb(40, 95, 155);
+    border-bottom: 2px solid rgba(120, 185, 235, 0.6);
+}
+
 .setting-item {
     margin-bottom: 10px;
 }
@@ -1285,6 +1537,23 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+#user-info .setting-buttons {
+    gap: 5px;
+}
+
+#cloud-local-actions {
+    margin-top: 10px;
+}
+
+#cloud-local-actions .setting-btn {
+    width: 100%;
+}
+
+#cloud-local-actions .setting-btn.danger {
+    border-color: #e74c3c;
+    color: #e74c3c;
 }
 
 .setting-btn {
@@ -1689,6 +1958,10 @@ body {
     pointer-events: none;
     animation: particle-fly 0.6s ease-out forwards;
     transform: translate(-50%, -50%);
+}
+
+.earth-particle.moon-particle {
+    filter: grayscale(80%) brightness(1.1);
 }
 
 @keyframes particle-fly {

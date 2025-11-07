@@ -39,9 +39,45 @@ async function initializeGame() {
         updateLoadingInfo('Loading game data...');
         
         // Try to load existing save
-        if (!saveManager.loadGame()) {
+        const saveLoaded = saveManager.loadGame();
+        if (!saveLoaded) {
             // No save found, start new game
             notificationManager.showInfo('Welcome to DogeMiner: Community Edition!');
+        } else {
+            // Make sure character sprite and rock are correctly set based on current level
+            const mainCharacter = document.getElementById('main-character');
+            const mainRock = document.getElementById('main-rock');
+            const platform = document.getElementById('platform');
+            
+            if (mainCharacter && mainRock && game) {
+                // Set correct character sprite
+                if (game.currentLevel === 'earth') {
+                    mainCharacter.src = 'assets/general/character/standard.png';
+                    mainRock.src = 'assets/general/rocks/earth.png';
+                    if (platform) {
+                        platform.src = '../assets/quickUI/dogeplatform.png';
+                    }
+                } else if (game.currentLevel === 'moon') {
+                    mainCharacter.src = 'assets/general/character/spacehelmet.png';
+                    mainRock.src = 'assets/general/rocks/moon.png';
+                    if (platform) {
+                        platform.src = '../assets/quickUI/dogeplatformmoon.png';
+                    }
+                    
+                    // Make sure moon is unlocked in UI
+                    if (uiManager) {
+                        uiManager.hideMoonLocked();
+                    }
+                }
+                
+                // Force update shop content if on Moon
+                if (game.currentLevel === 'moon' && uiManager) {
+                    uiManager.initializePlanetTabs?.();
+                    setTimeout(() => {
+                        uiManager.updateShopContent();
+                    }, 100); // Short delay to ensure UI is ready
+                }
+            }
         }
         
         // CloudSaveManager will be initialized by cloud-save.js

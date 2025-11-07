@@ -80,6 +80,64 @@ class ShopManager {
                 }
             },
             
+            // Moon helpers
+            moonHelpers: {
+                moonBase: {
+                    name: 'Moon Base',
+                    baseCost: 29999,
+                    baseDps: 12,
+                    icon: 'assets/helpers/bases/bases-idle-0.png',
+                    miningSprite: 'assets/helpers/bases/bases-mine-0.png',
+                    description: 'A base on the moon to extract much dogecoin.',
+                    category: 'moon'
+                },
+                moonShibe: {
+                    name: 'Moon Shibe',
+                    baseCost: 10000,
+                    baseDps: 9,
+                    icon: 'assets/helpers/moonshibe/moonshibe-idle-0.png',
+                    miningSprite: 'assets/helpers/moonshibe/moonshibe-mine-0.png',
+                    description: 'Astronaut moon shibe to mine much dogecoin.',
+                    category: 'moon'
+                },
+                dogeCar: {
+                    name: 'Doge Car',
+                    baseCost: 35000,
+                    baseDps: 12,
+                    icon: 'assets/helpers/dogecar/dogecar-idle-0.png',
+                    miningSprite: 'assets/helpers/dogecar/dogecar-mine-0.png',
+                    description: 'Wow! Much fast doge car with such doge driver. Very Wise. How it mines, no one knows.',
+                    category: 'moon'
+                },
+                landerShibe: {
+                    name: 'Lander Shibe',
+                    baseCost: 420000,
+                    baseDps: 20,
+                    icon: 'assets/helpers/landershibe/landershibe-idle-0.png',
+                    miningSprite: 'assets/helpers/landershibe/landershibe-mine-0.png',
+                    description: 'Lander shibe explores other planets and moons in pursuit of dogecoin.',
+                    category: 'moon'
+                },
+                marsRocket: {
+                    name: 'Mars Rocket',
+                    baseCost: 2500000,
+                    baseDps: 50,
+                    icon: 'assets/helpers/marsrocket/marsrocket-idle-0.png',
+                    miningSprite: 'assets/helpers/marsrocket/marsrocket-mine-0.png',
+                    description: 'A rocket to fly to Mars, much red planet, such adventure.',
+                    category: 'moon'
+                },
+                dogeGate: {
+                    name: 'Doge Gate',
+                    baseCost: 123000000,
+                    baseDps: 155,
+                    icon: 'assets/helpers/dogegate/dogegate-idle-0.png',
+                    miningSprite: 'assets/helpers/dogegate/dogegate-mine-0.png',
+                    description: 'A Doge Gate for instant galaxy-wide dogecoin transfers.',
+                    category: 'moon'
+                }
+            },
+            
             pickaxes: {
                 standard: {
                     name: 'Standard Pickaxe',

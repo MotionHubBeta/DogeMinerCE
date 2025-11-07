@@ -33,16 +33,35 @@ class CloudSaveManager {
         const userInfo = document.getElementById('user-info');
         const signInSection = document.getElementById('sign-in-section');
         const userName = document.getElementById('user-name');
+        const localSection = document.getElementById('local-save-section');
+        const localButtons = document.getElementById('local-save-buttons');
+        const cloudLocalActions = document.getElementById('cloud-local-actions');
 
         if (this.currentUser) {
             // User is signed in
             userInfo.style.display = 'block';
             signInSection.style.display = 'none';
             userName.textContent = `Signed in as: ${this.currentUser.displayName || this.currentUser.email}`;
+
+            if (cloudLocalActions && localButtons && localButtons.parentElement !== cloudLocalActions) {
+                cloudLocalActions.appendChild(localButtons);
+            }
+
+            if (localSection) {
+                localSection.style.display = 'none';
+            }
         } else {
             // User is not signed in
             userInfo.style.display = 'none';
             signInSection.style.display = 'block';
+
+            if (localSection && localButtons && localButtons.parentElement !== localSection) {
+                localSection.appendChild(localButtons);
+            }
+
+            if (localSection) {
+                localSection.style.display = '';
+            }
         }
     }
 

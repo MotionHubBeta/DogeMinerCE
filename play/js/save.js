@@ -149,46 +149,58 @@ class SaveManager {
     }
     
     createSaveData() {
-        // Create helper data for save - only save positions and mining shibe names
-        const helperData = this.game.placedHelpers ? this.game.placedHelpers.map(helper => {
+        const serializePlacedHelper = (helper) => {
+            if (!helper) return null;
             const saveHelper = {
                 type: helper.type,
-                x: helper.x,
-                y: helper.y,
-                id: helper.id,
-                isMining: helper.isMining
+                x: helper.x ?? 0,
+                y: helper.y ?? 0,
+                id: helper.id ?? (Date.now() + Math.random()),
+                isMining: !!helper.isMining
             };
-            
-            // Only save name for mining shibes to save space
-            if (helper.type === 'miningShibe' && helper.name) {
+
+            if (helper.name) {
                 saveHelper.name = helper.name;
             }
-            
+
             return saveHelper;
-        }) : [];
+        };
+
+        const currentPlaced = Array.isArray(this.game.placedHelpers) ? this.game.placedHelpers : [];
+
+        if (this.game.currentLevel === 'earth') {
+            this.game.earthPlacedHelpers = [...currentPlaced];
+        } else if (this.game.currentLevel === 'moon') {
+            this.game.moonPlacedHelpers = [...currentPlaced];
+        }
+
+        const earthPlacedHelpers = Array.isArray(this.game.earthPlacedHelpers)
+            ? this.game.earthPlacedHelpers.map(serializePlacedHelper).filter(Boolean)
+            : [];
+
+        const moonPlacedHelpers = Array.isArray(this.game.moonPlacedHelpers)
+            ? this.game.moonPlacedHelpers.map(serializePlacedHelper).filter(Boolean)
+            : [];
+
+        const helperData = currentPlaced.map(serializePlacedHelper).filter(Boolean);
 
         return {
             version: '1.0.0',
             timestamp: Date.now(),
-            
-            // Game state
             dogecoins: this.game.dogecoins,
             totalMined: this.game.totalMined,
             totalClicks: this.game.totalClicks,
             dps: this.game.dps,
             highestDps: this.game.highestDps,
             currentLevel: this.game.currentLevel,
-            
-            // Items
             helpers: this.game.helpers,
+            moonHelpers: this.game.moonHelpers,
             pickaxes: this.game.pickaxes,
             currentPickaxe: this.game.currentPickaxe,
             upgrades: this.game.upgrades || {},
-            
-            // Helper positions and names
             placedHelpers: helperData,
-            
-            // Statistics
+            earthPlacedHelpers,
+            moonPlacedHelpers,
             statistics: {
                 totalPlayTime: this.game.totalPlayTime || 0,
                 highestDps: this.game.highestDps || 0,
@@ -197,8 +209,6 @@ class SaveManager {
                 achievements: this.game.achievements || [],
                 startTime: this.game.startTime || Date.now()
             },
-            
-            // Settings
             settings: {
                 soundEnabled: this.game.soundEnabled !== false,
                 musicEnabled: this.game.musicEnabled !== false,
@@ -210,163 +220,190 @@ class SaveManager {
             }
         };
     }
-    
+
     applySaveData(saveData) {
-        // Validate save data version
         if (!this.validateSaveData(saveData)) {
             throw new Error('Invalid save data');
         }
-        
-        // Apply game state
+
         this.game.dogecoins = saveData.dogecoins || 0;
         this.game.totalMined = saveData.totalMined || 0;
         this.game.totalClicks = saveData.totalClicks || 0;
         this.game.dps = saveData.dps || 0;
         this.game.highestDps = saveData.highestDps || 0;
         this.game.currentLevel = saveData.currentLevel || 'earth';
-        
-        // Apply items
-        this.game.helpers = saveData.helpers || [];
+        this.game.isTransitioning = false;
+
+        this.game.helpers = Array.isArray(saveData.helpers)
+            ? saveData.helpers.map(helper => ({ ...helper }))
+            : [];
+        this.game.moonHelpers = Array.isArray(saveData.moonHelpers)
+            ? saveData.moonHelpers.map(helper => ({ ...helper }))
+            : [];
         this.game.pickaxes = saveData.pickaxes || ['standard'];
         this.game.currentPickaxe = saveData.currentPickaxe || 'standard';
         this.game.upgrades = saveData.upgrades || {};
-        
-        // Load helper positions and names
-        if (saveData.placedHelpers && Array.isArray(saveData.placedHelpers)) {
-            this.game.placedHelpers = saveData.placedHelpers.map(savedHelper => {
-                const helper = {
-                    type: savedHelper.type,
-                    x: savedHelper.x || 0,
-                    y: savedHelper.y || 0,
-                    id: savedHelper.id || Date.now() + Math.random(),
-                    isMining: savedHelper.isMining || false,
-                    helper: this.game.getHelperData(savedHelper.type),
-                    dps: this.game.getHelperData(savedHelper.type).baseDps
-                };
-                
-                // Restore name for mining shibes
-                if (savedHelper.type === 'miningShibe' && savedHelper.name) {
-                    helper.name = savedHelper.name;
-                }
-                
-                return helper;
-            });
-            
-            // Recreate helper sprites after loading
-            this.game.recreateHelperSprites();
-        } else {
-            this.game.placedHelpers = [];
+
+        const rebuildPlacedHelpers = (helpersArray = [], planet = 'earth') => {
+            if (!Array.isArray(helpersArray)) return [];
+
+            const shopCategory = planet === 'moon'
+                ? window.shopManager?.shopData?.moonHelpers
+                : window.shopManager?.shopData?.helpers;
+
+            return helpersArray
+                .map(savedHelper => {
+                    if (!savedHelper) return null;
+
+                    const fallbackHelperData = this.game.getHelperData(savedHelper.type);
+                    const shopHelperData = shopCategory?.[savedHelper.type];
+                    const helperData = shopHelperData || fallbackHelperData;
+
+                    const helper = {
+                        type: savedHelper.type,
+                        x: savedHelper.x ?? 0,
+                        y: savedHelper.y ?? 0,
+                        id: savedHelper.id ?? (Date.now() + Math.random()),
+                        isMining: !!savedHelper.isMining,
+                        helper: helperData,
+                        dps: helperData?.baseDps || fallbackHelperData?.baseDps || 0
+                    };
+
+                    if (savedHelper.name) {
+                        helper.name = savedHelper.name;
+                    }
+
+                    return helper;
+                })
+                .filter(Boolean);
+        };
+
+        let rawEarth = Array.isArray(saveData.earthPlacedHelpers) ? saveData.earthPlacedHelpers : [];
+        let rawMoon = Array.isArray(saveData.moonPlacedHelpers) ? saveData.moonPlacedHelpers : [];
+
+        if (!rawEarth.length && !rawMoon.length && Array.isArray(saveData.placedHelpers)) {
+            if ((saveData.currentLevel || 'earth') === 'moon') {
+                rawMoon = saveData.placedHelpers;
+            } else {
+                rawEarth = saveData.placedHelpers;
+            }
         }
-        
-        // Apply statistics
+
+        this.game.earthPlacedHelpers = rebuildPlacedHelpers(rawEarth, 'earth');
+        this.game.moonPlacedHelpers = rebuildPlacedHelpers(rawMoon, 'moon');
+
+        this.game.placedHelpers = this.game.currentLevel === 'moon'
+            ? [...this.game.moonPlacedHelpers]
+            : [...this.game.earthPlacedHelpers];
+
+        const body = document.body;
+        if (body) {
+            if (this.game.currentLevel === 'moon') {
+                body.classList.add('moon-theme');
+            } else {
+                body.classList.remove('moon-theme');
+            }
+        }
+
+        this.game.recreateHelperSprites();
+        this.game.updateShopPrices();
+
         this.game.totalPlayTime = saveData.statistics?.totalPlayTime || 0;
-        this.game.highestDps = saveData.statistics?.highestDps || 0;
         this.game.helpersBought = saveData.statistics?.helpersBought || 0;
         this.game.pickaxesBought = saveData.statistics?.pickaxesBought || 0;
         this.game.achievements = saveData.statistics?.achievements || [];
         this.game.startTime = saveData.statistics?.startTime || Date.now();
-        
-        // Apply settings
+
         this.game.soundEnabled = saveData.settings?.soundEnabled !== false;
         this.game.musicEnabled = saveData.settings?.musicEnabled !== false;
         this.game.notificationsEnabled = saveData.settings?.notificationsEnabled !== false;
         this.game.autoSaveEnabled = saveData.settings?.autoSaveEnabled !== false;
         this.game.hasPlayedMoonLaunch = saveData.cutscenes?.moonLaunch || false;
-        
-        // Sync settings to AudioManager and UI checkboxes
+
         if (window.audioManager) {
             window.audioManager.soundEnabled = this.game.soundEnabled;
             window.audioManager.musicEnabled = this.game.musicEnabled;
         }
-        
-        // Update checkbox states
+
         const soundCheckbox = document.getElementById('sound-enabled');
         const musicCheckbox = document.getElementById('music-enabled');
         const notificationsCheckbox = document.getElementById('notifications-enabled');
         const autoSaveCheckbox = document.getElementById('auto-save-enabled');
-        
+
         if (soundCheckbox) soundCheckbox.checked = this.game.soundEnabled;
         if (musicCheckbox) musicCheckbox.checked = this.game.musicEnabled;
         if (notificationsCheckbox) notificationsCheckbox.checked = this.game.notificationsEnabled;
         if (autoSaveCheckbox) autoSaveCheckbox.checked = this.game.autoSaveEnabled;
-        
-        // Start/stop music based on loaded setting
-        if (window.audioManager) {
-            if (this.game.musicEnabled) {
-                window.audioManager.playBackgroundMusic();
-            } else {
-                window.audioManager.stopMusic();
-            }
-        }
-        
-        // Update game state
+
         this.game.updateDPS();
         this.game.updateUI();
-        
-        // Update background if level changed
-        if (uiManager) {
+
+        if (window.uiManager) {
             uiManager.updateBackground(this.game.currentLevel);
+            uiManager.initializePlanetTabs?.();
+
+            if (this.game.hasPlayedMoonLaunch) {
+                uiManager.hideMoonLocked?.();
+            }
+
+            uiManager.updateShopContent?.();
         }
     }
-    
+
     validateSaveData(saveData) {
         if (!saveData || typeof saveData !== 'object') {
             return false;
         }
-        
-        // Check required fields
+
         const requiredFields = ['version', 'timestamp', 'dogecoins'];
         for (const field of requiredFields) {
             if (!(field in saveData)) {
                 return false;
             }
         }
-        
-        // Check data types
+
         if (typeof saveData.dogecoins !== 'number' || saveData.dogecoins < 0) {
             return false;
         }
-        
+
         if (typeof saveData.totalMined !== 'number' || saveData.totalMined < 0) {
             return false;
         }
-        
+
         if (typeof saveData.totalClicks !== 'number' || saveData.totalClicks < 0) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     autoSave() {
         if (this.game.autoSaveEnabled !== false) {
             this.saveGame();
-            
-            // Also save to cloud if user is signed in and game is ready
-            if (window.cloudSaveManager && window.cloudSaveManager.currentUser && window.game !== null && window.game !== undefined) {
+
+            if (window.cloudSaveManager && window.cloudSaveManager.currentUser && window.game != null) {
                 window.cloudSaveManager.saveToCloudSilent();
             }
         }
     }
-    
+
     exportSave() {
         try {
             const saveData = this.createSaveData();
             const saveString = JSON.stringify(saveData, null, 2);
-            
-            // Create download link
+
             const blob = new Blob([saveString], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            
+
             const a = document.createElement('a');
             a.href = url;
             a.download = `dogeminer_ce_save_${new Date().toISOString().split('T')[0]}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            
+
             URL.revokeObjectURL(url);
-            
+
             this.game.showNotification('Save exported successfully!');
             return true;
         } catch (error) {
@@ -375,12 +412,12 @@ class SaveManager {
             return false;
         }
     }
-    
+
     importSave() {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.json';
-        
+
         input.onchange = (event) => {
             const file = event.target.files[0];
             if (!file) return;
@@ -433,12 +470,17 @@ class SaveManager {
                 this.game.totalClicks = 0;
                 this.game.dps = 0;
                 this.game.helpers = [];
+                this.game.moonHelpers = [];
+                this.game.earthPlacedHelpers = [];
+                this.game.moonPlacedHelpers = [];
+                this.game.placedHelpers = [];
+                this.game.helpersOnCursor = [];
+                this.game.placementQueue = [];
+                this.game.isPlacingHelpers = false;
                 this.game.upgrades = [];
                 this.game.pickaxes = [];
                 this.game.currentPickaxe = 'standard';
                 this.game.currentLevel = 'earth';
-                this.game.placedHelpers = [];
-                this.game.helpersOnCursor = [];
                 this.game.hasPlayedMoonLaunch = false;
                 this.game.isCutscenePlaying = false;
                 

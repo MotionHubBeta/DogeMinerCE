@@ -8,6 +8,9 @@ class DogeMinerGame {
         this.highestDps = 0;
         this.currentLevel = 'earth';
         this.helpers = [];
+        this.moonHelpers = [];
+        this.earthPlacedHelpers = [];
+        this.moonPlacedHelpers = [];
         
         // Name lists for helpers
         this.miningShibeNames = [
@@ -25,7 +28,13 @@ class DogeMinerGame {
             'streamerKittens': 'Streamer Kittens',
             'spaceRocket': 'Space Rocket',
             'timeMachineRig': 'Time Machine Mining Rig',
-            'infiniteDogebility': 'Infinite Dogebility Drive'
+            'infiniteDogebility': 'Infinite Dogebility Drive',
+            'moonBase': 'Moon Base',
+            'moonShibe': 'Moon Shibe',
+            'dogeCar': 'Doge Car',
+            'landerShibe': 'Lander Shibe',
+            'marsRocket': 'Mars Rocket',
+            'dogeGate': 'Doge Gate'
         };
         
         // Game state
@@ -45,6 +54,7 @@ class DogeMinerGame {
         // Cutscenes
         this.hasPlayedMoonLaunch = false;
         this.isCutscenePlaying = false;
+        this.isTransitioning = false; // Flag for planet transitions
         this.cutsceneOverlay = null;
         this.cutsceneVideo = null;
         this.cutsceneSkipButton = null;
@@ -93,6 +103,28 @@ class DogeMinerGame {
         
         // Blinking animation
         this.blinkInterval = null;
+        
+        // Level definitions for UI updates
+        this.levels = {
+            earth: {
+                name: 'Earth',
+                background: 'assets/backgrounds/bg/bg1.jpg',
+                rock: 'assets/general/rocks/earth.png',
+                character: 'assets/general/character/standard.png'
+            },
+            moon: {
+                name: 'Moon',
+                background: 'assets/backgrounds/bg/bgmoon01.jpg',
+                rock: 'assets/general/rocks/moon.png',
+                character: 'assets/general/character/spacehelmet.png'
+            }
+        };
+        
+        // Unlock system
+        this.unlockedLevels = new Set(['earth']);
+        this.unlockedAchievements = new Set();
+        
+        // UI state flags
         
         // Rick Doge system
         this.rickInterval = null;
@@ -229,6 +261,24 @@ class DogeMinerGame {
             audioManager.resumeAudio();
         }
         
+        // After moon launch cutscene, switch to moon
+        if (this.hasPlayedMoonLaunch && this.currentLevel !== 'moon') {
+            console.log('[Cutscene] Switching to moon after cutscene');
+            // Use a timeout to ensure UI is updated before planet switch
+            setTimeout(() => {
+                // Find and click the moon tab
+                const moonTab = document.querySelector('.planet-tab[onclick*="moon"]');
+                if (moonTab) {
+                    moonTab.click();
+                } else {
+                    // Fallback if moon tab can't be found: call switchPlanet directly
+                    if (window.switchPlanet) {
+                        window.switchPlanet('moon');
+                    }
+                }
+            }, 500);
+        }
+        
         this.updateUI();
     }
     
@@ -282,84 +332,72 @@ class DogeMinerGame {
     }
     
     handleRockClick(event = null) {
-        if (!this.isPlaying || this.isIntroPlaying || this.isCutscenePlaying) return;
-        
+        if (!this.isPlaying || this.isIntroPlaying || this.isCutscenePlaying || this.isTransitioning) return;
+
         this.totalClicks++;
-        
-        // Pickaxe swing animation
+
         this.swingPickaxe();
-        
-        // Doge bounce animation
         this.bounceDoge();
-        
-        // Award dogecoins for each hit
+
         const coinsPerHit = this.getClickPower();
         this.dogecoins += coinsPerHit;
         this.totalMined += coinsPerHit;
-        
-        // Create floating coin effect (limited)
+
         if (this.clickEffects.length < this.maxEffects) {
-        this.createFloatingCoin(coinsPerHit, event);
-        }
-        
-        // Visual effects for hitting rock (limited)
-        if (this.clickEffects.length < this.maxEffects) {
-        this.createClickEffect(event);
+            this.createFloatingCoin(coinsPerHit, event);
+            this.createClickEffect(event);
         }
         if (this.particles.length < this.maxParticles) {
-        this.createParticleEffect(event);
+            this.createParticleEffect(event);
         }
-        
+
         this.updateUI();
-        
-        // Play random pick sound effect
         this.playSound('pick');
-        
     }
-    
+
     processClick(event = null) {
         const now = Date.now();
-        if (this.isIntroPlaying || this.isCutscenePlaying) {
+        if (this.isIntroPlaying || this.isCutscenePlaying || this.isTransitioning) {
             return;
         }
-        
-        // Remove clicks older than 1 second from tracking
+
         this.clickTimes = this.clickTimes.filter(time => now - time < 1000);
-        
-        // Check if we're at the 15 CPS limit
+
         if (this.clickTimes.length >= this.maxCPS) {
-            // Discard this click - we've already hit the limit
             return;
         }
-        
-        // Check minimum interval between clicks (66ms = ~15 CPS)
+
         if (now - this.lastClickTime < 66) {
-            // Too soon since last click, discard this one
             return;
         }
-        
-        // Process this click
+
         this.clickTimes.push(now);
         this.lastClickTime = now;
-        
+
         this.handleRockClick(event);
         this.startSwing();
     }
-    
+
     getClickPower() {
         const basePower = 1; // 1% per hit like DogeMiner 2
         return basePower;
     }
-    
+
     swingPickaxe() {
         // Pickaxe state is now managed by updatePickaxeState()
         // This method is kept for compatibility but doesn't do the timeout anymore
     }
-    
+
     bounceDoge() {
-        if (this.isIntroPlaying || this.isCutscenePlaying) return;
+        if (this.isIntroPlaying || this.isCutscenePlaying || this.isTransitioning) return;
         const doge = document.getElementById('main-character');
         if (!doge) return;
+
+        // Temporarily remove float so bounce animation is visible
+        const hadFloat = doge.classList.contains('float');
+        if (hadFloat) {
+            doge.classList.remove('float');
+        }
         
         // Add bounce class
         doge.classList.add('bounce');
@@ -367,78 +405,110 @@ class DogeMinerGame {
         // Remove bounce class after animation completes
         setTimeout(() => {
             doge.classList.remove('bounce');
+            if (hadFloat) {
+                doge.classList.add('float');
+            }
         }, 200);
     }
     
     playDogeIntro() {
+        // Don't play intro if transitioning between planets or cutscene is playing
+        if (this.isTransitioning || this.isCutscenePlaying) return;
         const characterContainer = document.getElementById('character-container');
         const pickaxe = document.getElementById('pickaxe');
         if (!characterContainer) return;
-        
+
+        // Hide character until animation kicks in to avoid flicker
+        characterContainer.style.visibility = 'hidden';
+        characterContainer.style.transform = 'translateY(-520px)';
+
         this.isIntroPlaying = true;
-        
-        const restartAnimation = (element, className) => {
-            element.classList.remove(className);
-            // Force reflow so animation can replay even if class was already present
-            void element.offsetWidth;
-            element.classList.add(className);
-        };
-        
-        restartAnimation(characterContainer, 'doge-intro');
-        setTimeout(() => {
-            characterContainer.classList.remove('doge-intro');
-        }, 2600);
-        
-        if (pickaxe) {
-            restartAnimation(pickaxe, 'pickaxe-intro');
-            setTimeout(() => {
-                pickaxe.classList.remove('pickaxe-intro');
-            }, 2300);
+
+        // Ensure character sprite is set correctly before animation
+        const doge = document.getElementById('main-character');
+        if (doge) {
+            // Set correct character sprite based on planet
+            if (this.currentLevel === 'earth') {
+                doge.src = 'assets/general/character/standard.png';
+            } else if (this.currentLevel === 'moon') {
+                doge.src = 'assets/general/character/spacehelmet.png';
+            }
+            doge.classList.remove('float');
         }
         
-        const introDuration = 1000;
-        const squashDuration = 350;
-        const startDelay = 500;
+        // Reset any existing classes to ensure clean animation
+        characterContainer.classList.remove('doge-intro');
+        if (pickaxe) pickaxe.classList.remove('pickaxe-intro');
+        
+        // Short delay to ensure everything is reset
         setTimeout(() => {
-            this.isIntroPlaying = false;
-        }, startDelay + introDuration + squashDuration);
+            characterContainer.style.visibility = 'visible';
+            const restartAnimation = (element, className) => {
+                element.classList.remove(className);
+                // Force reflow so animation can replay even if class was already present
+                void element.offsetWidth;
+                element.classList.add(className);
+            };
+            restartAnimation(characterContainer, 'doge-intro');
+            setTimeout(() => {
+                characterContainer.classList.remove('doge-intro');
+                characterContainer.style.transform = '';
+            }, 2600);
+
+            if (pickaxe) {
+                restartAnimation(pickaxe, 'pickaxe-intro');
+                setTimeout(() => {
+                    pickaxe.classList.remove('pickaxe-intro');
+                }, 1800);
+            }
+
+            const introDuration = 1000;
+            const squashDuration = 350;
+            const startDelay = 500;
+            setTimeout(() => {
+                this.isIntroPlaying = false;
+                const idleDoge = document.getElementById('main-character');
+                if (idleDoge) {
+                    idleDoge.classList.add('float');
+                }
+            }, startDelay + introDuration + squashDuration);
+        }, 50);
     }
-    
+
     startSwing() {
-        if (this.isIntroPlaying || this.isCutscenePlaying) return;
+        if (this.isIntroPlaying || this.isCutscenePlaying || this.isTransitioning) return;
         const pickaxe = document.getElementById('pickaxe');
         if (!pickaxe) return;
-        
+
         // Always start the swing immediately
+        pickaxe.classList.remove('pickaxe-intro');
+        pickaxe.classList.remove('swinging');
+        void pickaxe.offsetWidth; // Force reflow so animation can restart
         pickaxe.classList.add('swinging');
-        
+
         // Clear any existing timeout since we're starting a new swing
         if (this.swingTimeout) {
             clearTimeout(this.swingTimeout);
             this.swingTimeout = null;
         }
     }
-    
+
     endSwing() {
         const pickaxe = document.getElementById('pickaxe');
         if (!pickaxe) return;
-        
-        // Only end swing if neither input is currently held
+
         if (!this.isMouseDown && !this.isSpaceDown) {
-            // Clear any existing timeout first
             if (this.swingTimeout) {
                 clearTimeout(this.swingTimeout);
                 this.swingTimeout = null;
             }
-            
-            // Small delay to ensure swing is visible on quick taps
+
             this.swingTimeout = setTimeout(() => {
-                // Double-check that inputs are still not held when timeout fires
                 if (!this.isMouseDown && !this.isSpaceDown) {
                     pickaxe.classList.remove('swinging');
                 }
                 this.swingTimeout = null;
-            }, 30); // Just 30ms - enough to see the swing but fast enough for rapid clicks
+            }, 150); // Allow swing animation to complete before resetting
         }
     }
     
@@ -464,6 +534,9 @@ class DogeMinerGame {
             const particle = document.createElement('img');
             particle.src = 'assets/general/rocks/earth_particle.png';
             particle.className = 'earth-particle';
+            if (this.currentLevel === 'moon') {
+                particle.classList.add('moon-particle');
+            }
             particle.style.left = x + 'px';
             particle.style.top = y + 'px';
             
@@ -586,6 +659,7 @@ class DogeMinerGame {
         console.log('isPlacingHelpers:', this.isPlacingHelpers);
         console.log('Current placementQueue length:', this.placementQueue?.length || 0);
         console.log('helpersOnCursor length:', this.helpersOnCursor?.length || 0);
+        console.log('Current level:', this.currentLevel);
         console.log('Stack trace:', new Error().stack);
         
         // Allow buying multiple helpers - only block if actively clicking to place
@@ -593,21 +667,29 @@ class DogeMinerGame {
         // We just need to prevent buying during drag-and-drop, which doesn't set isPlacingHelpers
         // Actually, let's just allow all purchases - placement and drag-and-drop handle blocking
         
-        // Get helper data from shop system
-        const helper = window.shopManager.shopData.helpers[helperType];
+        // Get helper data from shop system based on current planet
+        const helperCategory = this.currentLevel === 'earth' ? 'helpers' : 'moonHelpers';
+        const helper = window.shopManager.shopData[helperCategory][helperType];
         if (!helper) {
-            console.error('Helper type not found:', helperType);
+            console.error('Helper type not found:', helperType, 'in category', helperCategory);
             return false;
         }
         
-        const owned = this.helpers.filter(h => h.type === helperType).length;
+        // Use the correct helper array based on current planet
+        const helperArray = this.currentLevel === 'earth' ? this.helpers : this.moonHelpers;
+        const owned = helperArray.filter(h => h.type === helperType).length;
         const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned));
         
         if (this.dogecoins >= cost) {
             this.dogecoins -= cost;
             
-            // Add helper to the array immediately so price updates correctly
-            this.helpers.push({
+            // Play purchase sound
+            if (window.audioManager) {
+                window.audioManager.playSound('ching');
+            }
+            
+            // Add helper to the correct array immediately so price updates correctly
+            helperArray.push({
                 type: helperType,
                 helper: helper,
                 dps: helper.baseDps
@@ -620,14 +702,20 @@ class DogeMinerGame {
             this.addHelperToCursor(helperType, helper);
             
             // Update UI but skip shop prices since we already updated them
-            this.updateUI(true); // Pass true to skip shop price updates
-            
-            // Play purchase sound
-            if (window.audioManager) {
-                audioManager.playSound('ching');
+            if (window.uiManager) {
+                const level = this.currentLevel;
+                const hasPlayedMoonLaunch = this.hasPlayedMoonLaunch;
+
+                uiManager.updateBackground?.(level);
+                uiManager.initializePlanetTabs?.();
+
+                if (hasPlayedMoonLaunch) {
+                    uiManager.hideMoonLocked?.();
+                }
+
+                uiManager.updateShopContent?.();
             }
-            
-            return true;
+            return false;
         }
         return false;
     }
@@ -698,14 +786,27 @@ class DogeMinerGame {
             // Add special classes for different helper types
             if (helperData.type === 'spaceRocket') {
                 helperSprite.classList.add('rocket');
-            } else if (helperData.type === 'miningShibe') {
+            } else if (helperData.type === 'miningShibe' || helperData.type === 'moonShibe') {
                 helperSprite.classList.add('shibe');
             } else if (helperData.type === 'infiniteDogebility') {
                 helperSprite.classList.add('dogebility');
+            } else if (helperData.type === 'moonBase') {
+                helperSprite.classList.add('moon-base');
+            } else if (helperData.type === 'marsRocket') {
+                helperSprite.classList.add('mars-rocket');
+            } else if (helperData.type === 'landerShibe') {
+                helperSprite.classList.add('lander-shibe');
             }
             
             // Position the sprite immediately at current cursor position
-            const helperSize = helperSprite.classList.contains('shibe') ? 30 : 60;
+            let helperSize = 60;
+            if (helperSprite.classList.contains('shibe')) {
+                helperSize = 30;
+            } else if (helperSprite.classList.contains('moon-base') || helperSprite.classList.contains('lander-shibe')) {
+                helperSize = 90;
+            } else if (helperSprite.classList.contains('dogebility')) {
+                helperSize = 69;
+            }
             const offset = helperSize / 2;
             
             let stackOffsetX = 0;
@@ -759,7 +860,14 @@ class DogeMinerGame {
                 // Update position of all cursor sprites with stacking offset
                 const cursorSprites = document.querySelectorAll('.helper-sprite.attached-to-mouse');
                 cursorSprites.forEach((sprite, index) => {
-                    const helperSize = sprite.classList.contains('shibe') ? 30 : 60;
+                    let helperSize = 60;
+                    if (sprite.classList.contains('shibe')) {
+                        helperSize = 30;
+                    } else if (sprite.classList.contains('moon-base') || sprite.classList.contains('lander-shibe')) {
+                        helperSize = 90;
+                    } else if (sprite.classList.contains('dogebility')) {
+                        helperSize = 69;
+                    }
                     const offset = helperSize / 2; // Center the sprite
                     
                     let stackOffsetX = 0;
@@ -799,7 +907,14 @@ class DogeMinerGame {
                 
                 // Use the first helper's size for collision detection
                 const firstHelper = this.helpersOnCursor[0];
-                const helperSize = firstHelper.type === 'miningShibe' ? 30 : 60;
+                let helperSize = 60;
+                if (firstHelper.type === 'miningShibe' || firstHelper.type === 'moonShibe') {
+                    helperSize = 30;
+                } else if (firstHelper.type === 'moonBase' || firstHelper.type === 'landerShibe') {
+                    helperSize = 90;
+                } else if (firstHelper.type === 'infiniteDogebility') {
+                    helperSize = 69;
+                }
                 const offset = helperSize / 2;
                 
                 // Use the same positioning logic as mouse move
@@ -1235,6 +1350,23 @@ class DogeMinerGame {
     }
     
     createHelperSprite(placedHelper) {
+        if (!placedHelper || !placedHelper.type) {
+            console.error('Invalid helper data provided to createHelperSprite:', placedHelper);
+            return;
+        }
+        
+        // Make sure we have a valid helper reference
+        if (!placedHelper.helper || !placedHelper.helper.icon) {
+            // Try to get helper data based on current level and type
+            const helperCategory = this.currentLevel === 'earth' ? 'helpers' : 'moonHelpers';
+            if (window.shopManager && window.shopManager.shopData && window.shopManager.shopData[helperCategory]) {
+                placedHelper.helper = window.shopManager.shopData[helperCategory][placedHelper.type] || this.getHelperData(placedHelper.type);
+            } else {
+                // Fallback to generic helper data
+                placedHelper.helper = this.getHelperData(placedHelper.type);
+            }
+        }
+        
         const helperSprite = document.createElement('img');
         helperSprite.src = placedHelper.helper.icon; // Use icon as idle sprite
         helperSprite.className = 'helper-sprite';
@@ -1245,10 +1377,16 @@ class DogeMinerGame {
         // Add special classes for different helper types
         if (placedHelper.type === 'spaceRocket') {
             helperSprite.classList.add('rocket');
-        } else if (placedHelper.type === 'miningShibe') {
+        } else if (placedHelper.type === 'miningShibe' || placedHelper.type === 'moonShibe') {
             helperSprite.classList.add('shibe');
         } else if (placedHelper.type === 'infiniteDogebility') {
             helperSprite.classList.add('dogebility');
+        } else if (placedHelper.type === 'moonBase') {
+            helperSprite.classList.add('moon-base');
+        } else if (placedHelper.type === 'marsRocket') {
+            helperSprite.classList.add('mars-rocket');
+        } else if (placedHelper.type === 'landerShibe') {
+            helperSprite.classList.add('lander-shibe');
         }
         
         // Add bounce animation class
@@ -1265,28 +1403,33 @@ class DogeMinerGame {
         nameTooltip.dataset.helperId = placedHelper.id;
         
         // Position tooltip relative to helper with dynamic centering
-        const helperWidth = 60; // Standard helper width
-        let centerOffset = 20; // Default centering offset
-        
-        // Adjust centering for different helper types
-        if (placedHelper.type === 'infiniteDogebility') {
-            centerOffset = 33; // Dogebility drive: unchanged
-        } else if (placedHelper.type === 'timeMachineRig') {
-            centerOffset = 28; // Mining Rig: moved right by 10 (18 + 10)
-        } else if (placedHelper.type === 'streamerKittens') {
-            centerOffset = 29; // Streamer Kittens: moved right by 2 (27 + 2)
-        } else if (placedHelper.type === 'spaceRocket') {
-            centerOffset = 25; // Space Rocket horizontal unchanged
-        } else if (placedHelper.type === 'dogeKennels') {
-            centerOffset = 30; // Doge Kennels: moved right by 2 (28 + 2)
-        }
-        
-        // Adjust vertical positioning for specific helper types
+        let centerOffset = 30; // Default centering offset (half of 60px)
         let verticalOffset = 22; // Default vertical offset
-        if (placedHelper.type === 'spaceRocket') {
-            verticalOffset = 10; // Space Rocket: moved up by 5 more (15 - 5)
+        
+        // Adjust centering and vertical positioning for different helper types
+        if (placedHelper.type === 'infiniteDogebility') {
+            centerOffset = 35; // Dogebility drive (69px): ~half width
+        } else if (placedHelper.type === 'timeMachineRig') {
+            centerOffset = 30;
         } else if (placedHelper.type === 'streamerKittens') {
-            verticalOffset = 18; // Streamer Kittens: moved down (25 - 7)
+            centerOffset = 30;
+            verticalOffset = 18;
+        } else if (placedHelper.type === 'spaceRocket' || placedHelper.type === 'marsRocket') {
+            centerOffset = 30;
+            verticalOffset = 10; // Rockets: moved up
+        } else if (placedHelper.type === 'dogeKennels') {
+            centerOffset = 30;
+        } else if (placedHelper.type === 'miningShibe' || placedHelper.type === 'moonShibe') {
+            centerOffset = 15; // Small shibes (30px): ~half width
+        } else if (placedHelper.type === 'moonBase') {
+            centerOffset = 45; // Moon Base (90px): ~half width
+            verticalOffset = 30; // Larger helper needs more vertical offset
+        } else if (placedHelper.type === 'landerShibe') {
+            centerOffset = 45; // Lander Shibe (90px): ~half width
+            verticalOffset = 28; // Larger helper needs more vertical offset
+        } else if (placedHelper.type === 'dogeCar') {
+            centerOffset = 30;
+            verticalOffset = 28; // Doge Car: needs more vertical offset
         }
         
         nameTooltip.style.left = (placedHelper.x + centerOffset) + 'px'; // Center horizontally
@@ -1634,9 +1777,18 @@ class DogeMinerGame {
     // Pickaxe system will be implemented later
     
     updateDPS() {
-        this.dps = this.helpers.reduce((total, helper) => {
+        // Calculate Earth helpers DPS
+        const earthDPS = this.helpers.reduce((total, helper) => {
             return total + helper.dps;
         }, 0);
+        
+        // Calculate Moon helpers DPS
+        const moonDPS = this.moonHelpers.reduce((total, helper) => {
+            return total + helper.dps;
+        }, 0);
+        
+        // Total DPS is the sum of both planet helpers
+        this.dps = earthDPS + moonDPS;
         
         // Update highest DPS
         if (this.dps > this.highestDps) {
@@ -1656,9 +1808,13 @@ class DogeMinerGame {
                 // Get helper type from the button's data attribute
                 const helperType = buyButton.getAttribute('data-helper-type');
                 if (helperType) {
-                    const helper = window.shopManager.shopData.helpers[helperType];
+                    // Get the correct helper category based on current planet
+                    const helperCategory = this.currentLevel === 'earth' ? 'helpers' : 'moonHelpers';
+                    const helper = window.shopManager.shopData[helperCategory][helperType];
                     if (helper) {
-                        const owned = this.helpers.filter(h => h.type === helperType).length;
+                        // Get the correct helper array based on current planet
+                        const helperArray = this.currentLevel === 'earth' ? this.helpers : this.moonHelpers;
+                        const owned = helperArray.filter(h => h.type === helperType).length;
                         const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned));
                         const canAfford = this.dogecoins >= cost;
                         
@@ -1768,8 +1924,19 @@ class DogeMinerGame {
         // Store original src
         const originalSrc = doge.src;
         
+        // Choose the correct closed eyes sprite based on current planet
+        let closedEyesSprite;
+        if (this.currentLevel === 'earth') {
+            closedEyesSprite = 'assets/general/character/closed_eyes.png';
+        } else if (this.currentLevel === 'moon') {
+            closedEyesSprite = 'assets/general/character/closed_space.png';
+        } else {
+            // Default fallback
+            closedEyesSprite = 'assets/general/character/closed_eyes.png';
+        }
+        
         // Change to closed eyes
-        doge.src = 'assets/general/character/closed_eyes.png';
+        doge.src = closedEyesSprite;
         
         // Blink for 200ms
         setTimeout(() => {
@@ -2065,6 +2232,13 @@ class DogeMinerGame {
     
     
     saveGame() {
+        // Save current helpers to the appropriate array before saving game state
+        if (this.currentLevel === 'earth') {
+            this.earthPlacedHelpers = [...this.placedHelpers];
+        } else if (this.currentLevel === 'moon') {
+            this.moonPlacedHelpers = [...this.placedHelpers];
+        }
+
         const saveData = {
             dogecoins: this.dogecoins,
             totalMined: this.totalMined,
@@ -2072,6 +2246,10 @@ class DogeMinerGame {
             dps: this.dps,
             currentLevel: this.currentLevel,
             helpers: this.helpers,
+            moonHelpers: this.moonHelpers,
+            earthPlacedHelpers: this.earthPlacedHelpers,
+            moonPlacedHelpers: this.moonPlacedHelpers,
+            hasPlayedMoonLaunch: this.hasPlayedMoonLaunch,
             timestamp: Date.now()
         };
         
@@ -2090,6 +2268,30 @@ class DogeMinerGame {
                 this.dps = data.dps || 0;
                 this.currentLevel = data.currentLevel || 'earth';
                 this.helpers = data.helpers || [];
+                this.moonHelpers = data.moonHelpers || [];
+                this.earthPlacedHelpers = data.earthPlacedHelpers || [];
+                this.moonPlacedHelpers = data.moonPlacedHelpers || [];
+                this.hasPlayedMoonLaunch = data.hasPlayedMoonLaunch || false;
+                
+                // Set placed helpers based on current level
+                if (this.currentLevel === 'earth') {
+                    this.placedHelpers = [...this.earthPlacedHelpers];
+                } else if (this.currentLevel === 'moon') {
+                    this.placedHelpers = [...this.moonPlacedHelpers];
+                }
+                
+                // Update character and rock based on current level
+                if (this.currentLevel === 'moon') {
+                    document.getElementById('main-character').src = 'assets/general/character/spacehelmet.png';
+                    document.getElementById('main-rock').src = 'assets/general/rocks/moon.png';
+                    const doge = document.getElementById('main-character');
+                    if (doge) {
+                        doge.classList.add('float');
+                    }
+                }
+                
+                // Always reset transition flag when loading
+                this.isTransitioning = false;
                 
                 this.updateDPS();
                 this.updateUI();
@@ -2112,8 +2314,22 @@ class DogeMinerGame {
     }
     
     getHelperData(helperType) {
-        // Return complete helper data based on type - match shop system types
-        const helperTypes = {
+        // First check if we have a ShopManager available with full helper data
+        if (window.shopManager && window.shopManager.shopData) {
+            // Try earth helpers first
+            if (window.shopManager.shopData.helpers && window.shopManager.shopData.helpers[helperType]) {
+                return window.shopManager.shopData.helpers[helperType];
+            }
+            
+            // Then try moon helpers
+            if (window.shopManager.shopData.moonHelpers && window.shopManager.shopData.moonHelpers[helperType]) {
+                return window.shopManager.shopData.moonHelpers[helperType];
+            }
+        }
+        
+        // Fallback to hardcoded helper data if not found in ShopManager
+        // Return complete helper data based on type
+        const earthHelpers = {
             'miningShibe': { 
                 baseDps: 0.2, 
                 icon: 'assets/helpers/shibes/shibes-idle-0.png',
@@ -2152,7 +2368,56 @@ class DogeMinerGame {
             }
         };
         
-        return helperTypes[helperType] || helperTypes['miningShibe'];
+        const moonHelpers = {
+            'moonBase': {
+                baseDps: 12,
+                icon: 'assets/helpers/bases/bases-idle-0.png',
+                miningSprite: 'assets/helpers/bases/bases-mine-0.png',
+                name: 'Moon Base'
+            },
+            'moonShibe': {
+                baseDps: 9,
+                icon: 'assets/helpers/moonshibe/moonshibe-idle-0.png',
+                miningSprite: 'assets/helpers/moonshibe/moonshibe-mine-0.png',
+                name: 'Moon Shibe'
+            },
+            'dogeCar': {
+                baseDps: 12,
+                icon: 'assets/helpers/dogecar/dogecar-idle-0.png',
+                miningSprite: 'assets/helpers/dogecar/dogecar-mine-0.png',
+                name: 'Doge Car'
+            },
+            'landerShibe': {
+                baseDps: 20,
+                icon: 'assets/helpers/landershibe/landershibe-idle-0.png',
+                miningSprite: 'assets/helpers/landershibe/landershibe-mine-0.png',
+                name: 'Lander Shibe'
+            },
+            'marsRocket': {
+                baseDps: 50,
+                icon: 'assets/helpers/marsrocket/marsrocket-idle-0.png',
+                miningSprite: 'assets/helpers/marsrocket/marsrocket-mine-0.png',
+                name: 'Mars Rocket'
+            },
+            'dogeGate': {
+                baseDps: 155,
+                icon: 'assets/helpers/dogegate/dogegate-idle-0.png',
+                miningSprite: 'assets/helpers/dogegate/dogegate-mine-0.png',
+                name: 'Doge Gate'
+            }
+        };
+        
+        // Check both helper types
+        if (earthHelpers[helperType]) {
+            return earthHelpers[helperType];
+        }
+        
+        if (moonHelpers[helperType]) {
+            return moonHelpers[helperType];
+        }
+        
+        // Default fallback
+        return earthHelpers['miningShibe'];
     }
     
     recreateHelperSprites() {

@@ -6,6 +6,7 @@ class UIManager {
         this.currentShopTab = 'helpers';
         
         this.setupUI();
+        this.initializePlanetTabs(); // Initialize planet tabs based on saved state
     }
     
     setupUI() {
@@ -84,11 +85,10 @@ class UIManager {
             }
         };
         
-        // Planet tab switching
+        // Planet tab switching with loading transition
         window.switchPlanet = (planetName) => {
-            // Don't allow switching if already on this planet
-            const currentPlanet = document.querySelector('.planet-tab.active')?.textContent?.toLowerCase();
-            if (currentPlanet === planetName) return;
+            // Don't allow switching if already on this planet or if transition is in progress
+            if (this.game.currentLevel === planetName || this.game.isTransitioning) return;
             
             // Check if Moon is locked (no Space Rockets owned)
             if (planetName === 'moon') {
@@ -112,8 +112,137 @@ class UIManager {
             });
             event.target.closest('.planet-tab').classList.add('active');
             
-            // Update game state to reflect planet change
-            // This is where you would implement actual planet switching logic
+            // Set transitioning flag
+            this.game.isTransitioning = true;
+            
+            // Show loading screen with appropriate message
+            const loadingInfo = document.getElementById('loading-info');
+            if (loadingInfo) {
+                loadingInfo.textContent = planetName === 'earth' ? 'Returning to Earth...' : 'Launching to Moon...';
+            }
+            
+            // Show loading screen
+            window.showLoadingScreen();
+            
+            // Use timeout to ensure loading screen is visible before processing
+            setTimeout(() => {
+                // First save the current state
+                if (this.game.currentLevel === 'earth') {
+                    // Save earth placed helpers
+                    this.game.earthPlacedHelpers = [...this.game.placedHelpers];
+                } else if (this.game.currentLevel === 'moon') {
+                    // Save moon placed helpers
+                    this.game.moonPlacedHelpers = [...this.game.placedHelpers];
+                }
+                
+                // Clear the current helpers from the screen
+                this.game.clearAllHelperSprites();
+                
+                // Update game state to reflect planet change
+                this.game.currentLevel = planetName;
+                
+                // Load the appropriate placed helpers
+                if (planetName === 'earth') {
+                    this.game.placedHelpers = [...this.game.earthPlacedHelpers];
+                } else if (planetName === 'moon') {
+                    this.game.placedHelpers = [...this.game.moonPlacedHelpers];
+                }
+                
+                // Update the character sprite
+                if (planetName === 'earth') {
+                    // Earth character
+                    this.updateCharacter('standard');
+                } else if (planetName === 'moon') {
+                    // Moon character with spacesuit
+                    this.updateCharacter('spacehelmet');
+                }
+                
+                // Update the rock image
+                if (planetName === 'earth') {
+                    document.getElementById('main-rock').src = 'assets/general/rocks/earth.png';
+                    const platform = document.getElementById('platform');
+                    if (platform) {
+                        platform.src = '../assets/quickUI/dogeplatform.png';
+                    }
+                    document.body.classList.remove('moon-theme');
+                    if (window.audioManager) {
+                        audioManager.playBackgroundMusic();
+                    }
+                } else if (planetName === 'moon') {
+                    document.getElementById('main-rock').src = 'assets/general/rocks/moon.png';
+                    const platform = document.getElementById('platform');
+                    if (platform) {
+                        platform.src = '../assets/quickUI/dogeplatformmoon.png';
+                    }
+                    document.body.classList.add('moon-theme');
+                    if (window.audioManager) {
+                        audioManager.playBackgroundMusic();
+                    }
+                }
+                
+                // Update backgrounds with the correct pool
+                if (planetName === 'earth') {
+                    // Earth backgrounds
+                    this.game.backgrounds = [
+                        'backgrounds/bg1.jpg',
+                        'backgrounds/bg3.jpg',
+                        'backgrounds/bg4.jpg',
+                        'backgrounds/bg5.jpg',
+                        'backgrounds/bg6.jpg',
+                        'backgrounds/bg7.jpg',
+                        'backgrounds/bg9.jpg',
+                        'backgrounds/bg-new.jpg'
+                    ];
+                } else if (planetName === 'moon') {
+                    // Moon backgrounds (same as earth since DOM only has 8 background elements)
+                    this.game.backgrounds = [
+                        'backgrounds/bg1.jpg',
+                        'backgrounds/bg3.jpg',
+                        'backgrounds/bg4.jpg',
+                        'backgrounds/bg5.jpg',
+                        'backgrounds/bg6.jpg',
+                        'backgrounds/bg7.jpg',
+                        'backgrounds/bg9.jpg',
+                        'backgrounds/bg-new.jpg'
+                    ];
+                }
+                
+                // Force background update
+                this.game.rotateBackground();
+                
+                // Update the shop to show the appropriate helpers
+                this.updateShopContent();
+                
+                // Delay a bit to simulate loading
+                setTimeout(() => {
+                    // Recreate helper sprites for the current planet
+                    this.game.recreateHelperSprites();
+                    
+                    // Hide loading screen
+                    window.hideLoadingScreen();
+                    
+                    // Reset transitioning flag
+                    this.game.isTransitioning = false;
+                    
+                        // For moon transitions, hide character until fall animation
+                    if (planetName === 'moon') {
+                        // Hide character container until we trigger the fall
+                        const characterContainer = document.getElementById('character-container');
+                        if (characterContainer) {
+                            characterContainer.style.visibility = 'hidden';
+                        }
+                        
+                        setTimeout(() => {
+                            // Show character and play fall animation
+                            if (characterContainer) {
+                                characterContainer.style.visibility = 'visible';
+                            }
+                            this.game.playDogeIntro();
+                        }, 300);
+                    }
+                }, 1000); // 1 second delay
+            }, 500); // Short delay to ensure loading screen appears
+            
             console.log(`Switched to ${planetName}`);
         };
         
@@ -161,19 +290,48 @@ class UIManager {
     }
     
     updateShopContent() {
+        if (!this.game) {
+            console.warn('updateShopContent called before game was ready');
+            return;
+        }
+
         const shopContent = document.getElementById('shop-content');
         if (!shopContent) {
             console.error('shop-content element not found!');
             return;
         }
+        
+        // Log the current planet to help debug shop issues
+        console.log(`Updating shop content for planet: ${this.game.currentLevel}`);
+        
+        // Clear existing content
         shopContent.innerHTML = '';
+        
+        // Render the correct helpers based on current planet
         this.renderHelperShop(shopContent);
+        
+        // Update shop prices to reflect current planet's helpers
+        this.game.updateShopPrices();
     }
     
     renderHelperShop(container) {
         container.innerHTML = ''; // Clear container completely
         
-        const helperEntries = Object.entries(window.shopManager.shopData.helpers);
+        if (!this.game) {
+            console.warn('renderHelperShop called before game was ready');
+            return;
+        }
+
+        // Choose which helpers to display based on current planet
+        const helperCategory = this.game.currentLevel === 'earth' ? 'helpers' : 'moonHelpers';
+        console.log(`Rendering shop with helper category: ${helperCategory} for planet: ${this.game.currentLevel}`);
+        
+        if (!window.shopManager.shopData[helperCategory]) {
+            console.error(`Shop data for ${helperCategory} is missing!`);
+            return;
+        }
+        
+        const helperEntries = Object.entries(window.shopManager.shopData[helperCategory]);
         
         // Create 6 helper items (2x3 grid)
         for (let i = 0; i < 6; i++) {
@@ -182,7 +340,9 @@ class UIManager {
             
             if (i < helperEntries.length) {
                 const [type, helper] = helperEntries[i];
-                const owned = this.game.helpers.filter(h => h.type === type).length;
+                // Choose the correct helper array based on current planet
+                const helperArray = this.game.currentLevel === 'earth' ? this.game.helpers : this.game.moonHelpers;
+                const owned = helperArray.filter(h => h.type === type).length;
                 const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned));
                 const canAfford = this.game.dogecoins >= cost;
                 
@@ -253,13 +413,30 @@ class UIManager {
         const helperType = button.getAttribute('data-helper-type');
         
         if (helperType && window.game) {
+            // Buy the helper based on the current planet
             const success = window.game.buyHelper(helperType);
+            
             if (success) {
                 // Trigger chromatic aberration effect on successful purchase
                 window.game.createChromaticAberrationEffect(button);
                 
                 // Update shop display immediately
                 this.updateShopDisplay();
+                
+                // Special handling for Earth helpers
+                if (window.game.currentLevel === 'earth') {
+                    // If this is the first Space Rocket purchase, unlock the Moon
+                    if (helperType === 'spaceRocket') {
+                        const spaceRocketCount = window.game.helpers.filter(h => h.type === 'spaceRocket').length;
+                        if (spaceRocketCount === 1) {
+                            // This is the first Space Rocket purchase
+                            this.hideMoonLocked();
+                            
+                            // Show notification that Moon is unlocked
+                            window.game.showNotification('Moon unlocked! You can now travel to the Moon!');
+                        }
+                    }
+                }
             } else {
                 console.log('Failed to buy helper - insufficient funds');
             }
@@ -474,7 +651,27 @@ class UIManager {
     
     updateCharacter(characterType = 'standard') {
         const characterImage = document.getElementById('main-character');
-        characterImage.src = `assets/general/character/${characterType}.png`;
+        if (!characterImage) return;
+        
+        // Check if the current character is already correct to avoid unnecessary updates
+        const currentSrc = characterImage.src;
+        const targetSrc = `assets/general/character/${characterType}.png`;
+        
+        // Only update if the source has changed (avoid unnecessary reloading)
+        if (!currentSrc.endsWith(targetSrc)) {
+            console.log(`Updating character sprite to: ${characterType}`);
+            
+            // Create a new image to preload
+            const preloadImage = new Image();
+            preloadImage.onload = () => {
+                // Once loaded, update the main character
+                characterImage.src = targetSrc;
+            };
+            preloadImage.onerror = () => {
+                console.error(`Failed to load character sprite: ${targetSrc}`);
+            };
+            preloadImage.src = targetSrc;
+        }
     }
     
     showComboEffect(comboCount) {
@@ -637,6 +834,37 @@ class UIManager {
         const lockedOverlay = document.querySelector('.planet-tab-locked');
         if (lockedOverlay) {
             lockedOverlay.style.display = 'none';
+        }
+    }
+    
+    // Initialize planet tabs based on saved state
+    initializePlanetTabs() {
+        if (this.game && this.game.currentLevel) {
+            // Update planet tab buttons to match current level
+            document.querySelectorAll('.planet-tab').forEach(btn => {
+                btn.classList.remove('active');
+                
+                // Check if this tab is for the current planet
+                const tabPlanet = btn.querySelector('img')?.alt?.toLowerCase() || '';
+                if (tabPlanet.toLowerCase() === this.game.currentLevel) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // If moon is unlocked, make sure the locked overlay is hidden
+            if (this.game.hasPlayedMoonLaunch) {
+                this.hideMoonLocked();
+            }
+
+            const shopPanel = document.getElementById('shop-panel');
+
+            // Ensure the shop content matches the current planet
+            if (shopPanel && (this.activePanel === 'shop-panel' || shopPanel.style.display === 'block')) {
+                console.log(`Updating shop content to match current planet: ${this.game.currentLevel}`);
+                this.updateShopContent();
+            }
+            
+            console.log(`Planet tabs initialized to: ${this.game.currentLevel}`);
         }
     }
 }

@@ -97,7 +97,7 @@
         </div>
 
         <!-- Version Indicator -->
-        <div id="version-indicator">v0.01 (ALPHA)</div>
+        <div id="version-indicator">v0.02 (ALPHA)</div>
 
         <!-- Planet Tabs -->
         <div id="planet-tabs">
@@ -257,11 +257,12 @@
                                 <div id="cloud-save-section">
                                     <div id="user-info" style="display: none;">
                                         <p id="user-name">Signed in as: </p>
-                                        <div class="setting-buttons">
+                                        <div class="setting-buttons" id="cloud-save-buttons">
                                             <button class="setting-btn" onclick="saveToCloud()">Save to Cloud</button>
                                             <button class="setting-btn" onclick="loadFromCloud()">Load from Cloud</button>
                                             <button class="setting-btn" onclick="signOutUser()">Sign Out</button>
                                         </div>
+                                        <div id="cloud-local-actions"></div>
                                     </div>
                                     <div id="sign-in-section">
                                         <button class="google-signin-btn" onclick="signInWithGoogle()">
@@ -277,9 +278,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="settings-section">
+                            <div class="settings-section" id="local-save-section">
                                 <h3>Local Save/Load</h3>
-                                <div class="setting-buttons">
+                                <div class="setting-buttons" id="local-save-buttons">
                                     <button class="setting-btn" onclick="saveGame()">Save Game</button>
                                     <button class="setting-btn" onclick="loadGame()">Load Game</button>
                                     <button class="setting-btn" onclick="exportSave()">Export Save</button>
