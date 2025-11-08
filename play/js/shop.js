@@ -1,7 +1,21 @@
 // DogeMiner: Community Edition - Shop Management
+
 class ShopManager {
-    constructor(game) {
-        this.game = game;
+    static #instance = null;
+    shopData = null;
+    
+    static getInstance() {
+        if (!ShopManager.#instance) {
+            ShopManager.#instance = new ShopManager();
+        }
+        return ShopManager.#instance;
+    }
+
+    constructor() {
+        if(ShopManager.#instance) {
+            throw new Error(window.ERR_MESSAGES.ERROR_SINGLETON_EXISTS);
+        }
+
         this.shopData = this.initializeShopData();
     }
     
