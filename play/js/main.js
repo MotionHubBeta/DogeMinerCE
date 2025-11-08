@@ -14,7 +14,7 @@ async function initializeGame() {
         updateLoadingInfo('Initializing game engine...');
         
         // Initialize game instance
-        game = new DogeMinerGame();
+        game = DogeMinerGame.getInstance();
         updateLoadingInfo('Setting up shop system...');
         
         // Initialize shop manager first (needed by UI manager)

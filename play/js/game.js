@@ -1,6 +1,23 @@
 // DogeMiner: Community Edition - Main Game Logic
+
+const ERR_MESSAGES = import('./exception_messages.js');
+
 class DogeMinerGame {
+    static #instance = null;
+
+    static getInstance() {
+        if (!DogeMinerGame.#instance) {
+            DogeMinerGame.#instance = new DogeMinerGame();
+        }
+
+        return DogeMinerGame.#instance;
+    }
+
     constructor() {
+        if(DogeMinerGame.#instance) {
+            throw new Error(ERR_MESSAGES.ERROR_CLASS_SINGLETON);
+        }
+
         this.dogecoins = 0;
         this.totalMined = 0;
         this.totalClicks = 0;
