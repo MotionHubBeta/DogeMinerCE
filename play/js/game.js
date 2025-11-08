@@ -299,12 +299,46 @@ class DogeMinerGame {
         // Rock clicking
         const rockContainer = document.getElementById('rock-container');
         const clickOverlay = document.getElementById('click-overlay');
-        
-        // Mouse events with click rate limiting
-        clickOverlay.addEventListener('mousedown', (e) => {
+        const dogeContainer = document.getElementById('character-container');
+
+        const handleMiningMouseDown = (e) => {
             this.isMouseDown = true;
             this.processClick(e);
-        });
+        };
+
+        const handleDogeMouseDown = (e) => {
+            const mainCharacter = document.getElementById('main-character');
+            const characterShadow = document.getElementById('character-shadow');
+            const target = e.target;
+
+            if (target === mainCharacter || target === characterShadow) {
+                const clickOverlay = document.getElementById('click-overlay');
+                if (clickOverlay) {
+                    const rect = clickOverlay.getBoundingClientRect();
+                    const simulatedEvent = {
+                        ...e,
+                        target: clickOverlay,
+                        currentTarget: clickOverlay,
+                        clientX: e.clientX,
+                        clientY: e.clientY,
+                        preventDefault: () => e.preventDefault()
+                    };
+                    this.processClick(simulatedEvent);
+                    return;
+                }
+            }
+
+            handleMiningMouseDown(e);
+        };
+
+        // Mouse events with click rate limiting
+        if (clickOverlay) {
+            clickOverlay.addEventListener('mousedown', handleMiningMouseDown);
+        }
+
+        if (dogeContainer) {
+            dogeContainer.addEventListener('mousedown', handleDogeMouseDown);
+        }
         
         document.addEventListener('mouseup', () => {
             this.isMouseDown = false;
