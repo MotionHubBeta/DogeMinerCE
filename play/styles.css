@@ -2717,6 +2717,17 @@ body.planet-mars #main-rock {
         -webkit-tap-highlight-color: transparent;
     }
 
+    /* Scale down game elements on mobile - centered by platform */
+    #doge-container {
+        transform: scale(0.7);
+        transform-origin: bottom center;
+    }
+
+    #platform {
+        transform: scale(0.7);
+        transform-origin: bottom center;
+    }
+
     /* Adjust game container for mobile - full width, single panel */
     #game-container {
         width: 100vw;
@@ -2750,6 +2761,18 @@ body.planet-mars #main-rock {
         flex: 1;
     }
 
+    /* Mobile swipe animation for tab content */
+    @keyframes swipeIn {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
     /* Mobile Menu Toggle Button */
     #mobile-menu-toggle {
         display: block;
@@ -2770,7 +2793,7 @@ body.planet-mars #main-rock {
 
     /* Move button up when menu is open - sits exactly on top of menu */
     #mobile-menu-toggle.menu-open {
-        bottom: calc(40vh - 40px);
+        bottom: calc(40vh - 30px);
     }
 
     #mobile-menu-toggle:active {
@@ -2878,10 +2901,12 @@ body.planet-mars #main-rock {
         overflow-y: auto;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
+        animation: fadeIn 0.3s ease-in-out;
     }
 
     .mobile-tab-content.active {
         display: block;
+        pointer-events: auto;
     }
 
     /* Mobile Shop Scroll Container */
@@ -2911,11 +2936,11 @@ body.planet-mars #main-rock {
         border-radius: 4px;
     }
 
-    /* Mobile Shop Item - Larger cards for touch interaction */
+    /* Mobile Shop Item - Full width cards with proper centering */
     .mobile-shop-scroll .shop-grid-item {
-        flex: 0 0 240px;
-        width: 240px;
-        min-width: 240px;
+        flex: 0 0 calc(100vw - 6px);
+        width: calc(100vw - 6px);
+        min-width: calc(100vw - 6px);
         height: auto;
         max-height: calc(40vh - 100px);
         scroll-snap-align: center;
@@ -2928,10 +2953,11 @@ body.planet-mars #main-rock {
         border: 1px solid #d4af37;
         border-radius: 12px;
         padding: 15px;
+        margin: 0 3px;
         display: flex;
         flex-direction: column;
         align-items: stretch;
-        gap: 10px;
+        gap: 8px;
         position: relative;
         transition: all 0.2s ease;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -2940,23 +2966,19 @@ body.planet-mars #main-rock {
         min-height: auto;
     }
 
-    /* Mobile shop item - quantity badge in top right */
+    /* Mobile shop item - quantity badge in top right (no border/background) */
     #mobile-shop-content .shop-item-quantity {
         position: absolute;
         top: 15px;
         right: 15px;
-        font-size: 16px;
+        font-size: 18px;
         font-weight: 700;
         color: #8b4513;
-        background: rgba(255, 255, 255, 0.9);
-        padding: 4px 10px;
-        border-radius: 12px;
-        border: 1px solid #d4af37;
         font-family: 'DogeSans', sans-serif;
     }
 
     #mobile-shop-content .shop-item-title {
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 700;
         color: #8b4513;
         text-align: left;
@@ -2965,23 +2987,31 @@ body.planet-mars #main-rock {
     }
 
     #mobile-shop-content .shop-item-dps {
-        font-size: 14px;
+        font-size: 15px;
         color: #8b4513;
         font-weight: 400;
         text-align: left;
         font-family: 'DogeSans', sans-serif;
         order: 2;
+        margin-bottom: 10px;
+    }
+
+    /* Sprite and description container */
+    #mobile-shop-content .shop-sprite-description-container {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        order: 3;
+        margin-bottom: 10px;
     }
 
     #mobile-shop-content .shop-item-sprite {
         width: 100px;
         height: 100px;
+        flex-shrink: 0;
         display: flex;
         align-items: center;
-        justify-content: flex-start;
-        align-self: flex-start;
-        order: 3;
-        margin: 8px 0;
+        justify-content: center;
     }
 
     #mobile-shop-content .shop-item-sprite img {
@@ -2996,53 +3026,53 @@ body.planet-mars #main-rock {
         color: #8b4513;
         text-align: left;
         font-family: 'DogeSans', sans-serif;
-        order: 4;
         line-height: 1.4;
         flex: 1;
     }
 
     #mobile-shop-content .shop-buy-btn {
-        width: 100%;
-        padding: 14px;
-        background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%);
-        border: 2px solid #d4af37;
-        border-radius: 12px;
-        font-size: 18px;
+        width: 80%;
+        padding: 10px 12px;
+        background: linear-gradient(to bottom, rgb(255, 220, 115) 50%, rgb(255, 210, 70) 50%);
+        border: 1px solid rgb(185, 150, 65);
+        border-radius: 8px;
+        font-size: 16px;
         font-weight: 700;
         font-family: 'DogeSans', sans-serif;
-        order: 5;
-        color: #8b4513;
+        order: 4;
+        color: rgb(80, 50, 0);
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 6px;
         cursor: pointer;
         transition: all 0.2s ease;
+        margin: 0 auto;
     }
 
     #mobile-shop-content .buy-btn-icon {
-        width: 24px;
-        height: 24px;
+        width: 20px;
+        height: 20px;
     }
 
     #mobile-shop-content .buy-btn-price {
-        font-size: 18px;
+        font-size: 16px;
         font-family: 'DogeSans', sans-serif;
+    }
+
+    #mobile-shop-content .shop-buy-btn:hover:not(:disabled) {
+        background: linear-gradient(to bottom, rgb(255, 230, 125) 50%, rgb(255, 220, 80) 50%);
     }
 
     #mobile-shop-content .shop-buy-btn:active:not(:disabled) {
         transform: scale(0.95);
-        background: linear-gradient(to bottom, rgba(255, 235, 150, 0.95) 50%, rgba(240, 220, 130, 0.95) 50%);
+        background: linear-gradient(to bottom, rgb(255, 240, 135) 50%, rgb(255, 230, 90) 50%);
     }
 
     #mobile-shop-content .shop-buy-btn:disabled {
         opacity: 0.5;
         cursor: not-allowed;
-    }
-
-    #mobile-shop-content .buy-btn-icon {
-        width: 24px;
-        height: 24px;
         pointer-events: auto;
     }
 

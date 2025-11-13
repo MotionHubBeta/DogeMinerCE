@@ -1156,64 +1156,140 @@ class UIManager {
                 fallbackTab?.classList.add('active');
             }
         }
+
+if (marsRocketOwned && this.game && !this.game.hasPlayedMoonLaunch) {
+    this.game.hasPlayedMoonLaunch = true;
+}
+
+const moonUnlocked = this.game?.hasPlayedMoonLaunch || marsRocketOwned;
+if (!moonUnlocked) {
+    return false;
+}
+
+return marsRocketOwned;
+}
+
+isJupiterUnlocked() {
+return this.playerHasJupiterRocket();
+}
+
+playerHasDogeStar() {
+// Check if player owns at least one DogeStar (final Jupiter helper)
+const jupiterHelpers = this.game.jupiterHelpers || [];
+const hasDogeStar = jupiterHelpers.some(helper => helper && helper.type === 'dogeStar');
+return hasDogeStar;
+}
+
+isTitanUnlocked() {
+// Titan requires owning at least one DogeStar from Jupiter
+return this.playerHasDogeStar();
+}
+
+updatePlanetTabVisibility() {
+const marsTab = document.querySelector('.planet-tab[data-planet="mars"]');
+if (marsTab) {
+    const marsUnlocked = this.isMarsUnlocked();
+    marsTab.style.display = marsUnlocked ? '' : 'none';
+    marsTab.disabled = !marsUnlocked;
+
+    if (!marsUnlocked && marsTab.classList.contains('active')) {
+        marsTab.classList.remove('active');
+        const fallbackTab = document.querySelector('.planet-tab[data-planet="earth"]');
+        fallbackTab?.classList.add('active');
+    }
+}
+
+const jupiterTab = document.querySelector('.planet-tab[data-planet="jupiter"]');
+if (jupiterTab) {
+    const jupiterUnlocked = this.isJupiterUnlocked();
+    jupiterTab.style.display = jupiterUnlocked ? '' : 'none';
+    jupiterTab.disabled = !jupiterUnlocked;
+
+    if (!jupiterUnlocked && jupiterTab.classList.contains('active')) {
+        jupiterTab.classList.remove('active');
+        const fallbackTab = document.querySelector('.planet-tab[data-planet="earth"]');
+        fallbackTab?.classList.add('active');
+    }
+}
+
+const titanTab = document.querySelector('.planet-tab[data-planet="titan"]');
+if (titanTab) {
+    const titanUnlocked = this.isTitanUnlocked();
+    titanTab.style.display = titanUnlocked ? '' : 'none';
+    titanTab.disabled = !titanUnlocked;
+
+    if (!titanUnlocked && titanTab.classList.contains('active')) {
+        titanTab.classList.remove('active');
+        const fallbackTab = document.querySelector('.planet-tab[data-planet="earth"]');
+        fallbackTab?.classList.add('active');
+    }
+}
+}
+
+// Mobile UI Setup - Handles mobile-specific functionality
+setupMobileUI() {
+    // Setup mobile menu toggle button
+    const mobileToggleBtn = document.getElementById('mobile-menu-toggle');
+    const mobileTabs = document.querySelectorAll('.mobile-tab-btn');
+
+    // Setup toggle button
+    if (mobileToggleBtn) {
+        mobileToggleBtn.addEventListener('click', () => this.toggleMobileMenu());
     }
 
-    // Mobile UI Setup - Handles mobile-specific functionality
-    setupMobileUI() {
-        // Setup mobile menu toggle button
-        const mobileToggleBtn = document.getElementById('mobile-menu-toggle');
-        const mobileMenu = document.getElementById('mobile-bottom-menu');
-        const toggleIcon = document.getElementById('mobile-toggle-icon');
+    // Setup tab buttons
+    mobileTabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            const tabName = e.currentTarget.dataset.tab;
+            if (tabName) {
+                this.switchMobileTab(tabName);
+            }
+        });
+    });
 
-        if (mobileToggleBtn && mobileMenu && toggleIcon) {
-            mobileToggleBtn.addEventListener('click', () => {
-                this.toggleMobileMenu();
-            });
-        }
+    // Update mobile stats every second
+    setInterval(() => {
+        this.updateMobileStats();
+    }, 1000);
 
-        // Setup global mobile tab switching function
-        window.switchMobileTab = (tabName) => {
-            this.switchMobileTab(tabName);
-        };
+    // Initialize mobile shop content if on mobile
+    if (window.innerWidth <= 768) {
+        this.updateMobileShopContent();
+    }
 
-        // Initialize mobile shop content if on mobile
+    // Update mobile content on window resize
+    window.addEventListener('resize', () => {
         if (window.innerWidth <= 768) {
             this.updateMobileShopContent();
         }
+    });
+}
 
-        // Update mobile content on window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth <= 768) {
-                this.updateMobileShopContent();
-            }
-        });
+// Toggle mobile menu open/closed
+toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobile-bottom-menu');
+    const toggleIcon = document.getElementById('mobile-toggle-icon');
+    const toggleBtn = document.getElementById('mobile-menu-toggle');
+
+    if (!mobileMenu || !toggleIcon || !toggleBtn) return;
+
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+
+    if (this.mobileMenuOpen) {
+        // Open menu
+        mobileMenu.classList.add('open');
+        toggleBtn.classList.add('menu-open');
+        toggleIcon.src = 'assets/general/btn_down.png';
+        
+        // Update mobile content when opening
+        this.updateMobileShopContent();
+    } else {
+        // Close menu
+        mobileMenu.classList.remove('open');
+        toggleBtn.classList.remove('menu-open');
+        toggleIcon.src = 'assets/general/btn_up.png';
     }
-
-    // Toggle mobile menu open/closed
-    toggleMobileMenu() {
-        const mobileMenu = document.getElementById('mobile-bottom-menu');
-        const toggleIcon = document.getElementById('mobile-toggle-icon');
-        const toggleBtn = document.getElementById('mobile-menu-toggle');
-
-        if (!mobileMenu || !toggleIcon || !toggleBtn) return;
-
-        this.mobileMenuOpen = !this.mobileMenuOpen;
-
-        if (this.mobileMenuOpen) {
-            // Open menu
-            mobileMenu.classList.add('open');
-            toggleBtn.classList.add('menu-open');
-            toggleIcon.src = 'assets/general/btn_down.png';
-            
-            // Update mobile content when opening
-            this.updateMobileShopContent();
-        } else {
-            // Close menu
-            mobileMenu.classList.remove('open');
-            toggleBtn.classList.remove('menu-open');
-            toggleIcon.src = 'assets/general/btn_up.png';
-        }
-    }
+}
 
     // Switch between mobile tabs
     switchMobileTab(tabName) {
@@ -1323,10 +1399,12 @@ class UIManager {
                     <div class="shop-item-quantity">#${owned}</div>
                     <div class="shop-item-title">${helper.name}</div>
                     <div class="shop-item-dps">${helper.baseDps} ĐPS</div>
-                    <div class="shop-item-sprite">
-                        <img src="${helper.icon}" alt="${helper.name}">
+                    <div class="shop-sprite-description-container">
+                        <div class="shop-item-sprite">
+                            <img src="${helper.icon}" alt="${helper.name}">
+                        </div>
+                        <div class="shop-item-description">${helper.description}</div>
                     </div>
-                    <div class="shop-item-description">${helper.description}</div>
                     <button class="shop-buy-btn" data-helper-type="${type}" ${buttonDisabled}>
                         <img src="assets/general/dogecoin_70x70.png" alt="DogeCoin" class="buy-btn-icon">
                         <span class="buy-btn-price">${priceText}</span>
@@ -1447,12 +1525,48 @@ class UIManager {
                 mobileCurrentLevel.textContent = levelName;
             }
             
-            if (mobilePlayTime && this.game.playTime) {
-                const hours = Math.floor(this.game.playTime / 3600);
-                const minutes = Math.floor((this.game.playTime % 3600) / 60);
-                const seconds = Math.floor(this.game.playTime % 60);
+            if (mobilePlayTime) {
+                // Calculate current play time from session start plus total accumulated time
+                const currentPlayTime = Math.floor((Date.now() - this.game.startTime) / 1000) + this.game.totalPlayTime;
+                const hours = Math.floor(currentPlayTime / 3600);
+                const minutes = Math.floor((currentPlayTime % 3600) / 60);
+                const seconds = Math.floor(currentPlayTime % 60);
                 mobilePlayTime.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
+        }
+    }
+
+    // Update mobile stats (called regularly when achievements tab is open)
+    updateMobileStats() {
+        if (!this.game || this.activeMobileTab !== 'achievements') return;
+
+        const mobileTotalMined = document.getElementById('mobile-total-mined');
+        const mobileCurrentBalance = document.getElementById('mobile-current-balance');
+        const mobileTotalClicks = document.getElementById('mobile-total-clicks');
+        const mobileCurrentDps = document.getElementById('mobile-current-dps');
+        const mobileHighestDps = document.getElementById('mobile-highest-dps');
+        const mobileHelpersOwned = document.getElementById('mobile-helpers-owned');
+        const mobilePlayTime = document.getElementById('mobile-play-time');
+
+        if (mobileTotalMined) mobileTotalMined.textContent = this.game.formatNumber(Math.floor(this.game.totalMined || 0));
+        if (mobileCurrentBalance) mobileCurrentBalance.textContent = this.game.formatNumber(Math.floor(this.game.dogecoins || 0));
+        if (mobileTotalClicks) mobileTotalClicks.textContent = this.game.formatNumber(this.game.totalClicks || 0);
+        if (mobileCurrentDps) mobileCurrentDps.textContent = this.game.formatNumber(this.game.dps || 0) + ' Đ/s';
+        if (mobileHighestDps) mobileHighestDps.textContent = this.game.formatNumber(this.game.highestDps || 0) + ' Đ/s';
+        
+        const totalHelpers = (this.game.helpers?.length || 0) + 
+                            (this.game.moonHelpers?.length || 0) + 
+                            (this.game.marsHelpers?.length || 0) + 
+                            (this.game.jupiterHelpers?.length || 0) + 
+                            (this.game.titanHelpers?.length || 0);
+        if (mobileHelpersOwned) mobileHelpersOwned.textContent = totalHelpers;
+        
+        if (mobilePlayTime) {
+            const currentPlayTime = Math.floor((Date.now() - this.game.startTime) / 1000) + this.game.totalPlayTime;
+            const hours = Math.floor(currentPlayTime / 3600);
+            const minutes = Math.floor((currentPlayTime % 3600) / 60);
+            const seconds = Math.floor(currentPlayTime % 60);
+            mobilePlayTime.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
     }
 
