@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1920, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DogeMiner:CE</title>
     
     <!-- Favicon -->
@@ -301,6 +301,67 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Menu Toggle Button -->
+    <button id="mobile-menu-toggle" class="mobile-only">
+        <img src="assets/general/btn_up.png" alt="Toggle Menu" id="mobile-toggle-icon">
+    </button>
+
+    <!-- Mobile Bottom Menu -->
+    <div id="mobile-bottom-menu" class="mobile-only">
+        <!-- Mobile Panel Tabs -->
+        <div id="mobile-panel-tabs">
+            <div class="mobile-tabs-left">
+                <button class="mobile-tab-btn active" onclick="switchMobileTab('shop')">
+                    <img src="assets/quickUI/Pickaxe.png" alt="Shop" class="tab-icon">
+                    <span class="tab-text">SHOP</span>
+                </button>
+                <button class="mobile-tab-btn" onclick="switchMobileTab('upgrades')">
+                    <img src="assets/quickUI/ArrowUp.png" alt="Upgrades" class="tab-icon">
+                    <span class="tab-text">UPGRADE</span>
+                </button>
+            </div>
+            <div class="mobile-tabs-right">
+                <button class="mobile-tab-btn" id="mobile-achievements-tab-btn" onclick="switchMobileTab('achievements')">
+                    <img src="assets/quickUI/Trophy ICON.png" alt="Achievements" class="tab-icon">
+                </button>
+                <button class="mobile-tab-btn" id="mobile-settings-tab-btn" onclick="switchMobileTab('settings')">
+                    <img src="assets/quickUI/settings icon.png" alt="Settings" class="tab-icon">
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Panel Content -->
+        <div id="mobile-panel-content">
+            <!-- Mobile Shop Tab -->
+            <div id="mobile-shop-tab" class="mobile-tab-content active">
+                <div id="mobile-shop-content" class="mobile-shop-scroll">
+                    <!-- Shop content will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Mobile Upgrades Tab -->
+            <div id="mobile-upgrades-tab" class="mobile-tab-content">
+                <div id="mobile-upgrades-container">
+                    <!-- Upgrades will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Mobile Achievements Tab -->
+            <div id="mobile-achievements-tab" class="mobile-tab-content">
+                <div id="mobile-achievements-content">
+                    <!-- Achievements content will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Mobile Settings Tab -->
+            <div id="mobile-settings-tab" class="mobile-tab-content">
+                <div id="mobile-settings-content">
+                    <!-- Settings content will be populated by JavaScript -->
+                </div>
             </div>
         </div>
     </div>

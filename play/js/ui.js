@@ -4,9 +4,12 @@ class UIManager {
         this.game = game;
         this.activePanel = 'shop-tab'; // Shop tab is active by default
         this.currentShopTab = 'helpers';
+        this.mobileMenuOpen = false; // Track mobile menu state
+        this.activeMobileTab = 'shop'; // Track active mobile tab
         
         this.setupUI();
         this.initializePlanetTabs(); // Initialize planet tabs based on saved state
+        this.setupMobileUI(); // Setup mobile-specific UI functionality
     }
     
     setupUI() {
@@ -1152,6 +1155,321 @@ class UIManager {
                 const fallbackTab = document.querySelector('.planet-tab[data-planet="earth"]');
                 fallbackTab?.classList.add('active');
             }
+        }
+    }
+
+    // Mobile UI Setup - Handles mobile-specific functionality
+    setupMobileUI() {
+        // Setup mobile menu toggle button
+        const mobileToggleBtn = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-bottom-menu');
+        const toggleIcon = document.getElementById('mobile-toggle-icon');
+
+        if (mobileToggleBtn && mobileMenu && toggleIcon) {
+            mobileToggleBtn.addEventListener('click', () => {
+                this.toggleMobileMenu();
+            });
+        }
+
+        // Setup global mobile tab switching function
+        window.switchMobileTab = (tabName) => {
+            this.switchMobileTab(tabName);
+        };
+
+        // Initialize mobile shop content if on mobile
+        if (window.innerWidth <= 768) {
+            this.updateMobileShopContent();
+        }
+
+        // Update mobile content on window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                this.updateMobileShopContent();
+            }
+        });
+    }
+
+    // Toggle mobile menu open/closed
+    toggleMobileMenu() {
+        const mobileMenu = document.getElementById('mobile-bottom-menu');
+        const toggleIcon = document.getElementById('mobile-toggle-icon');
+
+        if (!mobileMenu || !toggleIcon) return;
+
+        this.mobileMenuOpen = !this.mobileMenuOpen;
+
+        if (this.mobileMenuOpen) {
+            // Open menu
+            mobileMenu.classList.add('open');
+            toggleIcon.src = 'assets/general/btn_down.png';
+            
+            // Update mobile content when opening
+            this.updateMobileShopContent();
+        } else {
+            // Close menu
+            mobileMenu.classList.remove('open');
+            toggleIcon.src = 'assets/general/btn_up.png';
+        }
+    }
+
+    // Switch between mobile tabs
+    switchMobileTab(tabName) {
+        // Update active tab state
+        this.activeMobileTab = tabName;
+
+        // Update tab buttons
+        document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.closest('.mobile-tab-btn')?.classList.add('active');
+
+        // Update tab content
+        document.querySelectorAll('.mobile-tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        const targetTab = document.getElementById(`mobile-${tabName}-tab`);
+        if (targetTab) {
+            targetTab.classList.add('active');
+        }
+
+        // Update content based on active tab
+        if (tabName === 'shop') {
+            this.updateMobileShopContent();
+        } else if (tabName === 'upgrades') {
+            this.updateMobileUpgradesContent();
+        } else if (tabName === 'achievements') {
+            this.updateMobileAchievementsContent();
+        } else if (tabName === 'settings') {
+            this.updateMobileSettingsContent();
+        }
+
+        // Play sound
+        if (window.audioManager) {
+            audioManager.playSound('swipe');
+        }
+    }
+
+    // Update mobile shop content with horizontal scrolling
+    updateMobileShopContent() {
+        if (!this.game) return;
+
+        const mobileShopContent = document.getElementById('mobile-shop-content');
+        if (!mobileShopContent) return;
+
+        // Clear existing content
+        mobileShopContent.innerHTML = '';
+
+        // Get helper category for current level
+        const helperCategory = this.game.getHelperCategoryForLevel(this.game.currentLevel);
+        
+        if (!window.shopManager.shopData[helperCategory]) {
+            console.error(`Shop data for ${helperCategory} is missing!`);
+            return;
+        }
+
+        const helperEntries = Object.entries(window.shopManager.shopData[helperCategory]);
+        const helperArray = this.game.getHelperArrayForLevel(this.game.currentLevel);
+
+        // Create shop items (same logic as desktop but different layout)
+        for (let i = 0; i < 6; i++) {
+            const item = document.createElement('div');
+            item.className = 'shop-grid-item';
+
+            if (i < helperEntries.length) {
+                const [type, helper] = helperEntries[i];
+                const owned = helperArray.filter(h => h.type === type).length;
+                const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned));
+                const canAfford = this.game.dogecoins >= cost;
+
+                // Check if helper is locked (same logic as desktop)
+                let lockReason = null;
+                const moonHelpers = Array.isArray(this.game.moonHelpers) ? this.game.moonHelpers : [];
+                const marsHelpers = Array.isArray(this.game.marsHelpers) ? this.game.marsHelpers : [];
+                const jupiterHelpers = Array.isArray(this.game.jupiterHelpers) ? this.game.jupiterHelpers : [];
+                const moonBaseOwned = moonHelpers.some(h => h.type === 'moonBase');
+                const marsBaseOwned = marsHelpers.some(h => h.type === 'marsBase');
+                const jupiterBaseOwned = jupiterHelpers.some(h => h.type === 'cloudBase');
+                const landerShibeOwned = moonHelpers.some(h => h.type === 'landerShibe');
+
+                if (this.game.currentLevel === 'moon') {
+                    if (type !== 'moonBase' && !moonBaseOwned) {
+                        lockReason = 'moonBase';
+                    } else if (type === 'marsRocket' && !landerShibeOwned) {
+                        lockReason = 'landerShibe';
+                    }
+                } else if (this.game.currentLevel === 'mars') {
+                    if (type !== 'marsBase' && !marsBaseOwned) {
+                        lockReason = 'marsBase';
+                    }
+                    const spaceBassOwned = marsHelpers.some(h => h.type === 'spaceBass');
+                    if (type === 'jupiterRocket' && !spaceBassOwned) {
+                        lockReason = 'spaceBass';
+                    }
+                } else if (this.game.currentLevel === 'jupiter') {
+                    if (type !== 'cloudBase' && !jupiterBaseOwned) {
+                        lockReason = 'cloudBase';
+                    }
+                }
+                const isLocked = lockReason !== null;
+
+                const priceText = this.game.formatNumber(cost);
+                const buttonDisabled = (!canAfford || isLocked) ? 'disabled' : '';
+
+                item.innerHTML = `
+                    <div class="shop-item-quantity">#${owned}</div>
+                    <div class="shop-item-title">${helper.name}</div>
+                    <div class="shop-item-dps">${helper.baseDps} ĐPS</div>
+                    <div class="shop-item-sprite">
+                        <img src="${helper.icon}" alt="${helper.name}">
+                    </div>
+                    <div class="shop-item-description">${helper.description}</div>
+                    <button class="shop-buy-btn" data-helper-type="${type}" ${buttonDisabled}>
+                        <img src="assets/general/dogecoin_70x70.png" alt="DogeCoin" class="buy-btn-icon">
+                        <span class="buy-btn-price">${priceText}</span>
+                    </button>
+                `;
+
+                // Add click listener to buy button
+                const buyBtn = item.querySelector('.shop-buy-btn');
+                if (buyBtn) {
+                    buyBtn.addEventListener('click', () => {
+                        if (!buyBtn.disabled && window.game) {
+                            const success = window.game.buyHelper(type);
+                            if (success) {
+                                this.updateMobileShopContent();
+                            }
+                        }
+                    });
+                }
+            } else {
+                // Empty slot
+                item.innerHTML = `
+                    <div class="shop-item-empty">
+                        <div class="empty-text">Coming Soon!</div>
+                    </div>
+                `;
+            }
+
+            mobileShopContent.appendChild(item);
+        }
+    }
+
+    // Update mobile upgrades content
+    updateMobileUpgradesContent() {
+        const mobileUpgradesContainer = document.getElementById('mobile-upgrades-container');
+        if (!mobileUpgradesContainer) return;
+
+        // Copy the desktop upgrades content structure
+        mobileUpgradesContainer.innerHTML = `
+            <div style="text-align: center; color: #8b4513; padding: 20px;">
+                <p>Upgrades system coming soon!</p>
+                <p style="font-size: 12px; opacity: 0.7; margin-top: 10px;">Tap the shop to purchase helpers</p>
+            </div>
+        `;
+    }
+
+    // Update mobile achievements content
+    updateMobileAchievementsContent() {
+        const mobileAchievementsContent = document.getElementById('mobile-achievements-content');
+        if (!mobileAchievementsContent) return;
+
+        // Display stats (similar to desktop)
+        mobileAchievementsContent.innerHTML = `
+            <div style="color: #8b4513;">
+                <h3 style="margin-bottom: 15px; border-bottom: 2px solid #d4af37; padding-bottom: 8px;">Statistics</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
+                        <span>Total Dogecoins:</span>
+                        <span id="mobile-total-mined">0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
+                        <span>Total Clicks:</span>
+                        <span id="mobile-total-clicks">0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
+                        <span>Helpers Owned:</span>
+                        <span id="mobile-helpers-owned">0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
+                        <span>Current Level:</span>
+                        <span id="mobile-current-level">Earth</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Update stat values if game exists
+        if (this.game) {
+            const mobileTotalMined = document.getElementById('mobile-total-mined');
+            const mobileTotalClicks = document.getElementById('mobile-total-clicks');
+            const mobileHelpersOwned = document.getElementById('mobile-helpers-owned');
+            const mobileCurrentLevel = document.getElementById('mobile-current-level');
+
+            if (mobileTotalMined) mobileTotalMined.textContent = this.game.formatNumber(this.game.stats?.totalMined || 0);
+            if (mobileTotalClicks) mobileTotalClicks.textContent = this.game.formatNumber(this.game.stats?.totalClicks || 0);
+            if (mobileHelpersOwned) mobileHelpersOwned.textContent = (this.game.helpers?.length || 0) + (this.game.moonHelpers?.length || 0) + (this.game.marsHelpers?.length || 0);
+            if (mobileCurrentLevel) mobileCurrentLevel.textContent = this.game.currentLevel?.charAt(0).toUpperCase() + this.game.currentLevel?.slice(1) || 'Earth';
+        }
+    }
+
+    // Update mobile settings content
+    updateMobileSettingsContent() {
+        const mobileSettingsContent = document.getElementById('mobile-settings-content');
+        if (!mobileSettingsContent) return;
+
+        // Display basic settings options
+        mobileSettingsContent.innerHTML = `
+            <div style="color: #8b4513;">
+                <h3 style="margin-bottom: 15px; border-bottom: 2px solid #d4af37; padding-bottom: 8px;">Game Settings</h3>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
+                        <input type="checkbox" id="mobile-sound-enabled" checked style="width: 20px; height: 20px;">
+                        <span>Sound Effects</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
+                        <input type="checkbox" id="mobile-music-enabled" checked style="width: 20px; height: 20px;">
+                        <span>Background Music</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
+                        <input type="checkbox" id="mobile-notifications-enabled" checked style="width: 20px; height: 20px;">
+                        <span>Notifications</span>
+                    </label>
+                </div>
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #d4af37;">
+                    <button onclick="saveGame()" style="width: 100%; padding: 12px; background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%); border: 2px solid #d4af37; border-radius: 8px; color: #8b4513; font-weight: 700; margin-bottom: 10px;">Save Game</button>
+                    <button onclick="loadGame()" style="width: 100%; padding: 12px; background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%); border: 2px solid #d4af37; border-radius: 8px; color: #8b4513; font-weight: 700;">Load Game</button>
+                </div>
+            </div>
+        `;
+
+        // Sync checkbox states with game settings
+        const soundCheckbox = document.getElementById('mobile-sound-enabled');
+        const musicCheckbox = document.getElementById('mobile-music-enabled');
+        const notificationsCheckbox = document.getElementById('mobile-notifications-enabled');
+
+        if (soundCheckbox) {
+            soundCheckbox.checked = document.getElementById('sound-enabled')?.checked ?? true;
+            soundCheckbox.addEventListener('change', (e) => {
+                const desktopCheckbox = document.getElementById('sound-enabled');
+                if (desktopCheckbox) desktopCheckbox.checked = e.target.checked;
+            });
+        }
+
+        if (musicCheckbox) {
+            musicCheckbox.checked = document.getElementById('music-enabled')?.checked ?? true;
+            musicCheckbox.addEventListener('change', (e) => {
+                const desktopCheckbox = document.getElementById('music-enabled');
+                if (desktopCheckbox) desktopCheckbox.checked = e.target.checked;
+            });
+        }
+
+        if (notificationsCheckbox) {
+            notificationsCheckbox.checked = document.getElementById('notifications-enabled')?.checked ?? true;
+            notificationsCheckbox.addEventListener('change', (e) => {
+                const desktopCheckbox = document.getElementById('notifications-enabled');
+                if (desktopCheckbox) desktopCheckbox.checked = e.target.checked;
+            });
         }
     }
 }
