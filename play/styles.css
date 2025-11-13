@@ -2765,12 +2765,12 @@ body.planet-mars #main-rock {
         z-index: 1001;
         cursor: pointer;
         padding: 0;
-        transition: bottom 0.4s cubic-bezier(0.4, 0.0, 0.2, 1), transform 0.3s ease;
+        transition: bottom 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
     }
 
-    /* Move button up when menu is open */
+    /* Move button up when menu is open - sits exactly on top of menu */
     #mobile-menu-toggle.menu-open {
-        bottom: calc(40vh - 20px);
+        bottom: calc(40vh - 40px);
     }
 
     #mobile-menu-toggle:active {
@@ -2854,6 +2854,7 @@ body.planet-mars #main-rock {
 
     .mobile-tab-btn .tab-text {
         font-size: 12px;
+        font-family: 'DogeSans', sans-serif;
     }
 
     /* Hide text on icon-only buttons on smaller screens */
@@ -2925,61 +2926,62 @@ body.planet-mars #main-rock {
     #mobile-shop-content .shop-grid-item {
         background: linear-gradient(to bottom, rgba(240, 235, 220, 0.95) 20%, rgba(255, 240, 180, 0.95) 80%);
         border: 1px solid #d4af37;
-        border-radius: 6px;
-        padding: 6px;
-        display: grid;
-        grid-template-areas: 
-            "title quantity"
-            "dps quantity"
-            "sprite description"
-            "button button";
-        grid-template-rows: 20px 15px 46px auto;
-        grid-template-columns: 1fr 40px;
-        gap: 4px;
+        border-radius: 12px;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
         position: relative;
         transition: all 0.2s ease;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         backdrop-filter: blur(5px);
         outline: 1px solid rgb(135, 125, 105);
         min-height: auto;
     }
 
-    /* Mobile shop item styling to match desktop */
+    /* Mobile shop item - quantity badge in top right */
     #mobile-shop-content .shop-item-quantity {
         position: absolute;
-        top: 10px;
-        right: 10px;
-        font-size: 14px;
+        top: 15px;
+        right: 15px;
+        font-size: 16px;
         font-weight: 700;
-        color: #d4af37;
+        color: #8b4513;
         background: rgba(255, 255, 255, 0.9);
-        padding: 4px 8px;
-        border-radius: 6px;
+        padding: 4px 10px;
+        border-radius: 12px;
         border: 1px solid #d4af37;
+        font-family: 'DogeSans', sans-serif;
     }
 
     #mobile-shop-content .shop-item-title {
-        font-size: 18px;
+        font-size: 20px;
         font-weight: 700;
         color: #8b4513;
-        text-align: center;
-        margin-bottom: 8px;
+        text-align: left;
+        font-family: 'DogeSans', sans-serif;
+        order: 1;
     }
 
     #mobile-shop-content .shop-item-dps {
         font-size: 14px;
-        color: #d4af37;
-        font-weight: 600;
-        margin-bottom: 12px;
+        color: #8b4513;
+        font-weight: 400;
+        text-align: left;
+        font-family: 'DogeSans', sans-serif;
+        order: 2;
     }
 
     #mobile-shop-content .shop-item-sprite {
-        width: 120px;
-        height: 120px;
+        width: 100px;
+        height: 100px;
         display: flex;
         align-items: center;
-        justify-content: center;
-        margin: 10px 0;
+        justify-content: flex-start;
+        align-self: flex-start;
+        order: 3;
+        margin: 8px 0;
     }
 
     #mobile-shop-content .shop-item-sprite img {
@@ -2990,23 +2992,25 @@ body.planet-mars #main-rock {
     }
 
     #mobile-shop-content .shop-item-description {
-        font-size: 13px;
+        font-size: 14px;
         color: #8b4513;
-        text-align: center;
-        margin: 10px 0;
+        text-align: left;
+        font-family: 'DogeSans', sans-serif;
+        order: 4;
+        line-height: 1.4;
         flex: 1;
-        display: flex;
-        align-items: center;
     }
 
     #mobile-shop-content .shop-buy-btn {
-        width: 85%;
-        padding: 12px;
+        width: 100%;
+        padding: 14px;
         background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%);
         border: 2px solid #d4af37;
-        border-radius: 8px;
-        font-size: 16px;
+        border-radius: 12px;
+        font-size: 18px;
         font-weight: 700;
+        font-family: 'DogeSans', sans-serif;
+        order: 5;
         color: #8b4513;
         display: flex;
         align-items: center;
@@ -3014,6 +3018,16 @@ body.planet-mars #main-rock {
         gap: 8px;
         cursor: pointer;
         transition: all 0.2s ease;
+    }
+
+    #mobile-shop-content .buy-btn-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    #mobile-shop-content .buy-btn-price {
+        font-size: 18px;
+        font-family: 'DogeSans', sans-serif;
     }
 
     #mobile-shop-content .shop-buy-btn:active:not(:disabled) {
