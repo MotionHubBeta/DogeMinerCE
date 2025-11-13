@@ -106,6 +106,32 @@ class UIManager {
                 }
             }
             
+            if (planetName === 'mars' && !this.isMarsUnlocked()) {
+                if (window.audioManager) {
+                    audioManager.playSound('uhoh');
+                }
+                window.notificationManager?.showWarning?.('LOCKED: Requires Lander Shibe');
+                return;
+            }
+
+            if (planetName === 'jupiter') {
+                if (!this.isMarsUnlocked()) {
+                    if (window.audioManager) {
+                        audioManager.playSound('uhoh');
+                    }
+                    window.notificationManager?.showWarning?.('LOCKED: Requires Mars');
+                    return;
+                }
+
+                if (!this.isJupiterUnlocked()) {
+                    if (window.audioManager) {
+                        audioManager.playSound('uhoh');
+                    }
+                    window.notificationManager?.showWarning?.('LOCKED: Requires Jupiter Rocket');
+                    return;
+                }
+            }
+
             // Update planet tab buttons
             document.querySelectorAll('.planet-tab').forEach(btn => {
                 btn.classList.remove('active');
@@ -118,7 +144,19 @@ class UIManager {
             // Show loading screen with appropriate message
             const loadingInfo = document.getElementById('loading-info');
             if (loadingInfo) {
-                loadingInfo.textContent = planetName === 'earth' ? 'Returning to Earth...' : 'Launching to Moon...';
+                if (planetName === 'earth') {
+                    loadingInfo.textContent = 'Returning to Earth...';
+                } else if (planetName === 'moon') {
+                    loadingInfo.textContent = 'Launching to Moon...';
+                } else if (planetName === 'mars') {
+                    loadingInfo.textContent = 'Launching to Mars...';
+                } else if (planetName === 'jupiter') {
+                    // Ensure Jupiter travel displays the correct destination.
+                    loadingInfo.textContent = 'Launching to Jupiter...';
+                } else if (planetName === 'titan') {
+                    // Provide placeholder copy while Titan content is under construction.
+                    loadingInfo.textContent = 'Charting a course to Titan...';
+                }
             }
             
             // Show loading screen with fade
@@ -133,6 +171,11 @@ class UIManager {
                 } else if (this.game.currentLevel === 'moon') {
                     // Save moon placed helpers
                     this.game.moonPlacedHelpers = [...this.game.placedHelpers];
+                } else if (this.game.currentLevel === 'mars') {
+                    // Save mars placed helpers
+                    this.game.marsPlacedHelpers = [...this.game.placedHelpers];
+                } else if (this.game.currentLevel === 'jupiter') {
+                    this.game.jupiterPlacedHelpers = [...this.game.placedHelpers];
                 }
                 
                 // Clear the current helpers from the screen
@@ -146,6 +189,10 @@ class UIManager {
                     this.game.placedHelpers = [...this.game.earthPlacedHelpers];
                 } else if (planetName === 'moon') {
                     this.game.placedHelpers = [...this.game.moonPlacedHelpers];
+                } else if (planetName === 'mars') {
+                    this.game.placedHelpers = [...(this.game.marsPlacedHelpers || [])];
+                } else if (planetName === 'jupiter') {
+                    this.game.placedHelpers = [...(this.game.jupiterPlacedHelpers || [])];
                 }
                 
                 // Update the character sprite
@@ -155,26 +202,58 @@ class UIManager {
                 } else if (planetName === 'moon') {
                     // Moon character with spacesuit
                     this.updateCharacter('spacehelmet');
+                } else if (planetName === 'mars') {
+                    this.updateCharacter('party');
+                } else if (planetName === 'jupiter') {
+                    // Use moon suit on Jupiter per requirements
+                    this.updateCharacter('spacehelmet');
                 }
                 
                 // Update the rock image
+                const rockElement = document.getElementById('main-rock');
+                const platform = document.getElementById('platform');
                 if (planetName === 'earth') {
                     document.getElementById('main-rock').src = 'assets/general/rocks/earth.png';
-                    const platform = document.getElementById('platform');
                     if (platform) {
                         platform.src = '../assets/quickUI/dogeplatform.png';
                     }
                     document.body.classList.remove('moon-theme');
+                    document.body.classList.remove('planet-mars');
+                    document.body.classList.remove('planet-jupiter');
                     if (window.audioManager) {
                         audioManager.playBackgroundMusic();
                     }
                 } else if (planetName === 'moon') {
-                    document.getElementById('main-rock').src = 'assets/general/rocks/moon.png';
-                    const platform = document.getElementById('platform');
+                    rockElement.src = 'assets/general/rocks/moon.png';
                     if (platform) {
                         platform.src = '../assets/quickUI/dogeplatformmoon.png';
                     }
                     document.body.classList.add('moon-theme');
+                    document.body.classList.remove('planet-mars');
+                    document.body.classList.remove('planet-jupiter');
+                    if (window.audioManager) {
+                        audioManager.playBackgroundMusic();
+                    }
+                } else if (planetName === 'mars') {
+                    rockElement.src = 'assets/general/rocks/mars.png';
+                    if (platform) {
+                        platform.src = '../assets/quickUI/marsdogeplatform.png';
+                    }
+                    document.body.classList.remove('moon-theme');
+                    document.body.classList.add('planet-mars');
+                    document.body.classList.remove('planet-jupiter');
+                    if (window.audioManager) {
+                        audioManager.playBackgroundMusic();
+                    }
+                } else if (planetName === 'jupiter') {
+                    rockElement.src = 'assets/general/rocks/jupiter.png';
+                    if (platform) {
+                        // Jupiter uses its own platform art so the scene matches the new assets.
+                        platform.src = '../assets/quickUI/jupiterdogeplatform.png';
+                    }
+                    document.body.classList.remove('moon-theme');
+                    document.body.classList.remove('planet-mars');
+                    document.body.classList.add('planet-jupiter');
                     if (window.audioManager) {
                         audioManager.playBackgroundMusic();
                     }
@@ -205,13 +284,32 @@ class UIManager {
                         'backgrounds/bg9.jpg',
                         'backgrounds/bg-new.jpg'
                     ];
+                } else if (planetName === 'mars') {
+                    this.game.backgrounds = [
+                        'backgrounds/bg6.jpg',
+                        'assets/backgrounds/bg101.jpg',
+                        'assets/backgrounds/bg102.jpg',
+                        'assets/backgrounds/bg103.jpg',
+                        'assets/backgrounds/bg104.jpg',
+                        'assets/backgrounds/bg105.jpg',
+                        'backgrounds/bg-new.jpg'
+                    ];
+                } else if (planetName === 'jupiter') {
+                    this.game.backgrounds = [
+                        'assets/backgrounds/bgjup01.jpg',
+                        'assets/backgrounds/bgjup02.jpg',
+                        'assets/backgrounds/bgjup03.jpg',
+                        'assets/backgrounds/dogewow.jpg'
+                    ];
                 }
-                
-                // Force background update
-                this.game.rotateBackground();
+                this.game.currentBackgroundIndex = 0;
+
+                // Sync background image DOM nodes to match the newly selected planet.
+                this.game.syncBackgroundImages?.(true);
                 
                 // Update the shop to show the appropriate helpers
                 this.updateShopContent();
+                this.updatePlanetTabVisibility();
                 
                 // Delay a bit to simulate loading
                 setTimeout(() => {
@@ -235,7 +333,7 @@ class UIManager {
                             characterContainer.style.visibility = 'visible';
                         }
 
-                        const forceIntro = planetName === 'moon' || planetName === 'earth';
+                        const forceIntro = planetName === 'moon' || planetName === 'earth' || planetName === 'mars' || planetName === 'jupiter';
                         if (forceIntro) {
                             this.game.playDogeIntro(true);
                         }
@@ -296,6 +394,8 @@ class UIManager {
             return;
         }
 
+        this.updatePlanetTabVisibility();
+
         const shopContent = document.getElementById('shop-content');
         if (!shopContent) {
             console.error('shop-content element not found!');
@@ -324,7 +424,7 @@ class UIManager {
         }
 
         // Choose which helpers to display based on current planet
-        const helperCategory = this.game.currentLevel === 'earth' ? 'helpers' : 'moonHelpers';
+        const helperCategory = this.game.getHelperCategoryForLevel(this.game.currentLevel);
         console.log(`Rendering shop with helper category: ${helperCategory} for planet: ${this.game.currentLevel}`);
         
         if (!window.shopManager.shopData[helperCategory]) {
@@ -334,7 +434,11 @@ class UIManager {
         
         const helperEntries = Object.entries(window.shopManager.shopData[helperCategory]);
         const moonHelpers = Array.isArray(this.game.moonHelpers) ? this.game.moonHelpers : [];
+        const marsHelpers = Array.isArray(this.game.marsHelpers) ? this.game.marsHelpers : [];
+        const jupiterHelpers = Array.isArray(this.game.jupiterHelpers) ? this.game.jupiterHelpers : [];
         const moonBaseOwned = moonHelpers.some(helper => helper.type === 'moonBase');
+        const marsBaseOwned = marsHelpers.some(helper => helper.type === 'marsBase');
+        const jupiterBaseOwned = jupiterHelpers.some(helper => helper.type === 'cloudBase');
         const landerShibeOwned = moonHelpers.some(helper => helper.type === 'landerShibe');
         
         // Create 6 helper items (2x3 grid)
@@ -345,7 +449,7 @@ class UIManager {
             if (i < helperEntries.length) {
                 const [type, helper] = helperEntries[i];
                 // Choose the correct helper array based on current planet
-                const helperArray = this.game.currentLevel === 'earth' ? this.game.helpers : this.game.moonHelpers;
+                const helperArray = this.game.getHelperArrayForLevel(this.game.currentLevel);
                 const owned = helperArray.filter(h => h.type === type).length;
                 const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned));
                 const canAfford = this.game.dogecoins >= cost;
@@ -356,6 +460,18 @@ class UIManager {
                         lockReason = 'moonBase';
                     } else if (type === 'marsRocket' && !landerShibeOwned) {
                         lockReason = 'landerShibe';
+                    }
+                } else if (this.game.currentLevel === 'mars') {
+                    if (type !== 'marsBase' && !marsBaseOwned) {
+                        lockReason = 'marsBase';
+                    }
+                    const spaceBassOwned = marsHelpers.some(helper => helper.type === 'spaceBass');
+                    if (type === 'jupiterRocket' && !spaceBassOwned) {
+                        lockReason = 'spaceBass';
+                    }
+                } else if (this.game.currentLevel === 'jupiter') {
+                    if (type !== 'cloudBase' && !jupiterBaseOwned) {
+                        lockReason = 'cloudBase';
                     }
                 }
                 const isLocked = lockReason !== null;
@@ -382,11 +498,17 @@ class UIManager {
                 }
                 
                 const buttonDisabled = (!canAfford || isLocked) ? 'disabled' : '';
+                let lockText = 'REQUIRES MOON BASE';
+                if (lockReason === 'landerShibe') lockText = 'REQUIRES LANDER SHIBE';
+                else if (lockReason === 'marsBase') lockText = 'REQUIRES MARS BASE';
+                else if (lockReason === 'spaceBass') lockText = 'REQUIRES SPACE BASS';
+                else if (lockReason === 'cloudBase') lockText = 'REQUIRES CLOUD BASE';
+                
                 const lockOverlayHtml = isLocked ? `
                     <div class="helper-lock-overlay">
                         <div class="helper-lock-icon" aria-hidden="true"></div>
                         <div class="helper-lock-text">LOCKED</div>
-                        <div class="helper-lock-subtext">${lockReason === 'landerShibe' ? 'REQUIRES LANDER SHIBE' : 'REQUIRES MOON BASE'}</div>
+                        <div class="helper-lock-subtext">${lockText}</div>
                     </div>
                 ` : '';
 
@@ -459,9 +581,6 @@ class UIManager {
                         if (spaceRocketCount === 1) {
                             // This is the first Space Rocket purchase
                             this.hideMoonLocked();
-                            
-                            // Show notification that Moon is unlocked
-                            window.game.showNotification('Moon unlocked! You can now travel to the Moon!');
                         }
                     }
                 }
@@ -854,38 +973,109 @@ class UIManager {
             lockedOverlay.style.display = 'none';
         }
     }
-    
+
     // Initialize planet tabs based on saved state
     initializePlanetTabs() {
-        if (this.game && this.game.currentLevel) {
-            // Update planet tab buttons to match current level
-            document.querySelectorAll('.planet-tab').forEach(btn => {
-                btn.classList.remove('active');
-                
-                // Check if this tab is for the current planet
-                const tabPlanet = btn.querySelector('img')?.alt?.toLowerCase() || '';
-                if (tabPlanet.toLowerCase() === this.game.currentLevel) {
-                    btn.classList.add('active');
-                }
-            });
-            
-            // If moon is unlocked, make sure the locked overlay is hidden
-            if (this.game.hasPlayedMoonLaunch) {
-                this.hideMoonLocked();
-            }
+        if (!this.game || !this.game.currentLevel) {
+            return;
+        }
 
-            const shopPanel = document.getElementById('shop-panel');
+        this.updatePlanetTabVisibility();
 
-            // Ensure the shop content matches the current planet
-            if (shopPanel && (this.activePanel === 'shop-panel' || shopPanel.style.display === 'block')) {
-                console.log(`Updating shop content to match current planet: ${this.game.currentLevel}`);
-                this.updateShopContent();
+        // Update planet tab buttons to match current level
+        document.querySelectorAll('.planet-tab').forEach(btn => {
+            btn.classList.remove('active');
+
+            const tabPlanet = btn.dataset.planet || btn.querySelector('img')?.alt?.toLowerCase() || '';
+            if (tabPlanet.toLowerCase() === this.game.currentLevel) {
+                btn.classList.add('active');
             }
-            
-            console.log(`Planet tabs initialized to: ${this.game.currentLevel}`);
+        });
+
+        if (this.game.hasPlayedMoonLaunch) {
+            this.hideMoonLocked();
+        }
+
+        const shopPanel = document.getElementById('shop-panel');
+        if (shopPanel && (this.activePanel === 'shop-panel' || shopPanel.style.display === 'block')) {
+            console.log(`Updating shop content to match current planet: ${this.game.currentLevel}`);
+            this.updateShopContent();
+        }
+
+        console.log(`Planet tabs initialized to: ${this.game.currentLevel}`);
+    }
+
+    playerHasHelperType(helperType) {
+        if (!this.game) return false;
+
+        const helperLists = [
+            this.game.helpers,
+            this.game.moonHelpers,
+            this.game.marsHelpers,
+            this.game.earthPlacedHelpers,
+            this.game.moonPlacedHelpers,
+            this.game.marsPlacedHelpers
+        ];
+
+        return helperLists.some(list =>
+            Array.isArray(list) && list.some(helper => helper && helper.type === helperType)
+        );
+    }
+
+    playerHasMarsRocket() {
+        return this.playerHasHelperType('marsRocket');
+    }
+
+    playerHasJupiterRocket() {
+        return this.playerHasHelperType('jupiterRocket');
+    }
+
+    isMarsUnlocked() {
+        const marsRocketOwned = this.playerHasMarsRocket();
+
+        if (marsRocketOwned && this.game && !this.game.hasPlayedMoonLaunch) {
+            this.game.hasPlayedMoonLaunch = true;
+        }
+
+        const moonUnlocked = this.game?.hasPlayedMoonLaunch || marsRocketOwned;
+        if (!moonUnlocked) {
+            return false;
+        }
+
+        return marsRocketOwned;
+    }
+
+    isJupiterUnlocked() {
+        return this.playerHasJupiterRocket();
+    }
+
+    updatePlanetTabVisibility() {
+        const marsTab = document.querySelector('.planet-tab[data-planet="mars"]');
+        if (marsTab) {
+            const marsUnlocked = this.isMarsUnlocked();
+            marsTab.style.display = marsUnlocked ? '' : 'none';
+            marsTab.disabled = !marsUnlocked;
+
+            if (!marsUnlocked && marsTab.classList.contains('active')) {
+                marsTab.classList.remove('active');
+                const fallbackTab = document.querySelector('.planet-tab[data-planet="earth"]');
+                fallbackTab?.classList.add('active');
+            }
+        }
+
+        const jupiterTab = document.querySelector('.planet-tab[data-planet="jupiter"]');
+        if (jupiterTab) {
+            const jupiterUnlocked = this.isJupiterUnlocked();
+            jupiterTab.style.display = jupiterUnlocked ? '' : 'none';
+            jupiterTab.disabled = !jupiterUnlocked;
+
+            if (!jupiterUnlocked && jupiterTab.classList.contains('active')) {
+                jupiterTab.classList.remove('active');
+                const fallbackTab = document.querySelector('.planet-tab[data-planet="earth"]');
+                fallbackTab?.classList.add('active');
+            }
         }
     }
 }
-
 // Global UI manager instance
 let uiManager;

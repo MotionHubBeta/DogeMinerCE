@@ -24,6 +24,7 @@ async function initializeGame() {
         
         // Initialize UI manager (depends on shop manager)
         uiManager = new UIManager(game);
+        window.uiManager = uiManager; // Expose early for save/load routines
         updateLoadingInfo('Loading audio system...');
         
         // Initialize audio manager
@@ -57,21 +58,95 @@ async function initializeGame() {
                     if (platform) {
                         platform.src = '../assets/quickUI/dogeplatform.png';
                     }
+                    document.body.classList.remove('moon-theme');
+                    document.body.classList.remove('planet-mars');
+                    document.body.classList.remove('planet-jupiter');
+                    document.body.classList.remove('planet-titan');
+                    game.backgrounds = [
+                        'backgrounds/bg1.jpg',
+                        'backgrounds/bg3.jpg',
+                        'backgrounds/bg4.jpg',
+                        'backgrounds/bg5.jpg',
+                        'backgrounds/bg6.jpg',
+                        'backgrounds/bg7.jpg',
+                        'backgrounds/bg9.jpg',
+                        'backgrounds/bg-new.jpg'
+                    ];
                 } else if (game.currentLevel === 'moon') {
                     mainCharacter.src = 'assets/general/character/spacehelmet.png';
                     mainRock.src = 'assets/general/rocks/moon.png';
                     if (platform) {
                         platform.src = '../assets/quickUI/dogeplatformmoon.png';
                     }
+                    document.body.classList.remove('planet-mars');
+                    document.body.classList.remove('planet-jupiter');
+                    document.body.classList.remove('planet-titan');
                     
                     // Make sure moon is unlocked in UI
                     if (uiManager) {
                         uiManager.hideMoonLocked();
                     }
+                } else if (game.currentLevel === 'mars') {
+                    mainCharacter.src = 'assets/general/character/party.png';
+                    mainRock.src = 'assets/general/rocks/mars.png';
+                    if (platform) {
+                        platform.src = '../assets/quickUI/marsdogeplatform.png';
+                    }
+                    document.body.classList.remove('moon-theme');
+                    document.body.classList.remove('planet-jupiter');
+                    document.body.classList.remove('planet-titan');
+                    document.body.classList.add('planet-mars');
+                    game.backgrounds = [
+                        'backgrounds/bg6.jpg',
+                        'assets/backgrounds/bg101.jpg', // Mars extras live under play/assets/backgrounds/
+                        'assets/backgrounds/bg102.jpg',
+                        'assets/backgrounds/bg103.jpg',
+                        'assets/backgrounds/bg104.jpg',
+                        'assets/backgrounds/bg105.jpg',
+                        'backgrounds/bg-new.jpg'
+                    ];
+                } else if (game.currentLevel === 'jupiter') {
+                    // Jupiter reuses the space suit but swaps to the dedicated platform art.
+                    mainCharacter.src = 'assets/general/character/spacehelmet.png';
+                    mainRock.src = 'assets/general/rocks/jupiter.png';
+                    if (platform) {
+                        platform.src = '../assets/quickUI/jupiterdogeplatform.png';
+                    }
+                    document.body.classList.remove('moon-theme');
+                    document.body.classList.remove('planet-mars');
+                    document.body.classList.remove('planet-titan');
+                    document.body.classList.add('planet-jupiter');
+                    game.backgrounds = [
+                        'assets/backgrounds/bgjup01.jpg',
+                        'assets/backgrounds/bgjup02.jpg',
+                        'assets/backgrounds/bgjup03.jpg',
+                        'assets/backgrounds/dogewow.jpg'
+                    ];
+                } else if (game.currentLevel === 'titan') {
+                    // Titan is a placeholder world for upcoming content.
+                    mainCharacter.src = 'assets/general/character/spacehelmet.png';
+                    mainRock.src = 'assets/general/rocks/titan.png';
+                    if (platform) {
+                        // Reuse the Jupiter platform art until Titan-specific art arrives.
+                        platform.src = '../assets/quickUI/jupiterdogeplatform.png';
+                    }
+                    document.body.classList.remove('moon-theme');
+                    document.body.classList.remove('planet-mars');
+                    document.body.classList.remove('planet-jupiter');
+                    document.body.classList.add('planet-titan');
+                    game.backgrounds = [
+                        'assets/backgrounds/titan02.jpg',
+                        'assets/backgrounds/titan03.jpg',
+                        'assets/backgrounds/titan04.jpg',
+                        'assets/backgrounds/titan05.jpg'
+                    ];
                 }
+
+                // Make sure the background DOM nodes reflect the resolved pool for this load-in planet.
+                game.syncBackgroundImages?.(true);
                 
-                // Force update shop content if on Moon
-                if (game.currentLevel === 'moon' && uiManager) {
+                // Force update shop content and planet tabs if on Moon, Mars, or Jupiter
+                if ((game.currentLevel === 'moon' || game.currentLevel === 'mars' || game.currentLevel === 'jupiter') && uiManager) {
                     uiManager.initializePlanetTabs?.();
                     setTimeout(() => {
                         uiManager.updateShopContent();
@@ -98,7 +173,11 @@ async function initializeGame() {
             // window.audioManager already assigned above
             
             // Play doge intro animation
-            game.playDogeIntro();
+            if (game.currentLevel === 'earth') {
+                game.playDogeIntro();
+            } else {
+                game.playDogeIntro(true);
+            }
             
             // Start background music only if enabled
             if (audioManager && game && game.musicEnabled) {

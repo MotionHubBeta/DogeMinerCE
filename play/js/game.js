@@ -9,8 +9,14 @@ class DogeMinerGame {
         this.currentLevel = 'earth';
         this.helpers = [];
         this.moonHelpers = [];
+        this.marsHelpers = [];
+        this.jupiterHelpers = [];
+        this.titanHelpers = [];
         this.earthPlacedHelpers = [];
         this.moonPlacedHelpers = [];
+        this.marsPlacedHelpers = [];
+        this.jupiterPlacedHelpers = [];
+        this.titanPlacedHelpers = [];
         
         // Name lists for helpers
         this.miningShibeNames = [
@@ -34,7 +40,19 @@ class DogeMinerGame {
             'dogeCar': 'Doge Car',
             'landerShibe': 'Lander Shibe',
             'marsRocket': 'Mars Rocket',
-            'dogeGate': 'Doge Gate'
+            'dogeGate': 'Doge Gate',
+            'marsBase': 'Mars Base',
+            'partyShibe': 'Party Shibe',
+            'curiosiDoge': 'CuriosiDoge',
+            'djKittenz': 'DJ Kittenz',
+            'spaceBass': 'Space Bass',
+            'jupiterRocket': 'Jupiter Rocket',
+            'cloudBase': 'Cloud Base',
+            'superShibe': 'Super Shibe',
+            'dogeAirShip': 'Doge Air Ship',
+            'flyingDoggo': 'Flying Doggo',
+            'tardogeis': 'TARDogeIS',
+            'dogeStar': 'DogeStar'
         };
         
         // Game state
@@ -117,6 +135,24 @@ class DogeMinerGame {
                 background: 'assets/backgrounds/bg/bgmoon01.jpg',
                 rock: 'assets/general/rocks/moon.png',
                 character: 'assets/general/character/spacehelmet.png'
+            },
+            mars: {
+                name: 'Mars',
+                background: 'assets/backgrounds/bg/bgmars01.jpg',
+                rock: 'assets/general/rocks/mars.png',
+                character: 'assets/general/character/party.png'
+            },
+            jupiter: {
+                name: 'Jupiter',
+                background: 'assets/backgrounds/bg/bgmars01.jpg',
+                rock: 'assets/general/rocks/jupiter.png',
+                character: 'assets/general/character/spacehelmet.png'
+            },
+            titan: {
+                name: 'Titan (Coming Soon)',
+                background: 'assets/backgrounds/titan02.jpg',
+                rock: 'assets/general/rocks/titan.png',
+                character: 'assets/general/character/spacehelmet.png'
             }
         };
         
@@ -153,6 +189,9 @@ class DogeMinerGame {
         
         // Track global mouse position
         this.addGlobalMouseTracking();
+
+        // Ensure the DOM background images match the initial planet selection.
+        this.syncBackgroundImages(true);
 
         // Intro animation state
         this.isIntroPlaying = false;
@@ -427,16 +466,13 @@ class DogeMinerGame {
         const doge = document.getElementById('main-character');
         if (!doge) return;
 
-        // Temporarily remove float so bounce animation is visible
         const hadFloat = doge.classList.contains('float');
         if (hadFloat) {
             doge.classList.remove('float');
         }
-        
-        // Add bounce class
+
         doge.classList.add('bounce');
-        
-        // Remove bounce class after animation completes
+
         setTimeout(() => {
             doge.classList.remove('bounce');
             if (hadFloat) {
@@ -444,45 +480,46 @@ class DogeMinerGame {
             }
         }, 200);
     }
-    
-    playDogeIntro() {
-        // Don't play intro if transitioning between planets or cutscene is playing
-        if (this.isTransitioning || this.isCutscenePlaying) return;
+
+    playDogeIntro(force = false) {
+        if ((this.isTransitioning || this.isCutscenePlaying) && !force) return;
+        if (this.isIntroPlaying && !force) return;
+
         const characterContainer = document.getElementById('character-container');
         const pickaxe = document.getElementById('pickaxe');
         if (!characterContainer) return;
 
-        // Hide character until animation kicks in to avoid flicker
         characterContainer.style.visibility = 'hidden';
         characterContainer.style.transform = 'translateY(-520px)';
 
         this.isIntroPlaying = true;
 
-        // Ensure character sprite is set correctly before animation
         const doge = document.getElementById('main-character');
         if (doge) {
-            // Set correct character sprite based on planet
             if (this.currentLevel === 'earth') {
                 doge.src = 'assets/general/character/standard.png';
             } else if (this.currentLevel === 'moon') {
                 doge.src = 'assets/general/character/spacehelmet.png';
+            } else if (this.currentLevel === 'mars') {
+                doge.src = 'assets/general/character/party.png';
+            } else if (this.currentLevel === 'jupiter') {
+                doge.src = 'assets/general/character/spacehelmet.png';
             }
             doge.classList.remove('float');
         }
-        
-        // Reset any existing classes to ensure clean animation
+
         characterContainer.classList.remove('doge-intro');
         if (pickaxe) pickaxe.classList.remove('pickaxe-intro');
-        
-        // Short delay to ensure everything is reset
+
         setTimeout(() => {
             characterContainer.style.visibility = 'visible';
+
             const restartAnimation = (element, className) => {
                 element.classList.remove(className);
-                // Force reflow so animation can replay even if class was already present
                 void element.offsetWidth;
                 element.classList.add(className);
             };
+
             restartAnimation(characterContainer, 'doge-intro');
             setTimeout(() => {
                 characterContainer.classList.remove('doge-intro');
@@ -686,6 +723,36 @@ class DogeMinerGame {
         }, 1500);
     }
     
+    getHelperCategoryForLevel(level = this.currentLevel) {
+        switch (level) {
+            case 'moon':
+                return 'moonHelpers';
+            case 'mars':
+                return 'marsHelpers';
+            case 'jupiter':
+                return 'jupiterHelpers';
+            case 'titan':
+                return 'titanHelpers';
+            default:
+                return 'helpers';
+        }
+    }
+
+    getHelperArrayForLevel(level = this.currentLevel) {
+        switch (level) {
+            case 'moon':
+                return this.moonHelpers;
+            case 'mars':
+                return this.marsHelpers;
+            case 'jupiter':
+                return this.jupiterHelpers;
+            case 'titan':
+                return this.titanHelpers;
+            default:
+                return this.helpers;
+        }
+    }
+
     buyHelper(helperType) {
         if (this.isCutscenePlaying) return false;
 
@@ -697,7 +764,7 @@ class DogeMinerGame {
         console.log('Current level:', this.currentLevel);
         console.log('Stack trace:', new Error().stack);
 
-        const helperCategory = this.currentLevel === 'earth' ? 'helpers' : 'moonHelpers';
+        const helperCategory = this.getHelperCategoryForLevel();
         const helperData = window.shopManager?.shopData?.[helperCategory]?.[helperType];
         if (!helperData) {
             console.error('Helper type not found:', helperType, 'in category', helperCategory);
@@ -712,7 +779,32 @@ class DogeMinerGame {
             }
         }
 
-        const helperArray = this.currentLevel === 'earth' ? this.helpers : this.moonHelpers;
+        if (this.currentLevel === 'mars' && helperType !== 'marsBase') {
+            const hasMarsBase = (this.marsHelpers || []).some(h => h.type === 'marsBase');
+            if (!hasMarsBase) {
+                this.showNotification?.('LOCKED: Requires Mars Base');
+                return false;
+            }
+            
+            // Jupiter Rocket requires Space Bass
+            if (helperType === 'jupiterRocket') {
+                const hasSpaceBass = (this.marsHelpers || []).some(h => h.type === 'spaceBass');
+                if (!hasSpaceBass) {
+                    this.showNotification?.('LOCKED: Requires Space Bass');
+                    return false;
+                }
+            }
+        }
+
+        if (this.currentLevel === 'jupiter' && helperType !== 'cloudBase') {
+            const hasCloudBase = (this.jupiterHelpers || []).some(h => h.type === 'cloudBase');
+            if (!hasCloudBase) {
+                this.showNotification?.('LOCKED: Requires Cloud Base');
+                return false;
+            }
+        }
+
+        const helperArray = this.getHelperArrayForLevel();
         const owned = helperArray.filter(h => h.type === helperType).length;
         const cost = Math.floor(helperData.baseCost * Math.pow(1.15, owned));
 
@@ -731,6 +823,9 @@ class DogeMinerGame {
             helper: helperData,
             dps: helperData.baseDps
         });
+
+        // Recalculate total DPS with the newly purchased helper counted.
+        this.updateDPS();
 
         this.addHelperToCursor(helperType, helperData);
         this.updateShopPrices();
@@ -827,6 +922,21 @@ class DogeMinerGame {
                 helperSprite.classList.add('dogebility');
             } else if (helperData.type === 'moonBase') {
                 helperSprite.classList.add('moon-base');
+            } else if (helperData.type === 'marsBase') {
+                helperSprite.classList.add('mars-base');
+            } else if (helperData.type === 'cloudBase') {
+                helperSprite.classList.add('jupiter-base');
+                helperSprite.classList.add('cloud-base');
+            } else if (helperData.type === 'dogeAirShip') {
+                helperSprite.classList.add('doge-air-ship');
+            } else if (helperData.type === 'flyingDoggo') {
+                helperSprite.classList.add('flying-doggo');
+            } else if (helperData.type === 'superShibe') {
+                helperSprite.classList.add('super-shibe');
+            } else if (helperData.type === 'tardogeis') {
+                helperSprite.classList.add('tardogeis');
+            } else if (helperData.type === 'dogeStar') {
+                helperSprite.classList.add('dogestar');
             } else if (helperData.type === 'marsRocket') {
                 helperSprite.classList.add('mars-rocket');
             } else if (helperData.type === 'landerShibe') {
@@ -837,7 +947,7 @@ class DogeMinerGame {
             let helperSize = 60;
             if (helperSprite.classList.contains('shibe')) {
                 helperSize = 30;
-            } else if (helperSprite.classList.contains('moon-base') || helperSprite.classList.contains('lander-shibe')) {
+            } else if (helperSprite.classList.contains('moon-base') || helperSprite.classList.contains('lander-shibe') || helperSprite.classList.contains('mars-base')) {
                 helperSize = 90;
             } else if (helperSprite.classList.contains('dogebility')) {
                 helperSize = 69;
@@ -910,7 +1020,7 @@ class DogeMinerGame {
                     
                     // Only add stacking offset for helpers beyond the first one
                     if (index > 0 && this.helpersOnCursor[index]) {
-                        // Create loose horizontal formation with max 2 rows
+                        // Create loose horizontal formation to match cursor stacking
                         const helpersPerRow = 8; // More helpers per row for looser feel
                         const row = Math.floor(index / helpersPerRow);
                         const col = index % helpersPerRow;
@@ -1393,7 +1503,7 @@ class DogeMinerGame {
         // Make sure we have a valid helper reference
         if (!placedHelper.helper || !placedHelper.helper.icon) {
             // Try to get helper data based on current level and type
-            const helperCategory = this.currentLevel === 'earth' ? 'helpers' : 'moonHelpers';
+            const helperCategory = this.getHelperCategoryForLevel();
             if (window.shopManager && window.shopManager.shopData && window.shopManager.shopData[helperCategory]) {
                 placedHelper.helper = window.shopManager.shopData[helperCategory][placedHelper.type] || this.getHelperData(placedHelper.type);
             } else {
@@ -1422,6 +1532,25 @@ class DogeMinerGame {
             helperSprite.classList.add('mars-rocket');
         } else if (placedHelper.type === 'landerShibe') {
             helperSprite.classList.add('lander-shibe');
+        } else if (placedHelper.type === 'marsBase') {
+            helperSprite.classList.add('mars-base');
+        } else if (placedHelper.type === 'cloudBase') {
+            helperSprite.classList.add('jupiter-base');
+            helperSprite.classList.add('cloud-base');
+        } else if (placedHelper.type === 'dogeAirShip') {
+            helperSprite.classList.add('doge-air-ship');
+        } else if (placedHelper.type === 'flyingDoggo') {
+            helperSprite.classList.add('flying-doggo');
+        } else if (placedHelper.type === 'superShibe') {
+            helperSprite.classList.add('super-shibe');
+        } else if (placedHelper.type === 'tardogeis') {
+            helperSprite.classList.add('tardogeis');
+        } else if (placedHelper.type === 'dogeStar') {
+            helperSprite.classList.add('dogestar');
+        } else if (placedHelper.type === 'spaceBass') {
+            helperSprite.classList.add('space-bass');
+        } else if (placedHelper.type === 'jupiterRocket') {
+            helperSprite.classList.add('jupiter-rocket');
         }
         
         // Add bounce animation class
@@ -1433,7 +1562,9 @@ class DogeMinerGame {
         // Add name tooltip as a separate element
         const nameTooltip = document.createElement('div');
         nameTooltip.className = 'helper-name-tooltip';
-        const helperName = placedHelper.name || this.getHelperName(placedHelper.type);
+        const helperName = placedHelper.name
+            || placedHelper.helper?.name
+            || this.getHelperName(placedHelper.type);
         nameTooltip.textContent = helperName;
         nameTooltip.dataset.helperId = placedHelper.id;
         
@@ -1462,6 +1593,18 @@ class DogeMinerGame {
         } else if (placedHelper.type === 'landerShibe') {
             centerOffset = 45; // Lander Shibe (90px): ~half width
             verticalOffset = 28; // Larger helper needs more vertical offset
+        } else if (placedHelper.type === 'marsBase') {
+            centerOffset = 45; // Mars Base matches moon base sizing
+            verticalOffset = 30;
+        } else if (placedHelper.type === 'cloudBase') {
+            centerOffset = 45; // Cloud Base uses 1.5x sizing
+            verticalOffset = 30;
+        } else if (placedHelper.type === 'superShibe' || placedHelper.type === 'tardogeis') {
+            centerOffset = 36; // 1.2x helpers (72px)
+            verticalOffset = 26;
+        } else if (placedHelper.type === 'dogeStar') {
+            centerOffset = 45; // DogeStar matches 90px sizing
+            verticalOffset = 32;
         } else if (placedHelper.type === 'dogeCar') {
             centerOffset = 30;
             verticalOffset = 28; // Doge Car: needs more vertical offset
@@ -1823,7 +1966,10 @@ class DogeMinerGame {
         }, 0);
         
         // Total DPS is the sum of both planet helpers
-        this.dps = earthDPS + moonDPS;
+        const marsDPS = this.marsHelpers.reduce((total, helper) => total + helper.dps, 0);
+        const jupiterDPS = this.jupiterHelpers.reduce((total, helper) => total + helper.dps, 0);
+
+        this.dps = earthDPS + moonDPS + marsDPS + jupiterDPS;
         
         // Update highest DPS
         if (this.dps > this.highestDps) {
@@ -1844,11 +1990,11 @@ class DogeMinerGame {
                 const helperType = buyButton.getAttribute('data-helper-type');
                 if (helperType) {
                     // Get the correct helper category based on current planet
-                    const helperCategory = this.currentLevel === 'earth' ? 'helpers' : 'moonHelpers';
-                    const helper = window.shopManager.shopData[helperCategory][helperType];
+                    const helperCategory = this.getHelperCategoryForLevel();
+                    const shopCategory = window.shopManager?.shopData?.[helperCategory];
+                    const helper = shopCategory?.[helperType];
                     if (helper) {
-                        // Get the correct helper array based on current planet
-                        const helperArray = this.currentLevel === 'earth' ? this.helpers : this.moonHelpers;
+                        const helperArray = this.getHelperArrayForLevel();
                         const owned = helperArray.filter(h => h.type === helperType).length;
                         const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned));
                         const canAfford = this.dogecoins >= cost;
@@ -1882,7 +2028,7 @@ class DogeMinerGame {
                         // Update button width
                         buyButton.style.width = buttonWidth;
                         
-                        // Update button state
+                        // Update button state using the refreshed affordability check
                         if (canAfford) {
                             buyButton.disabled = false;
                             buyButton.style.opacity = '1';
@@ -1944,6 +2090,56 @@ class DogeMinerGame {
         
         console.log(`Background rotated to: ${this.backgrounds[this.currentBackgroundIndex]}`);
     }
+
+    // Keep the DOM background elements aligned with the active planet's background pool.
+    syncBackgroundImages(forceActive = false) {
+        const container = document.getElementById('background-container');
+        if (!container) {
+            return;
+        }
+
+        const imageNodes = Array.from(container.querySelectorAll('.background-image'));
+        if (!imageNodes.length) {
+            return;
+        }
+
+        let pool = Array.isArray(this.backgrounds) ? [...this.backgrounds] : [];
+        if (!pool.length) {
+            return;
+        }
+
+        if (pool.length > imageNodes.length) {
+            pool = pool.slice(0, imageNodes.length);
+        }
+
+        if (this.currentBackgroundIndex >= pool.length) {
+            this.currentBackgroundIndex = 0;
+        }
+
+        imageNodes.forEach((img, idx) => {
+            if (idx < pool.length) {
+                const desiredSrc = pool[idx];
+                const currentSrc = img.getAttribute('src') || '';
+                if (!currentSrc.endsWith(desiredSrc)) {
+                    img.src = desiredSrc;
+                }
+                img.style.display = '';
+
+                if (forceActive) {
+                    if (idx === this.currentBackgroundIndex) {
+                        img.classList.add('active');
+                    } else {
+                        img.classList.remove('active');
+                    }
+                }
+            } else {
+                img.style.display = 'none';
+                if (forceActive) {
+                    img.classList.remove('active');
+                }
+            }
+        });
+    }
     
     startBlinking() {
         // Start blinking every 10 seconds
@@ -1955,7 +2151,10 @@ class DogeMinerGame {
     blinkDoge() {
         const doge = document.getElementById('main-character');
         if (!doge) return;
-        
+        if (this.currentLevel === 'mars') {
+            return;
+        }
+
         // Store original src
         const originalSrc = doge.src;
         
@@ -1964,6 +2163,9 @@ class DogeMinerGame {
         if (this.currentLevel === 'earth') {
             closedEyesSprite = 'assets/general/character/closed_eyes.png';
         } else if (this.currentLevel === 'moon') {
+            closedEyesSprite = 'assets/general/character/closed_space.png';
+        } else if (this.currentLevel === 'jupiter') {
+            // Jupiter uses space helmet sprite like the Moon
             closedEyesSprite = 'assets/general/character/closed_space.png';
         } else {
             // Default fallback
@@ -2199,15 +2401,21 @@ class DogeMinerGame {
         
         // Update shop prices and quantities without rebuilding the entire shop (unless skipped)
         if (!skipShopPrices) {
-        this.updateShopPrices();
+            this.updateShopPrices();
         }
         
         document.getElementById('total-mined').textContent = this.formatNumber(Math.floor(this.totalMined));
         document.getElementById('total-clicks').textContent = this.formatNumber(this.totalClicks);
-        document.getElementById('helpers-owned').textContent = this.helpers.length;
-        document.getElementById('current-level').textContent = 'Earth'; // Default level name
+        const totalHelpersOwned =
+            (this.helpers?.length || 0) +
+            (this.moonHelpers?.length || 0) +
+            (this.marsHelpers?.length || 0) +
+            (this.jupiterHelpers?.length || 0); // Sum helpers across planets for an accurate counter.
+        document.getElementById('helpers-owned').textContent = totalHelpersOwned;
+        const activeLevelName = this.levels?.[this.currentLevel]?.name || this.currentLevel; // Match stats banner to current planet
+        document.getElementById('current-level').textContent = activeLevelName;
         
-        // Update play time
+        // Calculate current play time from session start plus total accumulated time.
         const currentPlayTime = Math.floor((Date.now() - this.startTime) / 1000) + this.totalPlayTime;
         document.getElementById('play-time').textContent = this.formatTime(currentPlayTime);
         document.getElementById('highest-dps').textContent = this.formatNumber(this.highestDps);
@@ -2269,9 +2477,13 @@ class DogeMinerGame {
     saveGame() {
         // Save current helpers to the appropriate array before saving game state
         if (this.currentLevel === 'earth') {
-            this.earthPlacedHelpers = [...this.placedHelpers];
+            this.earthPlacedHelpers = [...(this.earthPlacedHelpers || [])];
         } else if (this.currentLevel === 'moon') {
-            this.moonPlacedHelpers = [...this.placedHelpers];
+            this.moonPlacedHelpers = [...(this.moonPlacedHelpers || [])];
+        } else if (this.currentLevel === 'mars') {
+            this.marsPlacedHelpers = [...(this.marsPlacedHelpers || [])];
+        } else if (this.currentLevel === 'jupiter') {
+            this.jupiterPlacedHelpers = [...(this.jupiterPlacedHelpers || [])];
         }
 
         const saveData = {
@@ -2313,22 +2525,13 @@ class DogeMinerGame {
                     this.placedHelpers = [...this.earthPlacedHelpers];
                 } else if (this.currentLevel === 'moon') {
                     this.placedHelpers = [...this.moonPlacedHelpers];
+                } else if (this.currentLevel === 'mars') {
+                    this.placedHelpers = [...this.marsPlacedHelpers];
+                } else if (this.currentLevel === 'jupiter') {
+                    this.placedHelpers = [...this.jupiterPlacedHelpers];
                 }
                 
                 // Update character and rock based on current level
-                if (this.currentLevel === 'moon') {
-                    document.getElementById('main-character').src = 'assets/general/character/spacehelmet.png';
-                    document.getElementById('main-rock').src = 'assets/general/rocks/moon.png';
-                    const doge = document.getElementById('main-character');
-                    if (doge) {
-                        doge.classList.add('float');
-                    }
-                }
-                
-                // Always reset transition flag when loading
-                this.isTransitioning = false;
-                
-                this.updateDPS();
                 this.updateUI();
                 // Notification handled by main.js
                 return true;
@@ -2359,6 +2562,11 @@ class DogeMinerGame {
             // Then try moon helpers
             if (window.shopManager.shopData.moonHelpers && window.shopManager.shopData.moonHelpers[helperType]) {
                 return window.shopManager.shopData.moonHelpers[helperType];
+            }
+            
+            // Then try mars helpers
+            if (window.shopManager.shopData.marsHelpers && window.shopManager.shopData.marsHelpers[helperType]) {
+                return window.shopManager.shopData.marsHelpers[helperType];
             }
         }
         

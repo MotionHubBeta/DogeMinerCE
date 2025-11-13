@@ -7,6 +7,7 @@ class AudioManager {
         this.introSound = null;
         this.loopSound = null;
         this.moonLoop = null;
+        this.marsLoop = null;
         this.soundEffects = {};
         this.currentMusicPlanet = null;
     }
@@ -15,6 +16,7 @@ class AudioManager {
         // Load background music
         this.loadLevel1Music();
         this.loadMoonMusic();
+        this.loadMarsMusic();
         
         // Load sound effects
         this.loadSoundEffects();
@@ -134,6 +136,15 @@ class AudioManager {
         });
     }
 
+    loadMarsMusic() {
+        this.marsLoop = new Howl({
+            src: ['../assets/SoundsSrc/musiclevel3/music.mp3'],
+            loop: true,
+            autoplay: false,
+            volume: 0.5
+        });
+    }
+
     isPlaying(sound) {
         return !!(sound && typeof sound.playing === 'function' && sound.playing());
     }
@@ -147,7 +158,10 @@ class AudioManager {
             if (currentLevel === 'moon' && this.isPlaying(this.moonLoop)) {
                 return;
             }
-            if (currentLevel !== 'moon' && (this.isPlaying(this.introSound) || this.isPlaying(this.loopSound))) {
+            if (currentLevel === 'mars' && this.isPlaying(this.marsLoop)) {
+                return;
+            }
+            if (currentLevel !== 'moon' && currentLevel !== 'mars' && (this.isPlaying(this.introSound) || this.isPlaying(this.loopSound))) {
                 return;
             }
         }
@@ -160,6 +174,10 @@ class AudioManager {
         if (currentLevel === 'moon') {
             if (this.moonLoop) {
                 this.moonLoop.play();
+            }
+        } else if (currentLevel === 'mars') {
+            if (this.marsLoop) {
+                this.marsLoop.play();
             }
         } else {
             // Play intro first, then loop (Earth)
@@ -179,6 +197,9 @@ class AudioManager {
         if (this.moonLoop) {
             this.moonLoop.stop();
         }
+        if (this.marsLoop) {
+            this.marsLoop.stop();
+        }
         this.currentMusicPlanet = null;
     }
 
@@ -192,6 +213,9 @@ class AudioManager {
         }
         if (this.moonLoop) {
             this.moonLoop.volume(clampedVolume);
+        }
+        if (this.marsLoop) {
+            this.marsLoop.volume(clampedVolume);
         }
     }
 

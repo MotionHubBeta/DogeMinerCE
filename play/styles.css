@@ -211,6 +211,321 @@
     color: rgb(40, 95, 155);
 }
 
+/* Mars Theme */
+.planet-mars #left-panel,
+.planet-mars #right-panel {
+    background: linear-gradient(to bottom, rgba(80, 35, 30, 0.95) 20%, rgba(90, 30, 25, 0.95) 80%);
+    border: 1px solid rgb(130, 80, 75);
+}
+
+.planet-mars .shop-grid-item,
+.planet-mars .shop-item {
+    background: linear-gradient(to bottom, rgba(80, 35, 30, 0.95) 20%, rgba(90, 30, 25, 0.95) 80%);
+    border: 1px solid rgb(130, 80, 75);
+}
+
+/* Mars text color - white for all text including helper names */
+.planet-mars #dogecoin-amount,
+.planet-mars #dps-amount,
+.planet-mars .shop-item-dps,
+.planet-mars .shop-item-description,
+.planet-mars .buy-btn-price,
+.planet-mars .tab-text,
+.planet-mars .shop-item-quantity,
+.planet-mars .shop-item-title {
+    color: white !important;
+}
+
+/* Tab icons white on Mars */
+.planet-mars .tab-btn .tab-icon,
+.planet-mars .tab-btn.active .tab-icon {
+    filter: brightness(0) saturate(100%) invert(100%);
+}
+
+/* Tab rectangle behind main tabs */
+.planet-mars #panel-tabs {
+    background: linear-gradient(to bottom, rgb(130, 65, 60) 50%, rgb(100, 40, 35) 50%);
+    border: 1px solid rgb(130, 80, 75);
+}
+
+/* Buttons and tabs */
+.planet-mars .tab-btn {
+    background: linear-gradient(to bottom, rgb(125, 30, 95) 50%, rgb(115, 25, 90) 50%);
+    border: 1px solid rgb(130, 80, 75);
+}
+
+.planet-mars .tab-btn:hover {
+    background: linear-gradient(to bottom, rgb(135, 40, 105) 50%, rgb(125, 35, 100) 50%);
+}
+
+.planet-mars .tab-btn.active {
+    background: linear-gradient(to bottom, rgb(145, 50, 115) 50%, rgb(135, 45, 110) 50%);
+    border-color: rgb(160, 90, 85);
+}
+
+.planet-mars .tab-text {
+    color: white;
+}
+
+.planet-mars .shop-buy-btn {
+    background: linear-gradient(to bottom, rgb(125, 30, 95) 50%, rgb(115, 25, 90) 50%);
+    border: 1px solid rgb(130, 80, 75);
+    color: white;
+}
+
+.planet-mars .shop-buy-btn:hover:not(:disabled) {
+    background: linear-gradient(to bottom, rgb(135, 40, 105) 50%, rgb(125, 35, 100) 50%);
+}
+
+.planet-mars .shop-buy-btn:disabled {
+    background: linear-gradient(to bottom, rgb(80, 35, 50) 50%, rgb(70, 30, 45) 50%);
+    border: 1px solid rgb(100, 60, 65);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+/* Mars stats tab styling */
+
+/* Mars stats tab styling */
+.planet-mars #stats-content {
+    background: none;
+    border: none;
+    color: white;
+    box-shadow: none;
+    padding: 0 18px; /* Add side breathing room without reintroducing a shell */
+    border-radius: 0;
+}
+
+.planet-mars #stats-content .stats-grid {
+    background: none;
+    border: none;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.planet-mars #stats-content .stat-row {
+    background: linear-gradient(to right, rgba(120, 55, 50, 0.5), rgba(80, 30, 25, 0.5));
+    border: 1px solid rgba(165, 100, 90, 0.55);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #ffe7d9;
+    box-shadow: inset 0 0 8px rgba(15, 5, 5, 0.35);
+}
+
+.planet-mars #stats-content .stat-row span {
+    color: #ffe7d9;
+}
+
+/* Mars settings tab styling */
+.planet-mars #settings-tab {
+    background: linear-gradient(to bottom, rgba(75, 30, 25, 0.95), rgba(60, 20, 20, 0.95));
+    border: 1px solid rgb(130, 80, 75);
+    color: white;
+    box-shadow: 0 0 25px rgba(140, 70, 60, 0.35);
+}
+
+.planet-mars #settings-tab .settings-grid {
+    background: none; /* Keep Mars settings sections flush without an extra wrapper shell */
+    border: none; /* Remove wrapper border so only individual cards show outlines */
+    padding: 0; /* Eliminate added spacing that wrapped the menu group */
+    border-radius: 0; /* Prevent rounded outer container corners */
+}
+
+.planet-mars #settings-tab .settings-column,
+.planet-mars #settings-tab .settings-info-card,
+.planet-mars #settings-tab .setting-category,
+.planet-mars #settings-tab .settings-section {
+    background: none;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+}
+
+.planet-mars #settings-tab .settings-section h3 {
+    color: #ffe7d9;
+}
+
+.planet-mars #settings-tab h2,
+.planet-mars #settings-tab h3,
+.planet-mars #settings-tab h4,
+.planet-mars #settings-tab label,
+.planet-mars #settings-tab p,
+.planet-mars #settings-tab span {
+    color: #ffe7d9;
+}
+
+.planet-mars #settings-tab .toggle-button,
+.planet-mars #settings-tab select,
+.planet-mars #settings-tab button,
+.planet-mars #settings-tab input[type="range"],
+.planet-mars #settings-tab input[type="checkbox"],
+.planet-mars #settings-tab input[type="text"],
+.planet-mars #settings-tab input[type="number"] {
+    background: none;
+    border: 1px solid rgba(165, 95, 145, 0.6);
+    color: #ffe7d9;
+}
+
+.planet-mars #settings-tab .toggle-button:hover,
+.planet-mars #settings-tab button:hover:not(:disabled) {
+    background: rgba(135, 45, 105, 0.25);
+}
+
+.planet-mars #settings-tab .toggle-button:disabled,
+.planet-mars #settings-tab button:disabled {
+    background: rgba(90, 40, 65, 0.2);
+    border-color: rgba(120, 70, 100, 0.5);
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.planet-mars #settings-tab input[type="range"]::-webkit-slider-thumb,
+.planet-mars #settings-tab input[type="range"]::-moz-range-thumb {
+    background: rgba(240, 200, 255, 0.8);
+    border: 1px solid rgba(190, 120, 185, 0.8);
+}
+
+.planet-mars #settings-tab input[type="checkbox"] {
+    accent-color: rgba(200, 120, 190, 0.85);
+}
+
+/* White feathered circle behind character area on Mars */
+.planet-mars #left-panel::before {
+    content: '';
+    position: absolute;
+    width: 340px;
+    height: 340px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 40%, rgba(255, 255, 255, 0) 70%);
+    border-radius: 50%;
+    top: calc(50% + 50px);
+    left: calc(50% - 20px);
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Mars stat display rectangles */
+.planet-mars .stat-item span {
+    background: rgb(60, 20, 20);
+}
+
+/* Jupiter Theme - Custom golden/orange color palette */
+.planet-jupiter #left-panel,
+.planet-jupiter #right-panel {
+    background: linear-gradient(to bottom, rgba(225, 190, 135, 0.95) 20%, rgba(240, 215, 260, 0.95) 80%);
+    border: 1px solid rgb(225, 180, 105);
+}
+
+.planet-jupiter .shop-grid-item,
+.planet-jupiter .shop-item {
+    background: linear-gradient(to bottom, rgba(225, 190, 135, 0.95) 20%, rgba(240, 215, 260, 0.95) 80%);
+    border: 1px solid rgb(225, 180, 105);
+}
+
+/* Jupiter text color - dark for readability on light background */
+.planet-jupiter #dogecoin-amount,
+.planet-jupiter #dps-amount,
+.planet-jupiter .shop-item-dps,
+.planet-jupiter .shop-item-description,
+.planet-jupiter .buy-btn-price,
+.planet-jupiter .tab-text,
+.planet-jupiter .shop-item-quantity,
+.planet-jupiter .shop-item-title {
+    color: #2d2416 !important;
+}
+
+/* Tab icons dark on Jupiter */
+.planet-jupiter .tab-btn .tab-icon,
+.planet-jupiter .tab-btn.active .tab-icon {
+    filter: brightness(0) saturate(100%) invert(0%);
+}
+
+/* Tab rectangle behind main tabs */
+.planet-jupiter #panel-tabs {
+    background: linear-gradient(to bottom, rgb(155, 145, 125) 50%, rgb(135, 125, 105) 50%);
+    border: 1px solid rgb(225, 180, 105);
+}
+
+/* Buttons and tabs */
+.planet-jupiter .tab-btn {
+    background: linear-gradient(to bottom, rgb(250, 205, 125) 50%, rgb(240, 190, 115) 50%);
+    border: 1px solid rgb(225, 180, 105);
+}
+
+.planet-jupiter .tab-btn:hover {
+    background: linear-gradient(to bottom, rgb(255, 215, 135) 50%, rgb(250, 200, 125) 50%);
+}
+
+.planet-jupiter .tab-btn.active {
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95) 30%, rgba(245, 245, 245, 0.95) 70%);
+    border-color: rgb(235, 190, 115);
+    color: rgb(240, 160, 60);
+}
+
+.planet-jupiter .tab-btn.active .tab-text {
+    color: rgb(240, 160, 60);
+}
+
+.planet-jupiter .tab-text {
+    color: #2d2416;
+}
+
+.planet-jupiter .shop-buy-btn {
+    background: linear-gradient(to bottom, rgb(250, 205, 125) 50%, rgb(240, 190, 115) 50%);
+    border: 1px solid rgb(225, 180, 105);
+    color: #2d2416;
+}
+
+.planet-jupiter .shop-buy-btn:hover:not(:disabled) {
+    background: linear-gradient(to bottom, rgb(255, 215, 135) 50%, rgb(250, 200, 125) 50%);
+}
+
+.planet-jupiter .shop-buy-btn:disabled {
+    background: linear-gradient(to bottom, rgb(180, 150, 100) 50%, rgb(170, 140, 90) 50%);
+    border: 1px solid rgb(160, 130, 80);
+    color: rgba(45, 36, 22, 0.4);
+}
+
+/* Titan placeholder styling - reuse Earth look until design is finalized */
+.planet-titan #left-panel,
+.planet-titan #right-panel,
+.planet-titan #panel-tabs,
+.planet-titan .tab-btn,
+.planet-titan .shop-grid-item,
+.planet-titan .shop-item,
+.planet-titan .shop-buy-btn {
+    /* Titan currently mirrors Earth UI while assets are under construction. */
+    background: inherit;
+    color: inherit;
+}
+
+/* Jupiter uses Earth-style stats and settings menus */
+
+/* Jupiter helper lock overlay styling */
+.planet-jupiter .helper-lock-overlay::before {
+    background: rgba(240, 200, 130, 0.85);
+    border: 2px solid rgba(250, 210, 140, 0.9);
+    box-shadow: inset 0 2px 8px rgba(200, 160, 90, 0.4);
+}
+
+.planet-jupiter .helper-lock-icon {
+    background-color: rgb(45, 36, 22);
+}
+
+.planet-jupiter .helper-lock-text {
+    color: rgb(45, 36, 22);
+    text-shadow:
+        0 0 0 rgba(240, 210, 155, 0.8),
+        0.45px 0.45px 0 rgba(240, 210, 155, 0.8),
+        0.45px -0.45px 0 rgba(240, 210, 155, 0.8),
+        -0.45px 0.45px 0 rgba(240, 210, 155, 0.8),
+        -0.45px -0.45px 0 rgba(240, 210, 155, 0.8);
+}
+
+.planet-jupiter .helper-lock-subtext {
+    color: rgba(45, 36, 22, 0.85);
+}
+
 /* Prevent image dragging throughout the game */
 img {
     -webkit-user-drag: none;
@@ -554,10 +869,42 @@ body {
     height: 90px;
 }
 
+.helper-sprite.mars-base {
+    width: 90px; /* 1.5x default size */
+    height: 90px;
+}
+
+/* Jupiter helper sizing */
+.helper-sprite.jupiter-base {
+    width: 90px; /* 1.5x default size */
+    height: 90px;
+}
+.helper-sprite.cloud-base,
+.helper-sprite.doge-air-ship,
+.helper-sprite.flying-doggo {
+    animation: rocketFloat 2.4s ease-in-out infinite; /* Match rocket float motion */
+}
+
+.helper-sprite.dogestar {
+    width: 90px; /* 1.5x default size */
+    height: 90px;
+}
+
+.helper-sprite.super-shibe,
+.helper-sprite.tardogeis {
+    width: 72px; /* 60px * 1.2 */
+    height: 72px;
+}
+
 /* Mars rocket and lander shibe animations (same as rocket) */
 .helper-sprite.mars-rocket,
-.helper-sprite.lander-shibe {
+.helper-sprite.lander-shibe,
+.helper-sprite.jupiter-rocket {
     animation: rocketFloat 2s ease-in-out infinite;
+}
+
+.helper-sprite.space-bass {
+    animation: rocketFloat 2.4s ease-in-out infinite;
 }
 
 /* Cursor helper floating animation */
@@ -584,6 +931,11 @@ body {
     width: 137px; /* 10% smaller than previous size */
     height: auto;
     filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.3));
+}
+
+/* Mars rock size - 10% bigger */
+body.planet-mars #main-rock {
+    width: 151px;
 }
 
 /* Rock health text removed - simplified mining */
@@ -845,6 +1197,11 @@ body {
 #dps-amount {
     color: rgb(115, 85, 45) !important;
     font-weight: 900 !important; /* Extra bold */
+}
+
+.planet-mars #dogecoin-amount,
+.planet-mars #dps-amount {
+    color: #ffffff !important;
 }
 
 .stat-item:nth-child(2) span {
@@ -1114,6 +1471,34 @@ body {
     font-size: 12px;
     color: rgb(95, 90, 85);
     margin-top: 2px;
+}
+
+.planet-mars .helper-lock-overlay::before {
+    background: rgba(120, 60, 120, 0.85);
+    border: 2px solid rgba(180, 110, 200, 0.9);
+    box-shadow: inset 0 2px 8px rgba(40, 0, 60, 0.4);
+}
+
+.planet-mars .helper-lock-icon {
+    background-color: rgb(220, 200, 255);
+}
+
+.planet-mars .helper-lock-text {
+    color: rgb(230, 210, 255);
+    text-shadow:
+        0 0 0 rgba(70, 0, 100, 0.8),
+        0.6px 0 0 rgba(70, 0, 100, 0.8),
+        -0.6px 0 0 rgba(70, 0, 100, 0.8),
+        0 0.6px 0 rgba(70, 0, 100, 0.8),
+        0 -0.6px 0 rgba(70, 0, 100, 0.8),
+        0.45px 0.45px 0 rgba(70, 0, 100, 0.8),
+        -0.45px 0.45px 0 rgba(70, 0, 100, 0.8),
+        0.45px -0.45px 0 rgba(70, 0, 100, 0.8),
+        -0.45px -0.45px 0 rgba(70, 0, 100, 0.8);
+}
+
+.planet-mars .helper-lock-subtext {
+    color: rgba(230, 210, 255, 0.85);
 }
 
 .shop-item-icon {

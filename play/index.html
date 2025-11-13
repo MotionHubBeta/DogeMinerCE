@@ -101,11 +101,20 @@
 
         <!-- Planet Tabs -->
         <div id="planet-tabs">
-            <button class="planet-tab active" onclick="switchPlanet('earth')">
+            <button class="planet-tab active" data-planet="earth" onclick="switchPlanet('earth')">
                 <img src="assets/general/earth_tab.png" alt="Earth">
             </button>
-            <button class="planet-tab" onclick="switchPlanet('moon')">
+            <button class="planet-tab" data-planet="moon" onclick="switchPlanet('moon')">
                 <img src="assets/general/moon_tab.png" alt="Moon">
+            </button>
+            <button class="planet-tab" data-planet="mars" onclick="switchPlanet('mars')">
+                <img src="assets/general/mars_tab.png" alt="Mars">
+            </button>
+            <button class="planet-tab" data-planet="jupiter" onclick="switchPlanet('jupiter')">
+                <img src="assets/general/jupiter_tab.png" alt="Jupiter">
+            </button>
+            <button class="planet-tab" data-planet="titan" onclick="switchPlanet('titan')">
+                <img src="assets/general/titan_tab.png" alt="Titan">
             </button>
         </div>
 
@@ -302,9 +311,10 @@
     <!-- Loading Screen -->
     <div id="loading-screen">
         <div class="loading-content">
-            <img src="../assets/DogeMiner CE Logo.png" alt="DogeMiner CE" class="loading-logo">
+            <!-- Loading logo uses encoded spaces so it resolves consistently across static servers -->
+            <img src="assets/DogeMiner%20CE%20Logo.png" alt="DogeMiner CE" class="loading-logo">
             <div class="loading-title">INITIALIZING</div>
-            <img src="../assets/quickUI/dogeloader.svg" alt="Loading" class="loading-spinner">
+            <img src="assets/quickUI/dogeloader.svg" alt="Loading" class="loading-spinner">
             <div class="loading-info" id="loading-info">Loading DogeMiner: Community Edition...</div>
         </div>
     </div>

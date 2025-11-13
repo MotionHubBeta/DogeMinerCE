@@ -204,6 +204,23 @@ class CloudSaveManager {
         }
     }
 
+    async deleteCloudSave() {
+        if (!this.currentUser) {
+            console.log('No user signed in, skipping cloud save deletion');
+            return;
+        }
+
+        try {
+            // Delete the user's save data from Firestore
+            const userDocRef = window.firebase.doc(window.firebase.db, 'users', this.currentUser.uid);
+            await window.firebase.deleteDoc(userDocRef);
+            console.log('Cloud save deleted successfully');
+            
+        } catch (error) {
+            console.error('Failed to delete cloud save:', error);
+        }
+    }
+
     async loadFromCloud() {
         if (!this.currentUser) {
             if (window.notificationManager) {
