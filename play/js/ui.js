@@ -1193,14 +1193,16 @@ class UIManager {
     toggleMobileMenu() {
         const mobileMenu = document.getElementById('mobile-bottom-menu');
         const toggleIcon = document.getElementById('mobile-toggle-icon');
+        const toggleBtn = document.getElementById('mobile-menu-toggle');
 
-        if (!mobileMenu || !toggleIcon) return;
+        if (!mobileMenu || !toggleIcon || !toggleBtn) return;
 
         this.mobileMenuOpen = !this.mobileMenuOpen;
 
         if (this.mobileMenuOpen) {
             // Open menu
             mobileMenu.classList.add('open');
+            toggleBtn.classList.add('menu-open');
             toggleIcon.src = 'assets/general/btn_down.png';
             
             // Update mobile content when opening
@@ -1208,6 +1210,7 @@ class UIManager {
         } else {
             // Close menu
             mobileMenu.classList.remove('open');
+            toggleBtn.classList.remove('menu-open');
             toggleIcon.src = 'assets/general/btn_up.png';
         }
     }
@@ -1374,26 +1377,42 @@ class UIManager {
         const mobileAchievementsContent = document.getElementById('mobile-achievements-content');
         if (!mobileAchievementsContent) return;
 
-        // Display stats (similar to desktop)
+        // Display comprehensive stats matching desktop
         mobileAchievementsContent.innerHTML = `
-            <div style="color: #8b4513;">
-                <h3 style="margin-bottom: 15px; border-bottom: 2px solid #d4af37; padding-bottom: 8px;">Statistics</h3>
-                <div style="display: flex; flex-direction: column; gap: 10px;">
-                    <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
-                        <span>Total Dogecoins:</span>
-                        <span id="mobile-total-mined">0</span>
+            <div style="color: #8b4513; padding: 10px;">
+                <h3 style="margin-bottom: 10px; border-bottom: 2px solid #d4af37; padding-bottom: 6px; font-size: 16px;">Statistics</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: rgba(255, 255, 255, 0.5); border-radius: 6px; border: 1px solid #d4af37;">
+                        <span style="font-size: 14px;">Total Dogecoins:</span>
+                        <span id="mobile-total-mined" style="font-weight: 700; font-size: 14px;">0</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
-                        <span>Total Clicks:</span>
-                        <span id="mobile-total-clicks">0</span>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: rgba(255, 255, 255, 0.5); border-radius: 6px; border: 1px solid #d4af37;">
+                        <span style="font-size: 14px;">Current Balance:</span>
+                        <span id="mobile-current-balance" style="font-weight: 700; font-size: 14px;">0</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
-                        <span>Helpers Owned:</span>
-                        <span id="mobile-helpers-owned">0</span>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: rgba(255, 255, 255, 0.5); border-radius: 6px; border: 1px solid #d4af37;">
+                        <span style="font-size: 14px;">Total Clicks:</span>
+                        <span id="mobile-total-clicks" style="font-weight: 700; font-size: 14px;">0</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
-                        <span>Current Level:</span>
-                        <span id="mobile-current-level">Earth</span>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: rgba(255, 255, 255, 0.5); border-radius: 6px; border: 1px solid #d4af37;">
+                        <span style="font-size: 14px;">Current DPS:</span>
+                        <span id="mobile-current-dps" style="font-weight: 700; font-size: 14px;">0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: rgba(255, 255, 255, 0.5); border-radius: 6px; border: 1px solid #d4af37;">
+                        <span style="font-size: 14px;">Highest DPS:</span>
+                        <span id="mobile-highest-dps" style="font-weight: 700; font-size: 14px;">0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: rgba(255, 255, 255, 0.5); border-radius: 6px; border: 1px solid #d4af37;">
+                        <span style="font-size: 14px;">Helpers Owned:</span>
+                        <span id="mobile-helpers-owned" style="font-weight: 700; font-size: 14px;">0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: rgba(255, 255, 255, 0.5); border-radius: 6px; border: 1px solid #d4af37;">
+                        <span style="font-size: 14px;">Current Level:</span>
+                        <span id="mobile-current-level" style="font-weight: 700; font-size: 14px;">Earth</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 10px; background: rgba(255, 255, 255, 0.5); border-radius: 6px; border: 1px solid #d4af37;">
+                        <span style="font-size: 14px;">Play Time:</span>
+                        <span id="mobile-play-time" style="font-weight: 700; font-size: 14px;">0:00:00</span>
                     </div>
                 </div>
             </div>
@@ -1402,14 +1421,38 @@ class UIManager {
         // Update stat values if game exists
         if (this.game) {
             const mobileTotalMined = document.getElementById('mobile-total-mined');
+            const mobileCurrentBalance = document.getElementById('mobile-current-balance');
             const mobileTotalClicks = document.getElementById('mobile-total-clicks');
+            const mobileCurrentDps = document.getElementById('mobile-current-dps');
+            const mobileHighestDps = document.getElementById('mobile-highest-dps');
             const mobileHelpersOwned = document.getElementById('mobile-helpers-owned');
             const mobileCurrentLevel = document.getElementById('mobile-current-level');
+            const mobilePlayTime = document.getElementById('mobile-play-time');
 
-            if (mobileTotalMined) mobileTotalMined.textContent = this.game.formatNumber(this.game.stats?.totalMined || 0);
-            if (mobileTotalClicks) mobileTotalClicks.textContent = this.game.formatNumber(this.game.stats?.totalClicks || 0);
-            if (mobileHelpersOwned) mobileHelpersOwned.textContent = (this.game.helpers?.length || 0) + (this.game.moonHelpers?.length || 0) + (this.game.marsHelpers?.length || 0);
-            if (mobileCurrentLevel) mobileCurrentLevel.textContent = this.game.currentLevel?.charAt(0).toUpperCase() + this.game.currentLevel?.slice(1) || 'Earth';
+            if (mobileTotalMined) mobileTotalMined.textContent = this.game.formatNumber(Math.floor(this.game.totalMined || 0));
+            if (mobileCurrentBalance) mobileCurrentBalance.textContent = this.game.formatNumber(Math.floor(this.game.dogecoins || 0));
+            if (mobileTotalClicks) mobileTotalClicks.textContent = this.game.formatNumber(this.game.totalClicks || 0);
+            if (mobileCurrentDps) mobileCurrentDps.textContent = this.game.formatNumber(this.game.dps || 0) + ' Đ/s';
+            if (mobileHighestDps) mobileHighestDps.textContent = this.game.formatNumber(this.game.highestDps || 0) + ' Đ/s';
+            
+            const totalHelpers = (this.game.helpers?.length || 0) + 
+                                (this.game.moonHelpers?.length || 0) + 
+                                (this.game.marsHelpers?.length || 0) + 
+                                (this.game.jupiterHelpers?.length || 0) + 
+                                (this.game.titanHelpers?.length || 0);
+            if (mobileHelpersOwned) mobileHelpersOwned.textContent = totalHelpers;
+            
+            if (mobileCurrentLevel) {
+                const levelName = this.game.currentLevel?.charAt(0).toUpperCase() + this.game.currentLevel?.slice(1) || 'Earth';
+                mobileCurrentLevel.textContent = levelName;
+            }
+            
+            if (mobilePlayTime && this.game.playTime) {
+                const hours = Math.floor(this.game.playTime / 3600);
+                const minutes = Math.floor((this.game.playTime % 3600) / 60);
+                const seconds = Math.floor(this.game.playTime % 60);
+                mobilePlayTime.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
         }
     }
 
@@ -1418,27 +1461,55 @@ class UIManager {
         const mobileSettingsContent = document.getElementById('mobile-settings-content');
         if (!mobileSettingsContent) return;
 
-        // Display basic settings options
+        // Display complete settings options matching desktop
         mobileSettingsContent.innerHTML = `
-            <div style="color: #8b4513;">
-                <h3 style="margin-bottom: 15px; border-bottom: 2px solid #d4af37; padding-bottom: 8px;">Game Settings</h3>
-                <div style="display: flex; flex-direction: column; gap: 15px;">
-                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
-                        <input type="checkbox" id="mobile-sound-enabled" checked style="width: 20px; height: 20px;">
-                        <span>Sound Effects</span>
+            <div style="color: #8b4513; padding: 10px;">
+                <h3 style="margin-bottom: 10px; border-bottom: 2px solid #d4af37; padding-bottom: 6px; font-size: 16px;">Game Settings</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                    <label style="display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(255, 255, 255, 0.5); border-radius: 6px; border: 1px solid #d4af37;">
+                        <input type="checkbox" id="mobile-sound-enabled" checked style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px;">Sound Effects</span>
                     </label>
-                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
-                        <input type="checkbox" id="mobile-music-enabled" checked style="width: 20px; height: 20px;">
-                        <span>Background Music</span>
+                    <label style="display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(255, 255, 255, 0.5); border-radius: 6px; border: 1px solid #d4af37;">
+                        <input type="checkbox" id="mobile-music-enabled" checked style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px;">Background Music</span>
                     </label>
-                    <label style="display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 8px; border: 1px solid #d4af37;">
-                        <input type="checkbox" id="mobile-notifications-enabled" checked style="width: 20px; height: 20px;">
-                        <span>Notifications</span>
+                    <label style="display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(255, 255, 255, 0.5); border-radius: 6px; border: 1px solid #d4af37;">
+                        <input type="checkbox" id="mobile-notifications-enabled" checked style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px;">Notifications</span>
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(255, 255, 255, 0.5); border-radius: 6px; border: 1px solid #d4af37;">
+                        <input type="checkbox" id="mobile-auto-save-enabled" checked style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px;">Auto Save</span>
                     </label>
                 </div>
-                <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #d4af37;">
-                    <button onclick="saveGame()" style="width: 100%; padding: 12px; background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%); border: 2px solid #d4af37; border-radius: 8px; color: #8b4513; font-weight: 700; margin-bottom: 10px;">Save Game</button>
-                    <button onclick="loadGame()" style="width: 100%; padding: 12px; background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%); border: 2px solid #d4af37; border-radius: 8px; color: #8b4513; font-weight: 700;">Load Game</button>
+
+                <h3 style="margin-bottom: 10px; border-bottom: 2px solid #d4af37; padding-bottom: 6px; font-size: 16px;">Cloud Save</h3>
+                <div id="mobile-cloud-save-section" style="margin-bottom: 15px;">
+                    <div id="mobile-user-info" style="display: none;">
+                        <p id="mobile-user-name" style="font-size: 13px; margin-bottom: 8px;">Signed in as: </p>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <button onclick="saveToCloud()" style="width: 100%; padding: 10px; background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%); border: 2px solid #d4af37; border-radius: 6px; color: #8b4513; font-weight: 700; font-size: 13px;">Save to Cloud</button>
+                            <button onclick="loadFromCloud()" style="width: 100%; padding: 10px; background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%); border: 2px solid #d4af37; border-radius: 6px; color: #8b4513; font-weight: 700; font-size: 13px;">Load from Cloud</button>
+                            <button onclick="signOutUser()" style="width: 100%; padding: 10px; background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%); border: 2px solid #d4af37; border-radius: 6px; color: #8b4513; font-weight: 700; font-size: 13px;">Sign Out</button>
+                        </div>
+                    </div>
+                    <div id="mobile-sign-in-section">
+                        <button onclick="signInWithGoogle()" style="width: 100%; padding: 10px; background: white; border: 2px solid #d4af37; border-radius: 6px; color: #666; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <span>🔐</span>
+                            <span>Sign in with Google</span>
+                        </button>
+                        <p style="font-size: 11px; opacity: 0.7; margin-top: 6px; line-height: 1.3;">Sign in to save your progress in the cloud!</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom: 10px; border-bottom: 2px solid #d4af37; padding-bottom: 6px; font-size: 16px;">Local Save/Load</h3>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button onclick="saveGame()" style="width: 100%; padding: 10px; background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%); border: 2px solid #d4af37; border-radius: 6px; color: #8b4513; font-weight: 700; font-size: 13px;">Save Game</button>
+                    <button onclick="loadGame()" style="width: 100%; padding: 10px; background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%); border: 2px solid #d4af37; border-radius: 6px; color: #8b4513; font-weight: 700; font-size: 13px;">Load Game</button>
+                    <button onclick="exportSave()" style="width: 100%; padding: 10px; background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%); border: 2px solid #d4af37; border-radius: 6px; color: #8b4513; font-weight: 700; font-size: 13px;">Export Save</button>
+                    <button onclick="importSave()" style="width: 100%; padding: 10px; background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%); border: 2px solid #d4af37; border-radius: 6px; color: #8b4513; font-weight: 700; font-size: 13px;">Import Save</button>
+                    <button onclick="resetGame()" style="width: 100%; padding: 10px; background: linear-gradient(to bottom, rgba(220, 100, 100, 0.95) 50%, rgba(200, 80, 80, 0.95) 50%); border: 2px solid #a00; border-radius: 6px; color: white; font-weight: 700; font-size: 13px;">Reset Game</button>
                 </div>
             </div>
         `;
@@ -1447,6 +1518,7 @@ class UIManager {
         const soundCheckbox = document.getElementById('mobile-sound-enabled');
         const musicCheckbox = document.getElementById('mobile-music-enabled');
         const notificationsCheckbox = document.getElementById('mobile-notifications-enabled');
+        const autoSaveCheckbox = document.getElementById('mobile-auto-save-enabled');
 
         if (soundCheckbox) {
             soundCheckbox.checked = document.getElementById('sound-enabled')?.checked ?? true;
@@ -1470,6 +1542,34 @@ class UIManager {
                 const desktopCheckbox = document.getElementById('notifications-enabled');
                 if (desktopCheckbox) desktopCheckbox.checked = e.target.checked;
             });
+        }
+
+        if (autoSaveCheckbox) {
+            autoSaveCheckbox.checked = document.getElementById('auto-save-enabled')?.checked ?? true;
+            autoSaveCheckbox.addEventListener('change', (e) => {
+                const desktopCheckbox = document.getElementById('auto-save-enabled');
+                if (desktopCheckbox) desktopCheckbox.checked = e.target.checked;
+            });
+        }
+
+        // Update cloud save UI based on user sign-in state
+        const userInfo = document.getElementById('user-info');
+        const mobileUserInfo = document.getElementById('mobile-user-info');
+        const mobileSignInSection = document.getElementById('mobile-sign-in-section');
+        
+        if (userInfo && userInfo.style.display !== 'none') {
+            // User is signed in
+            if (mobileUserInfo) mobileUserInfo.style.display = 'block';
+            if (mobileSignInSection) mobileSignInSection.style.display = 'none';
+            const userName = document.getElementById('user-name')?.textContent;
+            const mobileUserName = document.getElementById('mobile-user-name');
+            if (mobileUserName && userName) {
+                mobileUserName.textContent = userName;
+            }
+        } else {
+            // User is not signed in
+            if (mobileUserInfo) mobileUserInfo.style.display = 'none';
+            if (mobileSignInSection) mobileSignInSection.style.display = 'block';
         }
     }
 }

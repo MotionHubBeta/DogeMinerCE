@@ -2752,18 +2752,25 @@ body.planet-mars #main-rock {
 
     /* Mobile Menu Toggle Button */
     #mobile-menu-toggle {
+        display: block;
         position: fixed;
-        bottom: 20px;
+        bottom: calc(35vh - 30px);
         left: 50%;
         transform: translateX(-50%);
-        width: 80px;
-        height: 40px;
-        background: none;
+        width: 60px;
+        height: 60px;
+        background: transparent;
         border: none;
-        padding: 0;
+        border-radius: 50%;
+        z-index: 1001;
         cursor: pointer;
-        z-index: 1000;
-        transition: transform 0.3s ease;
+        padding: 0;
+        transition: bottom 0.4s cubic-bezier(0.4, 0.0, 0.2, 1), transform 0.3s ease;
+    }
+
+    /* Move button down when menu is open */
+    #mobile-menu-toggle.menu-open {
+        bottom: calc(35vh + 10px);
     }
 
     #mobile-menu-toggle:active {
@@ -2804,17 +2811,17 @@ body.planet-mars #main-rock {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 15px;
-        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95) 50%, rgba(245, 240, 210, 0.95) 50%);
+        padding: 8px 12px;
         border-bottom: 2px solid #d4af37;
-        min-height: 60px;
+        background: linear-gradient(to bottom, rgba(255, 245, 200, 0.9) 0%, rgba(240, 235, 220, 0.9) 100%);
         flex-shrink: 0;
+        height: 50px;
     }
 
     .mobile-tabs-left,
     .mobile-tabs-right {
         display: flex;
-        gap: 8px;
+        gap: 6px;
         align-items: center;
     }
 
@@ -2826,11 +2833,11 @@ body.planet-mars #main-rock {
         background: linear-gradient(to bottom, rgba(240, 220, 130, 0.95) 50%, rgba(255, 235, 150, 0.95) 50%);
         border: 2px solid #d4af37;
         border-radius: 8px;
+        color: #8b4513;
+        font-weight: 700;
+        font-size: 12px;
         cursor: pointer;
         transition: all 0.2s ease;
-        font-size: 14px;
-        font-weight: 600;
-        color: #8b4513;
     }
 
     .mobile-tab-btn .tab-icon {
@@ -2871,23 +2878,26 @@ body.planet-mars #main-rock {
         flex: 1;
         overflow: hidden;
         position: relative;
+        height: calc(35vh - 50px);
     }
 
     .mobile-tab-content {
         display: none;
         height: 100%;
-        overflow: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
     }
 
     .mobile-tab-content.active {
         display: block;
     }
 
-    /* Mobile Shop - Horizontal Scrolling */
+    /* Mobile Shop Scroll Container */
     .mobile-shop-scroll {
         display: flex;
-        gap: 15px;
-        padding: 20px 15px;
+        gap: 12px;
+        padding: 12px;
         overflow-x: auto;
         overflow-y: hidden;
         height: 100%;
@@ -2911,10 +2921,18 @@ body.planet-mars #main-rock {
     }
 
     /* Mobile Shop Item - Larger cards for touch interaction */
-    #mobile-shop-content .shop-grid-item {
-        flex: 0 0 280px;
-        height: calc(100% - 40px);
+    .mobile-shop-scroll .shop-grid-item {
+        flex: 0 0 240px;
+        width: 240px;
+        min-width: 240px;
+        height: auto;
+        max-height: calc(35vh - 100px);
         scroll-snap-align: center;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #mobile-shop-content .shop-grid-item {
         background: linear-gradient(to bottom, rgba(255, 255, 255, 0.95) 20%, rgba(250, 245, 220, 0.95) 80%);
         border: 2px solid #d4af37;
         border-radius: 12px;
