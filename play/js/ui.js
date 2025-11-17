@@ -1300,7 +1300,10 @@ toggleMobileMenu() {
         document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        event.target.closest('.mobile-tab-btn')?.classList.add('active');
+        const activeBtn = document.querySelector(`.mobile-tab-btn[data-tab="${tabName}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
 
         // Update tab content
         document.querySelectorAll('.mobile-tab-content').forEach(content => {
