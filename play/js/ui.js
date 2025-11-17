@@ -1156,140 +1156,72 @@ class UIManager {
                 fallbackTab?.classList.add('active');
             }
         }
-
-if (marsRocketOwned && this.game && !this.game.hasPlayedMoonLaunch) {
-    this.game.hasPlayedMoonLaunch = true;
-}
-
-const moonUnlocked = this.game?.hasPlayedMoonLaunch || marsRocketOwned;
-if (!moonUnlocked) {
-    return false;
-}
-
-return marsRocketOwned;
-}
-
-isJupiterUnlocked() {
-return this.playerHasJupiterRocket();
-}
-
-playerHasDogeStar() {
-// Check if player owns at least one DogeStar (final Jupiter helper)
-const jupiterHelpers = this.game.jupiterHelpers || [];
-const hasDogeStar = jupiterHelpers.some(helper => helper && helper.type === 'dogeStar');
-return hasDogeStar;
-}
-
-isTitanUnlocked() {
-// Titan requires owning at least one DogeStar from Jupiter
-return this.playerHasDogeStar();
-}
-
-updatePlanetTabVisibility() {
-const marsTab = document.querySelector('.planet-tab[data-planet="mars"]');
-if (marsTab) {
-    const marsUnlocked = this.isMarsUnlocked();
-    marsTab.style.display = marsUnlocked ? '' : 'none';
-    marsTab.disabled = !marsUnlocked;
-
-    if (!marsUnlocked && marsTab.classList.contains('active')) {
-        marsTab.classList.remove('active');
-        const fallbackTab = document.querySelector('.planet-tab[data-planet="earth"]');
-        fallbackTab?.classList.add('active');
-    }
-}
-
-const jupiterTab = document.querySelector('.planet-tab[data-planet="jupiter"]');
-if (jupiterTab) {
-    const jupiterUnlocked = this.isJupiterUnlocked();
-    jupiterTab.style.display = jupiterUnlocked ? '' : 'none';
-    jupiterTab.disabled = !jupiterUnlocked;
-
-    if (!jupiterUnlocked && jupiterTab.classList.contains('active')) {
-        jupiterTab.classList.remove('active');
-        const fallbackTab = document.querySelector('.planet-tab[data-planet="earth"]');
-        fallbackTab?.classList.add('active');
-    }
-}
-
-const titanTab = document.querySelector('.planet-tab[data-planet="titan"]');
-if (titanTab) {
-    const titanUnlocked = this.isTitanUnlocked();
-    titanTab.style.display = titanUnlocked ? '' : 'none';
-    titanTab.disabled = !titanUnlocked;
-
-    if (!titanUnlocked && titanTab.classList.contains('active')) {
-        titanTab.classList.remove('active');
-        const fallbackTab = document.querySelector('.planet-tab[data-planet="earth"]');
-        fallbackTab?.classList.add('active');
-    }
-}
-}
-
-// Mobile UI Setup - Handles mobile-specific functionality
-setupMobileUI() {
-    // Setup mobile menu toggle button
-    const mobileToggleBtn = document.getElementById('mobile-menu-toggle');
-    const mobileTabs = document.querySelectorAll('.mobile-tab-btn');
-
-    // Setup toggle button
-    if (mobileToggleBtn) {
-        mobileToggleBtn.addEventListener('click', () => this.toggleMobileMenu());
     }
 
-    // Setup tab buttons
-    mobileTabs.forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            const tabName = e.currentTarget.dataset.tab;
-            if (tabName) {
-                this.switchMobileTab(tabName);
-            }
+    // Mobile UI Setup - Handles mobile-specific functionality
+    setupMobileUI() {
+        // Setup mobile menu toggle button
+        const mobileToggleBtn = document.getElementById('mobile-menu-toggle');
+        const mobileTabs = document.querySelectorAll('.mobile-tab-btn');
+
+        // Setup toggle button
+        if (mobileToggleBtn) {
+            mobileToggleBtn.addEventListener('click', () => this.toggleMobileMenu());
+        }
+
+        // Setup tab buttons
+        mobileTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const tabName = e.currentTarget.dataset.tab;
+                if (tabName) {
+                    this.switchMobileTab(tabName);
+                }
+            });
         });
-    });
 
-    // Update mobile stats every second
-    setInterval(() => {
-        this.updateMobileStats();
-    }, 1000);
+        // Update mobile stats every second
+        setInterval(() => {
+            this.updateMobileStats();
+        }, 1000);
 
-    // Initialize mobile shop content if on mobile
-    if (window.innerWidth <= 768) {
-        this.updateMobileShopContent();
-    }
-
-    // Update mobile content on window resize
-    window.addEventListener('resize', () => {
+        // Initialize mobile shop content if on mobile
         if (window.innerWidth <= 768) {
             this.updateMobileShopContent();
         }
-    });
-}
 
-// Toggle mobile menu open/closed
-toggleMobileMenu() {
-    const mobileMenu = document.getElementById('mobile-bottom-menu');
-    const toggleIcon = document.getElementById('mobile-toggle-icon');
-    const toggleBtn = document.getElementById('mobile-menu-toggle');
-
-    if (!mobileMenu || !toggleIcon || !toggleBtn) return;
-
-    this.mobileMenuOpen = !this.mobileMenuOpen;
-
-    if (this.mobileMenuOpen) {
-        // Open menu
-        mobileMenu.classList.add('open');
-        toggleBtn.classList.add('menu-open');
-        toggleIcon.src = 'assets/general/btn_down.png';
-        
-        // Update mobile content when opening
-        this.updateMobileShopContent();
-    } else {
-        // Close menu
-        mobileMenu.classList.remove('open');
-        toggleBtn.classList.remove('menu-open');
-        toggleIcon.src = 'assets/general/btn_up.png';
+        // Update mobile content on window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth <= 768) {
+                this.updateMobileShopContent();
+            }
+        });
     }
-}
+
+    // Toggle mobile menu open/closed
+    toggleMobileMenu() {
+        const mobileMenu = document.getElementById('mobile-bottom-menu');
+        const toggleIcon = document.getElementById('mobile-toggle-icon');
+        const toggleBtn = document.getElementById('mobile-menu-toggle');
+
+        if (!mobileMenu || !toggleIcon || !toggleBtn) return;
+
+        this.mobileMenuOpen = !this.mobileMenuOpen;
+
+        if (this.mobileMenuOpen) {
+            // Open menu
+            mobileMenu.classList.add('open');
+            toggleBtn.classList.add('menu-open');
+            toggleIcon.src = 'assets/general/btn_down.png';
+            
+            // Update mobile content when opening
+            this.updateMobileShopContent();
+        } else {
+            // Close menu
+            mobileMenu.classList.remove('open');
+            toggleBtn.classList.remove('menu-open');
+            toggleIcon.src = 'assets/general/btn_up.png';
+        }
+    }
 
     // Switch between mobile tabs
     switchMobileTab(tabName) {
