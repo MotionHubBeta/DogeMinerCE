@@ -315,20 +315,20 @@
         <!-- Mobile Panel Tabs -->
         <div id="mobile-panel-tabs">
             <div class="mobile-tabs-left">
-                <button class="mobile-tab-btn active" onclick="switchMobileTab('shop')">
+                <button class="mobile-tab-btn active" data-tab="shop" onclick="switchMobileTab('shop')">
                     <img src="assets/quickUI/Pickaxe.png" alt="Shop" class="tab-icon">
                     <span class="tab-text">SHOP</span>
                 </button>
-                <button class="mobile-tab-btn" onclick="switchMobileTab('upgrades')">
+                <button class="mobile-tab-btn" data-tab="upgrades" onclick="switchMobileTab('upgrades')">
                     <img src="assets/quickUI/ArrowUp.png" alt="Upgrades" class="tab-icon">
                     <span class="tab-text">UPGRADE</span>
                 </button>
             </div>
             <div class="mobile-tabs-right">
-                <button class="mobile-tab-btn" id="mobile-achievements-tab-btn" onclick="switchMobileTab('achievements')">
+                <button class="mobile-tab-btn" id="mobile-achievements-tab-btn" data-tab="achievements" onclick="switchMobileTab('achievements')">
                     <img src="assets/quickUI/Trophy ICON.png" alt="Achievements" class="tab-icon">
                 </button>
-                <button class="mobile-tab-btn" id="mobile-settings-tab-btn" onclick="switchMobileTab('settings')">
+                <button class="mobile-tab-btn" id="mobile-settings-tab-btn" data-tab="settings" onclick="switchMobileTab('settings')">
                     <img src="assets/quickUI/settings icon.png" alt="Settings" class="tab-icon">
                 </button>
             </div>
@@ -431,7 +431,9 @@
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js" 
+            crossorigin="anonymous"
+            onerror="console.error('Failed to load Howler.js from CDN! Audio will be disabled.')"></script>
     <script src="js/audio.js"></script>
     <script src="js/game.js?v=35"></script>
     <script src="js/ui.js"></script>

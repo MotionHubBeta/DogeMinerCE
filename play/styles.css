@@ -2833,12 +2833,15 @@ body.planet-mars #main-rock {
     #mobile-panel-tabs {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        padding: 8px 12px;
-        border-bottom: 2px solid #d4af37;
-        background: linear-gradient(to bottom, rgba(255, 245, 200, 0.9) 0%, rgba(240, 235, 220, 0.9) 100%);
+        align-items: flex-end;
+        padding: 6px 12px 0 12px;
         flex-shrink: 0;
-        height: 50px;
+        height: 54px;
+        margin: 4px 12px 0 12px;
+        background: linear-gradient(to bottom, rgb(160, 155, 140) 50%, rgb(140, 130, 110) 50%);
+        border: 1px solid rgb(140, 130, 110);
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
 
     .mobile-tabs-left,
@@ -2849,6 +2852,8 @@ body.planet-mars #main-rock {
     }
 
     .mobile-tab-btn {
+        position: relative;
+        z-index: 1;
         background: linear-gradient(to bottom, rgb(255, 220, 115) 50%, rgb(255, 210, 70) 50%);
         border: 1px solid rgb(185, 150, 65);
         color: rgb(80, 50, 0);
@@ -2977,6 +2982,7 @@ body.planet-mars #main-rock {
     }
 
     #mobile-shop-content .shop-item-title {
+        /* Allow multi-line titles so helper names stay readable on narrow screens */
         font-size: 24px;
         font-weight: 700;
         color: #8b4513;
@@ -2986,6 +2992,9 @@ body.planet-mars #main-rock {
         line-height: 1.2;
         margin-bottom: 4px;
         display: block;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
     }
 
     #mobile-shop-content .shop-item-dps {
@@ -3002,27 +3011,42 @@ body.planet-mars #main-rock {
 
     /* Sprite and description container */
     #mobile-shop-content .shop-sprite-description-container {
+        /* Keep sprite block tucked under DPS text with desktop-like spacing */
         display: flex;
-        gap: 15px;
-        align-items: center;
+        gap: 12px;
+        align-items: flex-start;
         order: 3;
-        margin-bottom: 10px;
+        margin: -2px 0 10px 0;
     }
 
     #mobile-shop-content .shop-item-sprite {
-        width: 100px;
-        height: 100px;
+        /* Slightly smaller (≈10%) sprite frame so art feels proportional */
+        width: 108px;
+        height: 108px;
         flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: center;
+        margin-top: -4px;
+        margin-left: -2px;
     }
 
     #mobile-shop-content .shop-item-sprite img {
+        /* Match frame reduction so helper art scales with the new size */
+        width: 99px;
+        height: 99px;
         max-width: 100%;
         max-height: 100%;
         object-fit: contain;
         pointer-events: auto;
+    }
+
+    #mobile-shop-content .shop-item-info {
+        /* Stack description and button vertically to mirror desktop layout */
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex: 1;
     }
 
     #mobile-shop-content .shop-item-description {
@@ -3035,11 +3059,12 @@ body.planet-mars #main-rock {
     }
 
     #mobile-shop-content .shop-buy-btn {
-        width: 80%;
-        padding: 10px 12px;
+        /* Desktop-style buy button: sits beneath description with similar footprint */
+        width: clamp(150px, 60%, 220px);
+        padding: 11px 16px;
         background: linear-gradient(to bottom, rgb(255, 220, 115) 50%, rgb(255, 210, 70) 50%);
         border: 1px solid rgb(185, 150, 65);
-        border-radius: 8px;
+        border-radius: 10px;
         font-size: 16px;
         font-weight: 700;
         font-family: 'DogeSans', sans-serif;
@@ -3049,19 +3074,20 @@ body.planet-mars #main-rock {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
-        cursor: pointer;
+        gap: 8px;
         transition: all 0.2s ease;
-        margin: 0 auto;
+        cursor: pointer;
+        margin: 6px auto 0 auto;
+        align-self: center;
     }
 
     #mobile-shop-content .buy-btn-icon {
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
     }
 
     #mobile-shop-content .buy-btn-price {
-        font-size: 16px;
+        font-size: 18px;
         font-family: 'DogeSans', sans-serif;
     }
 
@@ -3072,6 +3098,70 @@ body.planet-mars #main-rock {
     #mobile-shop-content .shop-buy-btn:active:not(:disabled) {
         transform: scale(0.95);
         background: linear-gradient(to bottom, rgb(255, 240, 135) 50%, rgb(255, 230, 90) 50%);
+    }
+
+    .moon-theme #mobile-shop-content .shop-buy-btn {
+        background: linear-gradient(to bottom, rgb(185, 215, 240) 50%, rgb(165, 210, 240) 50%);
+        border: 1px solid rgb(120, 185, 235);
+        color: rgb(40, 95, 155);
+    }
+
+    .moon-theme #mobile-shop-content .shop-buy-btn:hover:not(:disabled) {
+        background: linear-gradient(to bottom, rgb(195, 225, 245) 50%, rgb(175, 215, 245) 50%);
+    }
+
+    .moon-theme #mobile-shop-content .shop-buy-btn:disabled {
+        background: linear-gradient(to bottom, rgb(200, 210, 220) 50%, rgb(185, 200, 215) 50%);
+        border: 1px solid rgb(150, 180, 210);
+        color: rgb(110, 130, 150);
+    }
+
+    .planet-mars #mobile-shop-content .shop-buy-btn {
+        background: linear-gradient(to bottom, rgb(125, 30, 95) 50%, rgb(115, 25, 90) 50%);
+        border: 1px solid rgb(130, 80, 75);
+        color: white;
+    }
+
+    .planet-mars #mobile-shop-content .shop-buy-btn:hover:not(:disabled) {
+        background: linear-gradient(to bottom, rgb(135, 40, 105) 50%, rgb(125, 35, 100) 50%);
+    }
+
+    .planet-mars #mobile-shop-content .shop-buy-btn:disabled {
+        background: linear-gradient(to bottom, rgb(80, 35, 50) 50%, rgb(70, 30, 45) 50%);
+        border: 1px solid rgb(100, 60, 65);
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .planet-jupiter #mobile-shop-content .shop-buy-btn {
+        background: linear-gradient(to bottom, rgb(250, 205, 125) 50%, rgb(240, 190, 115) 50%);
+        border: 1px solid rgb(225, 180, 105);
+        color: #2d2416;
+    }
+
+    .planet-jupiter #mobile-shop-content .shop-buy-btn:hover:not(:disabled) {
+        background: linear-gradient(to bottom, rgb(255, 215, 135) 50%, rgb(250, 200, 125) 50%);
+    }
+
+    .planet-jupiter #mobile-shop-content .shop-buy-btn:disabled {
+        background: linear-gradient(to bottom, rgb(180, 150, 100) 50%, rgb(170, 140, 90) 50%);
+        border: 1px solid rgb(160, 130, 80);
+        color: rgba(45, 36, 22, 0.4);
+    }
+
+    .planet-titan #mobile-shop-content .shop-buy-btn {
+        background: linear-gradient(to bottom, rgb(255, 235, 173) 50%, rgb(247, 221, 140) 50%);
+        border: 1px solid rgb(235, 190, 80);
+        color: #2d2416;
+    }
+
+    .planet-titan #mobile-shop-content .shop-buy-btn:hover:not(:disabled) {
+        background: linear-gradient(to bottom, rgb(255, 245, 183) 50%, rgb(252, 231, 150) 50%);
+    }
+
+    .planet-titan #mobile-shop-content .shop-buy-btn:disabled {
+        background: linear-gradient(to bottom, rgb(180, 150, 100) 50%, rgb(175, 140, 90) 50%);
+        border: 1px solid rgb(110, 120, 50);
+        color: rgba(45, 36, 22, 0.4);
     }
 
     #mobile-shop-content .shop-buy-btn:disabled {

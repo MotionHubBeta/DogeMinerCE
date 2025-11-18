@@ -1501,8 +1501,13 @@ class DogeMinerGame {
     
     // Chromatic aberration effect for buy helper buttons
     createChromaticAberrationEffect(button) {
+        const animationLib = window.gsap;
+        if (!animationLib) {
+            // GSAP unavailable – bail out gracefully so purchases still work
+            return null;
+        }
         // Simple and compatible chromatic aberration effect
-        const tl = gsap.timeline();
+        const tl = animationLib.timeline();
         
         // Get all elements within the button (including dogecoin logo and price text)
         const buttonElements = [button, ...button.querySelectorAll('*')];

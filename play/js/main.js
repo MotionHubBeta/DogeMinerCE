@@ -28,9 +28,30 @@ async function initializeGame() {
         updateLoadingInfo('Loading audio system...');
         
         // Initialize audio manager
-        audioManager = new AudioManager();
-        audioManager.init();
-        window.audioManager = audioManager; // Make available for SaveManager
+        try {
+            audioManager = new AudioManager();
+            audioManager.init();
+            window.audioManager = audioManager; // Make available for SaveManager
+        } catch (error) {
+            console.error('Failed to initialize audio manager:', error);
+            console.warn('Game will continue without audio');
+            // Create a dummy audio manager so the game doesn't break
+            audioManager = {
+                musicEnabled: false,
+                soundEnabled: false,
+                playSound: () => {},
+                playBackgroundMusic: () => {},
+                stopBackgroundMusic: () => {},
+                pauseBackgroundMusic: () => {},
+                resumeBackgroundMusic: () => {},
+                switchToMoonMusic: () => {},
+                switchToMarsMusic: () => {},
+                switchToJupiterMusic: () => {},
+                switchToTitanMusic: () => {},
+                switchToEarthMusic: () => {}
+            };
+            window.audioManager = audioManager;
+        }
         updateLoadingInfo('Initializing save system...');
         
         saveManager = new SaveManager(game);
@@ -189,8 +210,11 @@ async function initializeGame() {
         
     } catch (error) {
         console.error('Error initializing game:', error);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+        console.error('Error name:', error.name);
         hideLoadingScreen();
-        alert('Error initializing game. Please refresh the page.');
+        alert('Error initializing game: ' + (error.message || error.toString()) + '. Please check console and refresh.');
     }
 }
 
@@ -204,6 +228,12 @@ function switchMainTab(tabName) {
 function switchAchievementsTab(tabName) {
     if (uiManager) {
         uiManager.switchAchievementsTab(tabName);
+    }
+}
+
+function switchMobileTab(tabName) {
+    if (uiManager) {
+        uiManager.switchMobileTab(tabName);
     }
 }
 
@@ -508,17 +538,22 @@ document.addEventListener('keydown', (e) => {
 // Error handling
 window.addEventListener('error', (e) => {
     console.error('Game error:', e.error);
+    console.error('Error message:', e.message);
+    console.error('Error filename:', e.filename);
+    console.error('Error line:', e.lineno, 'col:', e.colno);
+    console.error('Full event:', e);
     
     if (notificationManager) {
-        notificationManager.showError('An error occurred. Check console for details.');
+        notificationManager.showError('An error occurred: ' + (e.message || 'Unknown error'));
     }
 });
 
 window.addEventListener('unhandledrejection', (e) => {
     console.error('Unhandled promise rejection:', e.reason);
+    console.error('Promise:', e.promise);
     
     if (notificationManager) {
-        notificationManager.showError('An error occurred. Check console for details.');
+        notificationManager.showError('Promise error: ' + (e.reason?.message || e.reason));
     }
 });
 

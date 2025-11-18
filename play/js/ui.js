@@ -6,10 +6,18 @@ class UIManager {
         this.currentShopTab = 'helpers';
         this.mobileMenuOpen = false; // Track mobile menu state
         this.activeMobileTab = 'shop'; // Track active mobile tab
+        this.boundHandleBuyButtonClick = this.handleBuyButtonClick.bind(this);
+        this.boundMobileBuyButtonClick = this.handleMobileBuyClick.bind(this);
         
-        this.setupUI();
-        this.initializePlanetTabs(); // Initialize planet tabs based on saved state
-        this.setupMobileUI(); // Setup mobile-specific UI functionality
+        try {
+            this.setupUI();
+            this.initializePlanetTabs(); // Initialize planet tabs based on saved state
+            this.setupMobileUI(); // Setup mobile-specific UI functionality
+        } catch (error) {
+            console.error('Error in UIManager constructor:', error);
+            console.error('Error details:', error.message, error.stack);
+            throw error; // Re-throw to be caught by main.js
+        }
     }
     
     setupUI() {
@@ -605,12 +613,14 @@ class UIManager {
     
     setupShopButtonListeners() {
         // Add event listeners to all buy buttons
-        const buyButtons = document.querySelectorAll('.shop-buy-btn[data-helper-type]');
+        const shopContainer = document.getElementById('shop-container');
+        if (!shopContainer) return;
+        const buyButtons = shopContainer.querySelectorAll('.shop-buy-btn[data-helper-type]');
         buyButtons.forEach((button) => {
             // Remove any existing listeners to prevent duplicates
-            button.removeEventListener('click', this.handleBuyButtonClick);
+            button.removeEventListener('click', this.boundHandleBuyButtonClick);
             // Add new listener
-            button.addEventListener('click', this.handleBuyButtonClick.bind(this));
+            button.addEventListener('click', this.boundHandleBuyButtonClick);
         });
     }
     
@@ -647,13 +657,45 @@ class UIManager {
             console.error('Helper type or game not found:', helperType, !!window.game);
         }
     }
+
+    handleMobileBuyClick(event) {
+        event.preventDefault();
+
+        const button = event.currentTarget;
+        const helperType = button?.getAttribute('data-helper-type');
+
+        if (!helperType || !window.game) {
+            console.error('Mobile helper type or game not found:', helperType, !!window.game);
+            return;
+        }
+
+        if (button.disabled) {
+            return;
+        }
+
+        const success = window.game.buyHelper(helperType);
+
+        if (success) {
+            window.game.createChromaticAberrationEffect?.(button);
+            this.updateMobileShopContent();
+            this.updateMobileStats?.();
+        } else {
+            console.log('Failed to buy helper on mobile - insufficient funds or locked');
+        }
+    }
     
     updateShopDisplay() {
         // Update shop prices and refresh display with fade-in effect
         const shopContainer = document.getElementById('shop-container');
         if (shopContainer) {
+            const animationLib = window.gsap;
+            if (!animationLib) {
+                // GSAP missing (offline or blocked) – rerender instantly without animation
+                this.renderShop();
+                return;
+            }
             // Add fade-out effect
-            gsap.to(shopContainer, {
+            animationLib.to(shopContainer, {
                 opacity: 0,
                 duration: 0.15,
                 ease: "power2.out"
@@ -664,7 +706,7 @@ class UIManager {
                 this.renderShop();
                 
                 // Add smooth fade-in effect
-                gsap.to(shopContainer, {
+                animationLib.to(shopContainer, {
                     opacity: 1,
                     duration: 0.3,
                     ease: "power2.out"
@@ -1160,41 +1202,48 @@ class UIManager {
 
     // Mobile UI Setup - Handles mobile-specific functionality
     setupMobileUI() {
-        // Setup mobile menu toggle button
-        const mobileToggleBtn = document.getElementById('mobile-menu-toggle');
-        const mobileTabs = document.querySelectorAll('.mobile-tab-btn');
+        try {
+            // Setup mobile menu toggle button
+            const mobileToggleBtn = document.getElementById('mobile-menu-toggle');
+            const mobileTabs = document.querySelectorAll('.mobile-tab-btn');
 
-        // Setup toggle button
-        if (mobileToggleBtn) {
-            mobileToggleBtn.addEventListener('click', () => this.toggleMobileMenu());
-        }
+            // Setup toggle button
+            if (mobileToggleBtn) {
+                mobileToggleBtn.addEventListener('click', () => this.toggleMobileMenu());
+            }
 
-        // Setup tab buttons
-        mobileTabs.forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                const tabName = e.currentTarget.dataset.tab;
-                if (tabName) {
-                    this.switchMobileTab(tabName);
+            // Setup tab buttons
+            mobileTabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const tabName = e.currentTarget.dataset.tab;
+                    if (tabName) {
+                        this.switchMobileTab(tabName);
+                    }
+                });
+            });
+
+            // Update mobile stats every second
+            setInterval(() => {
+                this.updateMobileStats();
+            }, 1000);
+
+            // Initialize mobile shop content if on mobile - defer to allow shopManager to initialize
+            if (window.innerWidth <= 768) {
+                setTimeout(() => {
+                    this.updateMobileShopContent();
+                }, 100);
+            }
+
+            // Update mobile content on window resize
+            window.addEventListener('resize', () => {
+                if (window.innerWidth <= 768) {
+                    this.updateMobileShopContent();
                 }
             });
-        });
-
-        // Update mobile stats every second
-        setInterval(() => {
-            this.updateMobileStats();
-        }, 1000);
-
-        // Initialize mobile shop content if on mobile
-        if (window.innerWidth <= 768) {
-            this.updateMobileShopContent();
+        } catch (error) {
+            console.error('Error in setupMobileUI:', error);
+            console.error('Error details:', error.message, error.stack);
         }
-
-        // Update mobile content on window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth <= 768) {
-                this.updateMobileShopContent();
-            }
-        });
     }
 
     // Toggle mobile menu open/closed
@@ -1271,6 +1320,12 @@ class UIManager {
         const mobileShopContent = document.getElementById('mobile-shop-content');
         if (!mobileShopContent) return;
 
+        // Check if shopManager is ready
+        if (!window.shopManager || !window.shopManager.shopData) {
+            console.warn('Shop manager not ready yet, skipping mobile shop update');
+            return;
+        }
+
         // Clear existing content
         mobileShopContent.innerHTML = '';
 
@@ -1338,25 +1393,21 @@ class UIManager {
                         <div class="shop-item-sprite">
                             <img src="${helper.icon}" alt="${helper.name}">
                         </div>
-                        <div class="shop-item-description">${helper.description}</div>
+                        <div class="shop-item-info">
+                            <div class="shop-item-description">${helper.description}</div>
+                            <button class="shop-buy-btn" data-helper-type="${type}" ${buttonDisabled}>
+                                <img src="assets/general/dogecoin_70x70.png" alt="DogeCoin" class="buy-btn-icon">
+                                <span class="buy-btn-price">${priceText}</span>
+                            </button>
+                        </div>
                     </div>
-                    <button class="shop-buy-btn" data-helper-type="${type}" ${buttonDisabled}>
-                        <img src="assets/general/dogecoin_70x70.png" alt="DogeCoin" class="buy-btn-icon">
-                        <span class="buy-btn-price">${priceText}</span>
-                    </button>
                 `;
 
-                // Add click listener to buy button
+                // Add click listener to buy button using shared handler to avoid duplicate stacking
                 const buyBtn = item.querySelector('.shop-buy-btn');
                 if (buyBtn) {
-                    buyBtn.addEventListener('click', () => {
-                        if (!buyBtn.disabled && window.game) {
-                            const success = window.game.buyHelper(type);
-                            if (success) {
-                                this.updateMobileShopContent();
-                            }
-                        }
-                    });
+                    buyBtn.removeEventListener('click', this.boundMobileBuyButtonClick);
+                    buyBtn.addEventListener('click', this.boundMobileBuyButtonClick);
                 }
             } else {
                 // Empty slot
