@@ -613,7 +613,8 @@ class UIManager {
     
     setupShopButtonListeners() {
         // Add event listeners to all buy buttons
-        const shopContainer = document.getElementById('shop-container');
+        // Desktop helper cards render inside #shop-content, so bind listeners to that node.
+        const shopContainer = document.getElementById('shop-content');
         if (!shopContainer) return;
         const buyButtons = shopContainer.querySelectorAll('.shop-buy-btn[data-helper-type]');
         buyButtons.forEach((button) => {
@@ -685,34 +686,13 @@ class UIManager {
     }
     
     updateShopDisplay() {
-        // Update shop prices and refresh display with fade-in effect
-        const shopContainer = document.getElementById('shop-container');
-        if (shopContainer) {
-            const animationLib = window.gsap;
-            if (!animationLib) {
-                // GSAP missing (offline or blocked) – rerender instantly without animation
-                this.renderShop();
-                return;
-            }
-            // Add fade-out effect
-            animationLib.to(shopContainer, {
-                opacity: 0,
-                duration: 0.15,
-                ease: "power2.out"
-            });
-            
-            // Update shop content
-            setTimeout(() => {
-                this.renderShop();
-                
-                // Add smooth fade-in effect
-                animationLib.to(shopContainer, {
-                    opacity: 1,
-                    duration: 0.3,
-                    ease: "power2.out"
-                });
-            }, 150);
+        // Prices and availability update automatically, so rebuild instantly to avoid distracting fades.
+        const shopContainer = document.getElementById('shop-content');
+        if (!shopContainer) {
+            return;
         }
+
+        this.updateShopContent();
     }
     
     renderPickaxeShop(container) {

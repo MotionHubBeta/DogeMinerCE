@@ -1,7 +1,12 @@
 // DogeMiner: Community Edition - Main Initialization
-document.addEventListener('DOMContentLoaded', () => {
-    initializeGame();
-});
+const startGameWhenReady = () => initializeGame();
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startGameWhenReady);
+} else {
+    // Fallback loader inserts scripts after DOM is ready, so boot immediately in that case.
+    startGameWhenReady();
+}
 
 // Prevent context menu on right click everywhere
 document.addEventListener('contextmenu', (e) => {
