@@ -162,10 +162,15 @@ class UIManager {
             }
 
             // Update planet tab buttons
+            const targetElement = event && event.target ? event.target.closest('.planet-tab') : document.querySelector(`.planet-tab[data-planet="${planetName}"]`);
+
             document.querySelectorAll('.planet-tab').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.closest('.planet-tab').classList.add('active');
+
+            if (targetElement) {
+                targetElement.classList.add('active');
+            }
 
             // Set transitioning flag
             this.game.isTransitioning = true;
@@ -215,6 +220,9 @@ class UIManager {
 
                 // Update game state to reflect planet change
                 this.game.currentLevel = planetName;
+
+                // Update mobile display
+                this.updateMobilePlanetDisplay();
 
                 // Load the appropriate placed helpers
                 if (planetName === 'earth') {
@@ -1178,6 +1186,9 @@ class UIManager {
                 fallbackTab?.classList.add('active');
             }
         }
+
+        // Also update mobile planet tabs
+        this.updateMobilePlanetTabs();
     }
 
     // Mobile UI Setup - Handles mobile-specific functionality
@@ -1234,13 +1245,19 @@ class UIManager {
                 tab.addEventListener('click', (e) => {
                     const planet = e.currentTarget.dataset.planet;
                     if (planet && !e.currentTarget.disabled) {
-                        this.switchPlanet(planet);
+                        // Use arrow function or bind to ensure 'this' refers to UIManager
+                        // switchPlanet is defined on window in setupPanels
+                        window.switchPlanet(planet);
                         planetMenu.classList.remove('open');
 
-                        // Update toggle icon
+                        // Update toggle icon and text
                         const toggleIcon = document.getElementById('mobile-current-planet-icon');
+                        const toggleText = document.getElementById('mobile-planet-name');
                         if (toggleIcon) {
                             toggleIcon.src = `assets/general/${planet}.png`;
+                        }
+                        if (toggleText) {
+                            toggleText.textContent = planet.charAt(0).toUpperCase() + planet.slice(1);
                         }
 
                         // Update active state in menu
@@ -1250,22 +1267,13 @@ class UIManager {
                 });
             });
 
-            // Initialize toggle icon based on current planet
-            if (this.game && this.game.planet) {
-                const toggleIcon = document.getElementById('mobile-current-planet-icon');
-                if (toggleIcon) {
-                    toggleIcon.src = `assets/general/${this.game.planet}.png`;
-                }
+            // Initialize toggle icon and text based on current planet
+            this.updateMobilePlanetDisplay();
 
-                // Update active state in menu
-                mobilePlanetTabs.forEach(t => {
-                    if (t.dataset.planet === this.game.planet) {
-                        t.classList.add('active');
-                    } else {
-                        t.classList.remove('active');
-                    }
-                });
-            }
+            // Add a delayed update to ensure game state is fully loaded
+            setTimeout(() => {
+                this.updateMobilePlanetDisplay();
+            }, 500);
 
             // Update mobile stats every second
             setInterval(() => {
@@ -1288,6 +1296,77 @@ class UIManager {
 
         } catch (e) {
             console.error('Error setting up mobile UI:', e);
+        }
+    }
+
+    // Update mobile planet tabs based on unlock status
+    updateMobilePlanetTabs() {
+        const mobilePlanetTabs = document.querySelectorAll('.mobile-planet-tab');
+        mobilePlanetTabs.forEach(tab => {
+            const planet = tab.dataset.planet;
+            let isUnlocked = false;
+
+            switch (planet) {
+                case 'earth':
+                    isUnlocked = true;
+                    break;
+                case 'moon':
+                    isUnlocked = true; // Moon is always visible/accessible if unlocked
+                    break;
+                case 'mars':
+                    isUnlocked = this.isMarsUnlocked();
+                    break;
+                case 'jupiter':
+                    isUnlocked = this.isJupiterUnlocked();
+                    break;
+                case 'titan':
+                    isUnlocked = this.isTitanUnlocked();
+                    break;
+            }
+
+            tab.disabled = !isUnlocked;
+            const lockOverlay = tab.querySelector('.mobile-lock-overlay');
+            if (lockOverlay) {
+                lockOverlay.style.display = isUnlocked ? 'none' : 'block';
+            }
+        });
+    }
+
+    // Update mobile planet display (icon and text)
+    updateMobilePlanetDisplay() {
+        if (!this.game || !this.game.currentLevel) return;
+
+        const toggleIcon = document.getElementById('mobile-current-planet-icon');
+        const toggleText = document.getElementById('mobile-planet-name');
+        const mobilePlanetTabs = document.querySelectorAll('.mobile-planet-tab');
+
+        if (toggleIcon) {
+            toggleIcon.src = `assets/general/${this.game.currentLevel}.png`;
+        }
+        if (toggleText) {
+            toggleText.textContent = this.game.currentLevel.charAt(0).toUpperCase() + this.game.currentLevel.slice(1);
+        }
+
+        // Update active state in menu
+        mobilePlanetTabs.forEach(t => {
+            if (t.dataset.planet === this.game.currentLevel) {
+                t.classList.add('active');
+            } else {
+                t.classList.remove('active');
+            }
+        });
+
+        // Also update menu theming
+        const planetMenu = document.getElementById('mobile-planet-menu');
+        if (planetMenu) {
+            // Remove existing planet classes
+            planetMenu.classList.remove('planet-earth', 'planet-moon', 'planet-mars', 'planet-jupiter', 'planet-titan');
+            // Add current planet class (assuming CSS uses .planet-name structure on body, but here we scope it to menu if needed)
+            // Actually, the CSS uses body classes like .planet-mars. 
+            // But for the menu styling to work if it's outside the body class scope (it isn't, it's in body), 
+            // we just need to ensure body class is updated. switchPlanet does that via game logic usually.
+            // But let's ensure the menu itself has a class if we used that in CSS.
+            // Looking at CSS: .planet-mars #mobile-planet-menu. So it relies on body class.
         }
     }
 
