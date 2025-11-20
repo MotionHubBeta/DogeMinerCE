@@ -1202,6 +1202,71 @@ class UIManager {
                 });
             });
 
+            // Setup Mobile Planet Menu
+            const planetToggle = document.getElementById('mobile-planet-toggle');
+            const planetMenu = document.getElementById('mobile-planet-menu');
+            const closePlanetMenuBtn = document.getElementById('close-planet-menu');
+            const mobilePlanetTabs = document.querySelectorAll('.mobile-planet-tab');
+
+            if (planetToggle && planetMenu) {
+                planetToggle.addEventListener('click', () => {
+                    planetMenu.classList.add('open');
+                });
+            }
+
+            if (closePlanetMenuBtn && planetMenu) {
+                closePlanetMenuBtn.addEventListener('click', () => {
+                    planetMenu.classList.remove('open');
+                });
+            }
+
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (planetMenu && planetMenu.classList.contains('open') &&
+                    !planetMenu.contains(e.target) &&
+                    !planetToggle.contains(e.target)) {
+                    planetMenu.classList.remove('open');
+                }
+            });
+
+            // Setup mobile planet tabs
+            mobilePlanetTabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const planet = e.currentTarget.dataset.planet;
+                    if (planet && !e.currentTarget.disabled) {
+                        this.switchPlanet(planet);
+                        planetMenu.classList.remove('open');
+
+                        // Update toggle icon
+                        const toggleIcon = document.getElementById('mobile-current-planet-icon');
+                        if (toggleIcon) {
+                            toggleIcon.src = `assets/general/${planet}.png`;
+                        }
+
+                        // Update active state in menu
+                        mobilePlanetTabs.forEach(t => t.classList.remove('active'));
+                        e.currentTarget.classList.add('active');
+                    }
+                });
+            });
+
+            // Initialize toggle icon based on current planet
+            if (this.game && this.game.planet) {
+                const toggleIcon = document.getElementById('mobile-current-planet-icon');
+                if (toggleIcon) {
+                    toggleIcon.src = `assets/general/${this.game.planet}.png`;
+                }
+
+                // Update active state in menu
+                mobilePlanetTabs.forEach(t => {
+                    if (t.dataset.planet === this.game.planet) {
+                        t.classList.add('active');
+                    } else {
+                        t.classList.remove('active');
+                    }
+                });
+            }
+
             // Update mobile stats every second
             setInterval(() => {
                 this.updateMobileStats();
@@ -1220,9 +1285,9 @@ class UIManager {
                     this.updateMobileShopContent();
                 }
             });
-        } catch (error) {
-            console.error('Error in setupMobileUI:', error);
-            console.error('Error details:', error.message, error.stack);
+
+        } catch (e) {
+            console.error('Error setting up mobile UI:', e);
         }
     }
 

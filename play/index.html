@@ -310,6 +310,44 @@
         <img src="assets/general/btn_up.png" alt="Toggle Menu" id="mobile-toggle-icon">
     </button>
 
+    <!-- Mobile Planet Toggle & Menu -->
+    <div id="mobile-planet-toggle" class="mobile-only">
+        <img src="assets/general/earth.png" alt="Current Planet" id="mobile-current-planet-icon">
+    </div>
+
+    <div id="mobile-planet-menu" class="mobile-only">
+        <div class="mobile-planet-menu-header">
+            <span>Travel to...</span>
+            <button id="close-planet-menu">×</button>
+        </div>
+        <div class="mobile-planet-list">
+            <button class="mobile-planet-tab active" data-planet="earth">
+                <img src="assets/general/earth.png" alt="Earth">
+                <span>Earth</span>
+            </button>
+            <button class="mobile-planet-tab" data-planet="moon" disabled>
+                <img src="assets/general/moon.png" alt="Moon">
+                <span>Moon</span>
+                <div class="mobile-lock-overlay">LOCKED</div>
+            </button>
+            <button class="mobile-planet-tab" data-planet="mars" disabled>
+                <img src="assets/general/mars.png" alt="Mars">
+                <span>Mars</span>
+                <div class="mobile-lock-overlay">LOCKED</div>
+            </button>
+            <button class="mobile-planet-tab" data-planet="jupiter" disabled>
+                <img src="assets/general/jupiter.png" alt="Jupiter">
+                <span>Jupiter</span>
+                <div class="mobile-lock-overlay">LOCKED</div>
+            </button>
+            <button class="mobile-planet-tab" data-planet="titan" disabled>
+                <img src="assets/general/titan.png" alt="Titan">
+                <span>Titan</span>
+                <div class="mobile-lock-overlay">LOCKED</div>
+            </button>
+        </div>
+    </div>
+
     <!-- Mobile Bottom Menu -->
     <div id="mobile-bottom-menu" class="mobile-only">
         <!-- Mobile Panel Tabs -->
