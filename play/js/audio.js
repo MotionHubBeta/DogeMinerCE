@@ -15,18 +15,33 @@ class AudioManager {
     }
 
     init() {
-        // Load background music
-        this.loadLevel1Music();
-        this.loadMoonMusic();
-        this.loadMarsMusic();
-        this.loadJupiterMusic();
-        this.loadTitanMusic();
-        
-        // Load sound effects
-        this.loadSoundEffects();
-        
-        // Listen for settings changes
-        this.setupSettingsListeners();
+        // Check if Howler.js is loaded
+        if (typeof Howl === 'undefined') {
+            console.error('Howler.js library not loaded! Audio will be disabled.');
+            this.musicEnabled = false;
+            this.soundEnabled = false;
+            return;
+        }
+
+        try {
+            // Load background music
+            this.loadLevel1Music();
+            this.loadMoonMusic();
+            this.loadMarsMusic();
+            this.loadJupiterMusic();
+            this.loadTitanMusic();
+            
+            // Load sound effects
+            this.loadSoundEffects();
+            
+            // Listen for settings changes
+            this.setupSettingsListeners();
+        } catch (error) {
+            console.error('Error initializing audio:', error);
+            console.error('Audio will be disabled');
+            this.musicEnabled = false;
+            this.soundEnabled = false;
+        }
     }
 
     loadSoundEffects() {

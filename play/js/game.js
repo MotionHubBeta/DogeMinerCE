@@ -342,6 +342,15 @@ class DogeMinerGame {
             this.mouseX = e.clientX;
             this.mouseY = e.clientY;
         });
+        
+        // Track touch position for mobile devices
+        document.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                this.mouseX = touch.clientX;
+                this.mouseY = touch.clientY;
+            }
+        }, { passive: true });
     }
     
     initializeGameData() {
@@ -1113,16 +1122,35 @@ class DogeMinerGame {
             this.cancelHelperPlacement();
         };
         
-        // Add listeners
+        // Touch event handlers for mobile support
+        const handleTouchMove = (e) => {
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+            }
+        };
+        
+        const handleTouchEnd = (e) => {
+            if (e.changedTouches.length > 0) {
+                const touch = e.changedTouches[0];
+                handleClick({ clientX: touch.clientX, clientY: touch.clientY });
+            }
+        };
+        
+        // Add listeners (both mouse and touch)
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('click', handleClick);
         document.addEventListener('contextmenu', handleRightClick);
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd);
         
         // Store references for cleanup
         this.placementListeners = {
             mousemove: handleMouseMove,
             click: handleClick,
-            contextmenu: handleRightClick
+            contextmenu: handleRightClick,
+            touchmove: handleTouchMove,
+            touchend: handleTouchEnd
         };
     }
     
@@ -1488,8 +1516,13 @@ class DogeMinerGame {
     
     // Chromatic aberration effect for buy helper buttons
     createChromaticAberrationEffect(button) {
+        const animationLib = window.gsap;
+        if (!animationLib) {
+            // GSAP unavailable – bail out gracefully so purchases still work
+            return null;
+        }
         // Simple and compatible chromatic aberration effect
-        const tl = gsap.timeline();
+        const tl = animationLib.timeline();
         
         // Get all elements within the button (including dogecoin logo and price text)
         const buttonElements = [button, ...button.querySelectorAll('*')];
@@ -1699,10 +1732,11 @@ class DogeMinerGame {
         // Make helper draggable
         helperSprite.style.cursor = 'grab';
         
-        helperSprite.addEventListener('mousedown', (e) => {
+        // Helper function to start drag (used by both mouse and touch)
+        const startDrag = (e) => {
             // Prevent drag-and-drop ONLY during helper placement (buy mode)
             // Don't block during normal drag-and-drop (helpers can be on cursor for dragging)
-            console.log('Drag mousedown - isPlacingHelpers:', this.isPlacingHelpers);
+            console.log('Drag start - isPlacingHelpers:', this.isPlacingHelpers);
             if (this.isPlacingHelpers) {
                 console.log('BLOCKED: Drag attempt during placement');
                 e.preventDefault();
@@ -1719,28 +1753,30 @@ class DogeMinerGame {
             
             // Stop mining animation
             this.stopHelperMining(placedHelper);
-        });
+        };
         
-        document.addEventListener('mousemove', (e) => {
+        // Helper function to handle move (used by both mouse and touch)
+        const handleMove = () => {
             if (isDragging && !hasMoved) {
                 // First movement - pick up the helper immediately
                 hasMoved = true;
                 pickedUpHelper = this.pickupHelper(placedHelper, helperSprite, nameTooltip);
             }
-        });
+        };
         
-        document.addEventListener('mouseup', (e) => {
+        // Helper function to end drag (used by both mouse and touch)
+        const endDrag = (clientX, clientY) => {
             if (isDragging && pickedUpHelper) {
-                // Drop the helper at current mouse position, centered on cursor
+                // Drop the helper at current position, centered on cursor/touch
                 const leftPanel = document.getElementById('left-panel');
                 const panelRect = leftPanel.getBoundingClientRect();
                 
                 // Calculate centered position
                 const helperSize = pickedUpHelper.type === 'miningShibe' ? 30 : 60;
-                const offset = helperSize / 2; // Center the helper on cursor
+                const offset = helperSize / 2; // Center the helper on cursor/touch
                 
-                const x = e.clientX - panelRect.left - offset;
-                const y = e.clientY - panelRect.top - offset;
+                const x = clientX - panelRect.left - offset;
+                const y = clientY - panelRect.top - offset;
                 
                 this.dropPickedUpHelper(pickedUpHelper, x, y);
             }
@@ -1749,6 +1785,45 @@ class DogeMinerGame {
             hasMoved = false;
             pickedUpHelper = null;
             helperSprite.style.cursor = 'grab';
+        };
+        
+        // Mouse events
+        helperSprite.addEventListener('mousedown', startDrag);
+        
+        document.addEventListener('mousemove', (e) => {
+            handleMove();
+        });
+        
+        document.addEventListener('mouseup', (e) => {
+            endDrag(e.clientX, e.clientY);
+        });
+        
+        // Touch events for mobile support
+        helperSprite.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                // Update mouse position for touch
+                this.mouseX = touch.clientX;
+                this.mouseY = touch.clientY;
+                startDrag(e);
+            }
+        }, { passive: false });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging && e.touches.length > 0) {
+                const touch = e.touches[0];
+                // Update mouse position for touch
+                this.mouseX = touch.clientX;
+                this.mouseY = touch.clientY;
+                handleMove();
+            }
+        }, { passive: false });
+        
+        document.addEventListener('touchend', (e) => {
+            if (e.changedTouches.length > 0) {
+                const touch = e.changedTouches[0];
+                endDrag(touch.clientX, touch.clientY);
+            }
         });
     }
     
@@ -1956,11 +2031,13 @@ class DogeMinerGame {
             this.helperSpriteBeingPlaced = null;
         }
         
-        // Remove event listeners
+        // Remove event listeners (both mouse and touch)
         if (this.placementListeners) {
             document.removeEventListener('mousemove', this.placementListeners.mousemove);
             document.removeEventListener('click', this.placementListeners.click);
             document.removeEventListener('contextmenu', this.placementListeners.contextmenu);
+            document.removeEventListener('touchmove', this.placementListeners.touchmove);
+            document.removeEventListener('touchend', this.placementListeners.touchend);
             this.placementListeners = null;
         }
         
