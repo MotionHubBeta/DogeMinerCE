@@ -3851,7 +3851,7 @@ body.planet-mars #main-rock {
     }
 
     #mobile-menu-toggle.menu-open {
-        bottom: calc(40vh - 33px + env(safe-area-inset-bottom));
+        bottom: calc(40vh - 33px);
     }
 
     /* Mobile Planet Menu */
