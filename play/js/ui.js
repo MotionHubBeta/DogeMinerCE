@@ -26,7 +26,7 @@ export class UIManager {
         }
     }
 
-    static  removeDebugConsole() {
+    static removeDebugConsole() {
         const debugConsole = document.getElementById('debug-console');
         if (debugConsole) {
             debugConsole.remove();
@@ -566,21 +566,15 @@ export class UIManager {
     renderHelperShop(container) {
         container.innerHTML = ''; // Clear container completely
 
-        if (!gameManager) {
-            console.warn('renderHelperShop called before game was ready');
-            return;
-        }
-
         // Choose which helpers to display based on current planet
-        const helperCategory = gameManager.getHelperCategoryForLevel(gameManager.currentLevel);
-        console.log(`Rendering shop with helper category: ${helperCategory} for planet: ${gameManager.currentLevel}`);
+        console.log(`Rendering shop with helper category: ${gameManager.currentLevel} for planet: ${gameManager.currentLevel}`);
 
-        if (!shopManager.shopData[helperCategory]) {
-            console.error(`Shop data for ${helperCategory} is missing!`);
+        if (!ShopManager.shopData.helpers[gameManager.currentLevel]) {
+            console.error(`Shop data for ${gameManager.currentLevel} is missing!`);
             return;
         }
 
-        const helperEntries = Object.entries(shopManager.shopData[helperCategory]);
+        const helperEntries = Object.entries(ShopManager.shopData.helpers[gameManager.currentLevel]);
         const moonHelpers = Array.isArray(gameManager.moonHelpers) ? gameManager.moonHelpers : [];
         const marsHelpers = Array.isArray(gameManager.marsHelpers) ? gameManager.marsHelpers : [];
         const jupiterHelpers = Array.isArray(gameManager.jupiterHelpers) ? gameManager.jupiterHelpers : [];
@@ -1554,16 +1548,8 @@ export class UIManager {
 
     // Update mobile shop content with horizontal scrolling
     updateMobileShopContent() {
-        if (!gameManager) return;
-
         const mobileShopContent = document.getElementById('mobile-shop-content');
         if (!mobileShopContent) return;
-
-        // Check if shopManager is ready
-        if (!shopManager || !shopManager.shopData) {
-            console.warn('Shop manager not ready yet, skipping mobile shop update');
-            return;
-        }
 
         // Clear existing content
         mobileShopContent.innerHTML = '';
@@ -1571,12 +1557,12 @@ export class UIManager {
         // Get helper category for current level
         const helperCategory = gameManager.getHelperCategoryForLevel(gameManager.currentLevel);
 
-        if (!shopManager.shopData[helperCategory]) {
+        if (!ShopManager.shopData[helperCategory]) {
             console.error(`Shop data for ${helperCategory} is missing!`);
             return;
         }
 
-        const helperEntries = Object.entries(shopManager.shopData[helperCategory]);
+        const helperEntries = Object.entries(ShopManager.shopData[helperCategory]);
         const helperArray = gameManager.getHelperArrayForLevel(gameManager.currentLevel);
 
         // Create shop items (same logic as desktop but different layout)

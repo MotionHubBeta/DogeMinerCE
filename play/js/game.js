@@ -735,21 +735,6 @@ export class GameManager {
             if (text.parentNode) text.parentNode.removeChild(text);
         }, 1500);
     }
-    
-    getHelperCategoryForLevel(level = this.currentLevel) {
-        switch (level) {
-            case 'moon':
-                return 'moonHelpers';
-            case 'mars':
-                return 'marsHelpers';
-            case 'jupiter':
-                return 'jupiterHelpers';
-            case 'titan':
-                return 'titanHelpers';
-            default:
-                return 'helpers';
-        }
-    }
 
     getHelperArrayForLevel(level = this.currentLevel) {
         switch (level) {
@@ -777,10 +762,9 @@ export class GameManager {
         console.log('Current level:', this.currentLevel);
         console.log('Stack trace:', new Error().stack);
 
-        const helperCategory = this.getHelperCategoryForLevel();
-        const helperData = shopManager.shopData?.[helperCategory]?.[helperType];
+        const helperData = ShopManager.shopData.helpers[this.currentLevel][helperType];
         if (!helperData) {
-            console.error('Helper type not found:', helperType, 'in category', helperCategory);
+            console.error('Helper type not found:', helperType, 'in category', this.currentLevel);
             return false;
         }
 
@@ -1557,8 +1541,8 @@ export class GameManager {
         if (!placedHelper.helper || !placedHelper.helper.icon) {
             // Try to get helper data based on current level and type
             const helperCategory = this.getHelperCategoryForLevel();
-            if (shopManager.shopData[helperCategory]) {
-                placedHelper.helper = shopManager.shopData[helperCategory][placedHelper.type] || this.getHelperData(placedHelper.type);
+            if (ShopManager.shopData[helperCategory]) {
+                placedHelper.helper = ShopManager.shopData[helperCategory][placedHelper.type] || this.getHelperData(placedHelper.type);
             } else {
                 // Fallback to generic helper data
                 placedHelper.helper = this.getHelperData(placedHelper.type);
@@ -2045,7 +2029,7 @@ export class GameManager {
     cancelHelperPlacement() {
         // Refund the cost for all helpers on cursor
         this.helpersOnCursor.forEach(helperData => {
-            const helper = shopManager.shopData.helpers[helperData.type];
+            const helper = ShopManager.shopData.helpers[helperData.type];
             const owned = this.helpers.filter(h => h.type === helperData.type).length;
             const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned - 1));
             this.dogecoins += cost;
@@ -2109,8 +2093,7 @@ export class GameManager {
                 const helperType = buyButton.getAttribute('data-helper-type');
                 if (helperType) {
                     // Get the correct helper category based on current planet
-                    const helperCategory = this.getHelperCategoryForLevel();
-                    const shopCategory = shopManager.shopData[helperCategory];
+                    const shopCategory = ShopManager.shopData[this.currentLevel];
                     const helper = shopCategory?.[helperType];
                     if (helper) {
                         const helperArray = this.getHelperArrayForLevel();
@@ -2674,115 +2657,15 @@ export class GameManager {
     }
     
     getHelperData(helperType) {
+        for (let i = 0; i < ShopManager.shopData.helpers.length; i++) {
+            const helper = ShopManager.shopData.helpers[i][helperType];
 
-        // TODO - shopData.helpers should be a single object so as to avoid situation like these
-        // Try earth helpers first
-        if (shopManager.shopData.helpers && shopManager.shopData.helpers[helperType]) {
-            return shopManager.shopData.helpers[helperType];
-        }
-        
-        // Then try moon helpers
-        if (shopManager.shopData.moonHelpers && shopManager.shopData.moonHelpers[helperType]) {
-            return shopManager.shopData.moonHelpers[helperType];
-        }
-        
-        // Then try mars helpers
-        if (shopManager.shopData.marsHelpers && shopManager.shopData.marsHelpers[helperType]) {
-            return shopManager.shopData.marsHelpers[helperType];
+            if (helper) {
+                return helper;
+            }
         }
 
-        // TODO - it would be better to figure out why we couldn't get the data to begin with rather than rely on a fallback
-        // Fallback to hardcoded helper data if not found in ShopManager
-        // Return complete helper data based on type
-        const earthHelpers = {
-            'miningShibe': { 
-                baseDps: 0.2, 
-                icon: 'assets/helpers/shibes/shibes-idle-0.png',
-                miningSprite: 'assets/helpers/shibes/shibes-mine-0.png',
-                name: 'Mining Shibe'
-            },
-            'dogeKennels': { 
-                baseDps: 2, 
-                icon: 'assets/helpers/kennels/kennels-idle-0.png',
-                miningSprite: 'assets/helpers/kennels/kennels-mine-0.png',
-                name: 'Doge Kennels'
-            },
-            'streamerKittens': { 
-                baseDps: 4, 
-                icon: 'assets/helpers/kittens/kittens-idle-0.png',
-                miningSprite: 'assets/helpers/kittens/kittens-mine-0.png',
-                name: 'Streamer Kittens'
-            },
-            'spaceRocket': { 
-                baseDps: 9, 
-                icon: 'assets/helpers/rockets/rockets-idle-0.png',
-                miningSprite: 'assets/helpers/rockets/rockets-mine-0.png',
-                name: 'Space Rocket'
-            },
-            'timeMachineRig': { 
-                baseDps: 20, 
-                icon: 'assets/helpers/rigs/rigs-idle-0.png',
-                miningSprite: 'assets/helpers/rigs/rigs-mine-0.png',
-                name: 'Time Machine Mining Rig'
-            },
-            'infiniteDogebility': { 
-                baseDps: 50, 
-                icon: 'assets/helpers/dogebility/dogebility-idle-0.png',
-                miningSprite: 'assets/helpers/dogebility/dogebility-mine-0.png',
-                name: 'Infinite Dogebility'
-            }
-        };
-        
-        const moonHelpers = {
-            'moonBase': {
-                baseDps: 12,
-                icon: 'assets/helpers/bases/bases-idle-0.png',
-                miningSprite: 'assets/helpers/bases/bases-mine-0.png',
-                name: 'Moon Base'
-            },
-            'moonShibe': {
-                baseDps: 9,
-                icon: 'assets/helpers/moonshibe/moonshibe-idle-0.png',
-                miningSprite: 'assets/helpers/moonshibe/moonshibe-mine-0.png',
-                name: 'Moon Shibe'
-            },
-            'dogeCar': {
-                baseDps: 12,
-                icon: 'assets/helpers/dogecar/dogecar-idle-0.png',
-                miningSprite: 'assets/helpers/dogecar/dogecar-mine-0.png',
-                name: 'Doge Car'
-            },
-            'landerShibe': {
-                baseDps: 20,
-                icon: 'assets/helpers/landershibe/landershibe-idle-0.png',
-                miningSprite: 'assets/helpers/landershibe/landershibe-mine-0.png',
-                name: 'Lander Shibe'
-            },
-            'marsRocket': {
-                baseDps: 50,
-                icon: 'assets/helpers/marsrocket/marsrocket-idle-0.png',
-                miningSprite: 'assets/helpers/marsrocket/marsrocket-mine-0.png',
-                name: 'Mars Rocket'
-            },
-            'dogeGate': {
-                baseDps: 155,
-                icon: 'assets/helpers/dogegate/dogegate-idle-0.png',
-                miningSprite: 'assets/helpers/dogegate/dogegate-mine-0.png',
-                name: 'Doge Gate'
-            }
-        };
-        
-        // Check both helper types
-        if (earthHelpers[helperType]) {
-            return earthHelpers[helperType];
-        }
-        
-        if (moonHelpers[helperType]) {
-            return moonHelpers[helperType];
-        }
-        
-        // Default fallback
-        return earthHelpers['miningShibe'];
+        return undefined;
     }
     
     recreateHelperSprites() {

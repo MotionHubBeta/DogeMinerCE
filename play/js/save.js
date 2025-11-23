@@ -285,25 +285,14 @@ export class SaveManager {
         const rebuildPlacedHelpers = (helpersArray = [], planet = 'earth') => {
             if (!Array.isArray(helpersArray)) return [];
 
-            let shopCategory;
-            if (planet === 'moon') {
-                shopCategory = shopManager.shopData.moonHelpers;
-            } else if (planet === 'mars') {
-                shopCategory = shopManager.shopData.marsHelpers;
-            } else if (planet === 'jupiter') {
-                shopCategory = shopManager.shopData.jupiterHelpers;
-            } else if (planet === 'titan') {
-                shopCategory = shopManager.shopData.titanHelpers;
-            } else {
-                shopCategory = shopManager.shopData.helpers;
-            }
+            const shopCategory = ShopManager.shopData.helpers[planet];
 
             return helpersArray
                 .map(savedHelper => {
                     if (!savedHelper) return null;
 
                     // Only use helpers that exist in the current planet's shop category
-                    const shopHelperData = shopCategory?.[savedHelper.type];
+                    const shopHelperData = shopCategory[savedHelper.type];
                     if (!shopHelperData) {
                         // Helper type doesn't exist on this planet, skip it
                         console.warn(`Skipping helper type '${savedHelper.type}' on ${planet} - not found in shop category`);
@@ -397,18 +386,7 @@ export class SaveManager {
             });
 
             // Get shop category for this planet
-            let shopCategory;
-            if (planet === 'moon') {
-                shopCategory = shopManager.shopData.moonHelpers;
-            } else if (planet === 'mars') {
-                shopCategory = shopManager.shopData.marsHelpers;
-            } else if (planet === 'jupiter') {
-                shopCategory = shopManager.shopData.jupiterHelpers;
-            } else if (planet === 'titan') {
-                shopCategory = shopManager.shopData.titanHelpers;
-            } else {
-                shopCategory = shopManager.shopData.helpers;
-            }
+            const shopCategory = ShopManager.shopData.helpers[planet];
 
             // Spawn missing helpers in a clump (bottom-left of panel, away from rock)
             const baseX = 120; // Far left side of panel
