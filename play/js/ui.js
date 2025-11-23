@@ -1311,7 +1311,7 @@ class UIManager {
                     isUnlocked = true;
                     break;
                 case 'moon':
-                    isUnlocked = true; // Moon is always visible/accessible if unlocked
+                    isUnlocked = this.game.unlockedLevels.has('moon');
                     break;
                 case 'mars':
                     isUnlocked = this.isMarsUnlocked();
