@@ -34,7 +34,7 @@ class CloudSaveManager {
         window.firebase.onAuthStateChanged(window.firebase.auth, (user) => {
             this.currentUser = user;
             this.updateUI();
-            
+
             // Automatically load from cloud when user signs in
             if (user) {
                 this.waitForGameReady(() => this.loadFromCloudSilent());
@@ -93,20 +93,20 @@ class CloudSaveManager {
             if (window.notificationManager) {
                 window.notificationManager.showInfo('Signing in with Google...');
             }
-            
+
             const result = await window.firebase.signInWithPopup(
-                window.firebase.auth, 
+                window.firebase.auth,
                 window.firebase.provider
             );
-            
+
             this.currentUser = result.user;
             if (window.notificationManager) {
                 window.notificationManager.showSuccess(`Welcome, ${this.currentUser.displayName}!`);
             }
-            
+
             // Refresh the page to ensure correct planet UI state
             window.location.reload();
-            
+
         } catch (error) {
             console.error('Sign in error:', error);
             if (window.notificationManager) {
@@ -142,18 +142,18 @@ class CloudSaveManager {
             if (window.notificationManager) {
                 window.notificationManager.showInfo('Saving to cloud...');
             }
-            
+
             // Get current game state
             const gameData = this.getGameState();
             console.log('Manual save - gameData:', gameData);
-            
+
             if (gameData === null) {
                 if (window.notificationManager) {
                     window.notificationManager.showError('Cannot save: Game not initialized');
                 }
                 return;
             }
-            
+
             // Save to Firestore
             const userDocRef = window.firebase.doc(window.firebase.db, 'users', this.currentUser.uid);
             await window.firebase.setDoc(userDocRef, {
@@ -165,7 +165,7 @@ class CloudSaveManager {
             if (window.notificationManager) {
                 window.notificationManager.showSuccess('Game saved to cloud successfully!');
             }
-            
+
         } catch (error) {
             console.error('Cloud save error:', error);
             if (window.notificationManager) {
@@ -183,12 +183,12 @@ class CloudSaveManager {
             // Get current game state
             const gameData = this.getGameState();
             console.log('Silent save - gameData:', gameData);
-            
+
             if (gameData === null) {
                 console.error('Cannot save to cloud: gameData is null');
                 return;
             }
-            
+
             // Save to Firestore silently
             const userDocRef = window.firebase.doc(window.firebase.db, 'users', this.currentUser.uid);
             await window.firebase.setDoc(userDocRef, {
@@ -198,7 +198,7 @@ class CloudSaveManager {
             }, { merge: true });
 
             console.log('Game auto-saved to cloud');
-            
+
         } catch (error) {
             console.error('Silent cloud save error:', error);
         }
@@ -215,7 +215,7 @@ class CloudSaveManager {
             const userDocRef = window.firebase.doc(window.firebase.db, 'users', this.currentUser.uid);
             await window.firebase.deleteDoc(userDocRef);
             console.log('Cloud save deleted successfully');
-            
+
         } catch (error) {
             console.error('Failed to delete cloud save:', error);
         }
@@ -233,7 +233,7 @@ class CloudSaveManager {
             if (window.notificationManager) {
                 window.notificationManager.showInfo('Loading from cloud...');
             }
-            
+
             // Get data from Firestore
             const userDocRef = window.firebase.doc(window.firebase.db, 'users', this.currentUser.uid);
             const docSnap = await window.firebase.getDoc(userDocRef);
@@ -255,7 +255,7 @@ class CloudSaveManager {
                     window.notificationManager.showWarning('No save data found in cloud');
                 }
             }
-            
+
         } catch (error) {
             console.error('Cloud load error:', error);
             if (window.notificationManager) {
@@ -281,7 +281,7 @@ class CloudSaveManager {
                     console.log('Game auto-loaded from cloud');
                 }
             }
-            
+
         } catch (error) {
             console.error('Silent cloud load error:', error);
         }
@@ -296,13 +296,13 @@ class CloudSaveManager {
         console.log('window.game type:', typeof window.game);
         console.log('window.game:', window.game);
         console.log('window.game.dogecoins:', window.game?.dogecoins);
-        
+
         // Wait a bit for game to be ready if it's not available yet
         if (typeof window.game === 'undefined' || window.game === null || window.game === undefined) {
             console.log('Game not available yet, waiting...');
             return null;
         }
-        
+
         const gameData = {
             dogecoins: window.game.dogecoins || 0,
             dps: window.game.dps || 0,
@@ -340,7 +340,7 @@ class CloudSaveManager {
             window.game.playTime = gameData.playTime || 0;
             window.game.highestDps = gameData.highestDps || 0;
             window.game.achievements = gameData.achievements || {};
-            
+
             // Load settings
             if (gameData.settings) {
                 window.game.soundEnabled = gameData.settings.soundEnabled !== undefined ? gameData.settings.soundEnabled : true;
@@ -445,8 +445,16 @@ function loadFromCloud() {
 }
 
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    cloudSaveManager = new CloudSaveManager();
-    window.cloudSaveManager = cloudSaveManager;
-});
+const initCloudSave = () => {
+    if (!cloudSaveManager) {
+        cloudSaveManager = new CloudSaveManager();
+        window.cloudSaveManager = cloudSaveManager;
+    }
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCloudSave);
+} else {
+    initCloudSave();
+}
 

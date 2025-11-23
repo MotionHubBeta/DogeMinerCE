@@ -6,45 +6,45 @@ class SaveManager {
         this.backupKey = 'dogeminer_ce_backup';
         this.autoSaveInterval = 30000; // 30 seconds
         this.lastSave = Date.now();
-        
+
         this.setupAutoSave();
         this.setupSaveFunctions();
         this.setupSettingsListeners();
     }
-    
+
     setupAutoSave() {
         setInterval(() => {
             this.autoSave();
         }, this.autoSaveInterval);
-        
+
         // Save before page unload
         window.addEventListener('beforeunload', () => {
             this.saveGame();
         });
     }
-    
+
     setupSaveFunctions() {
-        window.saveGame = () => {
-            this.saveGame();
+        window.saveGame = (showNotification) => {
+            this.saveGame(showNotification);
         };
-        
+
         window.loadGame = () => {
             this.loadGame();
         };
-        
+
         window.exportSave = () => {
             this.exportSave();
         };
-        
+
         window.importSave = () => {
             this.importSave();
         };
-        
+
         window.resetGame = () => {
             this.resetGame();
         };
     }
-    
+
     setupSettingsListeners() {
         // Listen for notifications setting changes
         const notificationsCheckbox = document.getElementById('notifications-enabled');
@@ -59,7 +59,7 @@ class SaveManager {
                 this.saveGame(false);
             });
         }
-        
+
         // Listen for auto-save setting changes
         const autoSaveCheckbox = document.getElementById('auto-save-enabled');
         if (autoSaveCheckbox) {
@@ -74,25 +74,25 @@ class SaveManager {
             });
         }
     }
-    
+
     saveGame(showNotification = true) {
         try {
             const saveData = this.createSaveData();
             const saveString = JSON.stringify(saveData);
-            
+
             // Save to localStorage
             localStorage.setItem(this.saveKey, saveString);
-            
+
             // Create backup
             localStorage.setItem(this.backupKey, saveString);
-            
+
             this.lastSave = Date.now();
-            
+
             // Only show notification if requested and notifications are enabled
             if (showNotification && this.game.notificationsEnabled) {
                 this.game.showNotification('Game saved successfully!');
             }
-            
+
             console.log('Game saved:', saveData);
             return true;
         } catch (error) {
@@ -103,7 +103,7 @@ class SaveManager {
             return false;
         }
     }
-    
+
     loadGame() {
         try {
             const saveString = localStorage.getItem(this.saveKey);
@@ -111,35 +111,35 @@ class SaveManager {
                 this.game.showNotification('No save data found!');
                 return false;
             }
-            
+
             const saveData = JSON.parse(saveString);
             this.applySaveData(saveData);
-            
+
             // Notification handled by main.js
             console.log('Game loaded:', saveData);
             return true;
         } catch (error) {
             console.error('Error loading game:', error);
-            
+
             // Try to load backup
             if (this.loadBackup()) {
                 this.game.showNotification('Loaded from backup save!');
                 return true;
             }
-            
+
             this.game.showNotification('Error loading game!');
             return false;
         }
     }
-    
+
     loadBackup() {
         try {
             const backupString = localStorage.getItem(this.backupKey);
             if (!backupString) return false;
-            
+
             const saveData = JSON.parse(backupString);
             this.applySaveData(saveData);
-            
+
             console.log('Loaded from backup:', saveData);
             return true;
         } catch (error) {
@@ -147,7 +147,7 @@ class SaveManager {
             return false;
         }
     }
-    
+
     createSaveData() {
         const serializePlacedHelper = (helper) => {
             if (!helper) return null;
@@ -422,7 +422,7 @@ class SaveManager {
                             // Create clump pattern with small random offsets
                             const offsetX = (Math.random() - 0.5) * 80;
                             const offsetY = (Math.random() - 0.5) * 80;
-                            
+
                             placedHelpers.push({
                                 type: type,
                                 x: baseX + offsetX,
@@ -612,12 +612,12 @@ class SaveManager {
         input.onchange = (event) => {
             const file = event.target.files[0];
             if (!file) return;
-            
+
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
                     const saveData = JSON.parse(e.target.result);
-                    
+
                     if (this.validateSaveData(saveData)) {
                         if (confirm('This will overwrite your current save. Continue?')) {
                             this.applySaveData(saveData);
@@ -632,13 +632,13 @@ class SaveManager {
                     this.game.showNotification('Error importing save!');
                 }
             };
-            
+
             reader.readAsText(file);
         };
-        
+
         input.click();
     }
-    
+
     async resetGame() {
         if (confirm('Are you sure you want to reset your game? This cannot be undone!')) {
             if (confirm('This will permanently delete all your progress. Are you absolutely sure?')) {
@@ -646,7 +646,7 @@ class SaveManager {
                 localStorage.removeItem(this.saveKey);
                 localStorage.removeItem(this.backupKey);
                 localStorage.removeItem('dogeminer_save'); // Remove old save key
-                
+
                 // Clear any other dogeminer-related keys
                 for (let i = 0; i < localStorage.length; i++) {
                     const key = localStorage.key(i);
@@ -654,12 +654,12 @@ class SaveManager {
                         localStorage.removeItem(key);
                     }
                 }
-                
+
                 // Delete cloud save if user is signed in to prevent restore on reload
                 if (window.cloudSaveManager && window.cloudSaveManager.currentUser) {
                     await window.cloudSaveManager.deleteCloudSave();
                 }
-                
+
                 // Reset game state directly
                 this.game.dogecoins = 0;
                 this.game.totalMined = 0;
@@ -685,17 +685,17 @@ class SaveManager {
                 this.game.currentLevel = 'earth';
                 this.game.hasPlayedMoonLaunch = false;
                 this.game.isCutscenePlaying = false;
-                
+
                 // Clear all helper sprites from the DOM
                 this.game.clearAllHelperSprites();
-                
+
                 // Update UI immediately
                 this.game.updateUI();
                 this.game.updateDPS();
-                
+
                 // Show notification
                 this.game.showNotification('Game reset successfully!');
-                
+
                 // Reload after a short delay to ensure UI updates
                 setTimeout(() => {
                     location.reload();
@@ -703,11 +703,11 @@ class SaveManager {
             }
         }
     }
-    
+
     getSaveInfo() {
         const saveString = localStorage.getItem(this.saveKey);
         if (!saveString) return null;
-        
+
         try {
             const saveData = JSON.parse(saveString);
             return {
@@ -724,43 +724,43 @@ class SaveManager {
             return null;
         }
     }
-    
+
     // Cloud save functionality (placeholder for future implementation)
     async saveToCloud() {
         // This would integrate with a cloud service
         console.log('Cloud save not implemented yet');
         return false;
     }
-    
+
     async loadFromCloud() {
         // This would integrate with a cloud service
         console.log('Cloud load not implemented yet');
         return false;
     }
-    
+
     // Save validation and repair
     repairSave() {
         try {
             const saveString = localStorage.getItem(this.saveKey);
             if (!saveString) return false;
-            
+
             const saveData = JSON.parse(saveString);
-            
+
             // Repair common issues
             if (!saveData.helpers) saveData.helpers = [];
             if (!saveData.pickaxes) saveData.pickaxes = ['standard'];
             if (!saveData.upgrades) saveData.upgrades = {};
             if (!saveData.statistics) saveData.statistics = {};
             if (!saveData.settings) saveData.settings = {};
-            
+
             // Ensure minimum values
             saveData.dogecoins = Math.max(0, saveData.dogecoins || 0);
             saveData.totalMined = Math.max(0, saveData.totalMined || 0);
             saveData.totalClicks = Math.max(0, saveData.totalClicks || 0);
-            
+
             // Save repaired data
             localStorage.setItem(this.saveKey, JSON.stringify(saveData));
-            
+
             this.game.showNotification('Save data repaired!');
             return true;
         } catch (error) {
