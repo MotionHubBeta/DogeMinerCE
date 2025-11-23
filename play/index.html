@@ -484,8 +484,8 @@
         console.log("Firebase initialized successfully!");
     </script>
 
-    <!-- Global constants -->
-    <script src="js/exception_messages.js"></script>
+    <!-- Game entry point -->
+    <script type="module" src="js/main.js"> </script>
 
     <!-- Scripts -->
     <script>
@@ -629,17 +629,6 @@
                 }
             ];
 
-            const gameScripts = [
-                'js/audio.js',
-                'js/game.js?v=35',
-                'js/ui.js',
-                'js/shop.js',
-                'js/save.js',
-                'js/notifications.js',
-                'js/cloud-save.js',
-                'js/main.js'
-            ];
-
             function appendScript(src) {
                 // Keep execution order stable while reporting any script fetch issues for debugging.
                 return new Promise((resolve, reject) => {
@@ -678,14 +667,6 @@
             (async function bootstrap() {
                 for (const entry of queuedLibraries) {
                     await loadWithFallback(entry);
-                }
-
-                for (const script of gameScripts) {
-                    try {
-                        await appendScript(script);
-                    } catch (error) {
-                        console.error(error.message);
-                    }
                 }
             })();
         })();

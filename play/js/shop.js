@@ -1,6 +1,6 @@
 // DogeMiner: Community Edition - Shop Management
 
-class ShopManager {
+export class ShopManager {
     static #instance = null;
     shopData = null;
     

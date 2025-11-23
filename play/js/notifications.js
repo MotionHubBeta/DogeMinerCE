@@ -1,5 +1,5 @@
 // DogeMiner: Community Edition - Notifications System
-class NotificationManager {
+export class NotificationManager {
     constructor(game) {
         this.game = game;
         this.notifications = [];

@@ -1,5 +1,5 @@
 // DogeMiner: Community Edition - UI Management
-class UIManager {
+export class UIManager {
     constructor(game) {
         this.game = game;
         this.activePanel = 'shop-tab'; // Shop tab is active by default

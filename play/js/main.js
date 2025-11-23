@@ -1,3 +1,10 @@
+import { DogeMinerGame } from './game.js';
+import { UIManager } from './ui.js';
+import { ShopManager } from './shop.js';
+import { SaveManager } from './save.js';
+import { AudioManager } from './audio.js';
+import { NotificationManager } from './notifications.js';
+
 // DogeMiner: Community Edition - Main Initialization
 const startGameWhenReady = () => initializeGame();
 
@@ -19,29 +26,29 @@ async function initializeGame() {
         updateLoadingInfo('Initializing game engine...');
         
         // Initialize game instance
-        game = DogeMinerGame.getInstance();
+        const game = DogeMinerGame.getInstance();
         updateLoadingInfo('Setting up shop system...');
         
         // Initialize shop manager first (needed by UI manager)
-        shopManager = new ShopManager(game);
+        const shopManager = new ShopManager(game);
         window.shopManager = shopManager; // Make available immediately
         updateLoadingInfo('Building user interface...');
         
         // Initialize UI manager (depends on shop manager)
-        uiManager = new UIManager(game);
+        const uiManager = new UIManager(game);
         window.uiManager = uiManager; // Expose early for save/load routines
         updateLoadingInfo('Loading audio system...');
         
         // Initialize audio manager
         try {
-            audioManager = new AudioManager();
+            const audioManager = new AudioManager();
             audioManager.init();
             window.audioManager = audioManager; // Make available for SaveManager
         } catch (error) {
             console.error('Failed to initialize audio manager:', error);
             console.warn('Game will continue without audio');
             // Create a dummy audio manager so the game doesn't break
-            audioManager = {
+            const audioManager = {
                 musicEnabled: false,
                 soundEnabled: false,
                 playSound: () => {},
@@ -59,10 +66,10 @@ async function initializeGame() {
         }
         updateLoadingInfo('Initializing save system...');
         
-        saveManager = new SaveManager(game);
+        const saveManager = new SaveManager(game);
         updateLoadingInfo('Preparing notifications...');
         
-        notificationManager = new NotificationManager(game);
+        const notificationManager = new NotificationManager(game);
         updateLoadingInfo('Loading game data...');
         
         // Try to load existing save

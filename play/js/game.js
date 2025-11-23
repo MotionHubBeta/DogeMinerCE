@@ -1,6 +1,6 @@
 // DogeMiner: Community Edition - Main Game Logic
 
-class DogeMinerGame {
+export class DogeMinerGame {
     static #instance = null;
 
     static getInstance() {
@@ -2844,6 +2844,3 @@ class DogeMinerGame {
         existingNameTooltips.forEach(tooltip => tooltip.remove());
     }
 }
-
-// Global game instance
-let game;

@@ -1,5 +1,5 @@
 // DogeMiner: Community Edition - Save/Load System
-class SaveManager {
+export class SaveManager {
     constructor(game) {
         this.game = game;
         this.saveKey = 'dogeminer_ce_save';
