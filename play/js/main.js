@@ -5,29 +5,6 @@ import saveManager, { SaveManager } from './save.js';
 import audioManager, { AudioManager } from './audio.js';
 import notificationManager, { NotificationManager } from './notification.js';
 
-// Loading screen functions
-function showLoadingScreen(useFade = false) {
-    const loadingScreen = document.getElementById('loading-screen');
-    if (loadingScreen) {
-        loadingScreen.style.display = 'flex';
-        loadingScreen.classList.remove('hidden', 'fade-out');
-
-        if (useFade) {
-            loadingScreen.classList.remove('fade-in');
-            loadingScreen.style.opacity = '0';
-            // Force reflow to allow transition to restart
-            void loadingScreen.offsetWidth;
-            loadingScreen.classList.add('fade-in');
-            requestAnimationFrame(() => {
-                loadingScreen.style.removeProperty('opacity');
-            });
-        } else {
-            loadingScreen.classList.remove('fade-in');
-            loadingScreen.style.opacity = '1';
-        }
-    }
-}
-
 // DogeMiner: Community Edition - Main Initialization
 const startGameWhenReady = () => initializeGame();
 
@@ -45,27 +22,27 @@ document.addEventListener('contextmenu', (e) => {
 
 async function initializeGame() {
     try {
-        showLoadingScreen();
+        UIManager.showLoadingScreen();
 
-        updateLoadingInfo('Initializing game engine...');
+        UIManager.updateLoadingInfo('Initializing game engine...');
         gameManager.init();
 
-        updateLoadingInfo('Setting up shop system...');
+        UIManager.updateLoadingInfo('Setting up shop system...');
         shopManager.init();
 
-        updateLoadingInfo('Building user interface...');
+        UIManager.updateLoadingInfo('Building user interface...');
         uiManager.init();
 
-        updateLoadingInfo('Loading audio system...');
+        UIManager.updateLoadingInfo('Loading audio system...');
         audioManager.init();
 
-        updateLoadingInfo('Initializing save system...');
+        UIManager.updateLoadingInfo('Initializing save system...');
         saveManager.init();
 
-        updateLoadingInfo('Preparing notifications...');
+        UIManager.updateLoadingInfo('Preparing notifications...');
         notificationManager.init();
 
-        updateLoadingInfo('Loading game data...');
+        UIManager.updateLoadingInfo('Loading game data...');
         
         // Try to load existing save
         const saveLoaded = saveManager.loadGame();
@@ -184,13 +161,13 @@ async function initializeGame() {
         }
         
         // CloudSaveManager will be initialized by cloud-save.js
-        updateLoadingInfo('Finalizing...');
+        UIManager.updateLoadingInfo('Finalizing...');
         
-        updateLoadingInfo('Ready!');
+        UIManager.updateLoadingInfo('Ready!');
         
         // Hide loading screen after a short delay
         setTimeout(() => {
-            hideLoadingScreen();
+            UIManager.hideLoadingScreen();
             gameManager.isPlaying = true;
             
             // Play doge intro animation
@@ -213,7 +190,7 @@ async function initializeGame() {
         console.error('Error message:', error.message);
         console.error('Error stack:', error.stack);
         console.error('Error name:', error.name);
-        hideLoadingScreen();
+        UIManager.hideLoadingScreen();
         alert('Error initializing game: ' + (error.message || error.toString()) + '. Please check console and refresh.');
     }
 }
@@ -266,35 +243,6 @@ function importSave() {
 function resetGame() {
     if (saveManager) {
         saveManager.resetGame();
-    }
-}
-
-function hideLoadingScreen() {
-    const loadingScreen = document.getElementById('loading-screen');
-    if (loadingScreen) {
-        loadingScreen.classList.remove('fade-in');
-        loadingScreen.classList.add('fade-out');
-
-        // Remove inline opacity on next frame so CSS transition can take over
-        requestAnimationFrame(() => {
-            loadingScreen.style.removeProperty('opacity');
-        });
-
-        const fadeDuration = parseFloat(getComputedStyle(loadingScreen).getPropertyValue('--loading-fade-duration') || '1.5');
-        const timeout = isNaN(fadeDuration) ? 1500 : fadeDuration * 1000;
-
-        setTimeout(() => {
-            loadingScreen.style.display = 'none';
-            loadingScreen.classList.remove('fade-out');
-            loadingScreen.style.opacity = '';
-        }, timeout);
-    }
-}
-
-function updateLoadingInfo(info) {
-    const loadingInfo = document.getElementById('loading-info');
-    if (loadingInfo) {
-        loadingInfo.textContent = info;
     }
 }
 
@@ -414,7 +362,7 @@ function toggleDebugMode() {
         }
         
         // Add debug console
-        addDebugConsole();
+        UIManager.addDebugConsole();
         
         console.log('Debug mode enabled');
     } else {
@@ -424,48 +372,9 @@ function toggleDebugMode() {
             window.performanceMonitor = null;
         }
         
-        removeDebugConsole();
+        UIManager.removeDebugConsole();
         
         console.log('Debug mode disabled');
-    }
-}
-
-function addDebugConsole() {
-    const debugConsole = document.createElement('div');
-    debugConsole.id = 'debug-console';
-    debugConsole.style.cssText = `
-        position: fixed;
-        bottom: 100px;
-        left: 10px;
-        background: rgba(0, 0, 0, 0.8);
-        color: #fff;
-        padding: 10px;
-        border-radius: 5px;
-        font-family: monospace;
-        font-size: 12px;
-        z-index: 10000;
-        max-width: 300px;
-    `;
-    
-    debugConsole.innerHTML = `
-        <div>Debug Console</div>
-        <button onclick="game.dogecoins += 1000">+1000 Coins</button>
-        <button onclick="game.dogecoins += 10000">+10000 Coins</button>
-        <button onclick="game.dogecoins = 40000000000000000; game.updateUI();" style="background: #ff6b6b; color: white;">+40 Quadrillion Coins</button>
-        <button onclick="game.dps += 100">+100 DPS</button>
-        <button onclick="game.rotateBackground()">Rotate Background</button>
-        <button onclick="game.forceRickSpawn()">Spawn Rick</button>
-        <button onclick="saveManager.repairSave()">Repair Save</button>
-        <button onclick="toggleDebugMode()">Close Debug</button>
-    `;
-    
-    document.body.appendChild(debugConsole);
-}
-
-function removeDebugConsole() {
-    const debugConsole = document.getElementById('debug-console');
-    if (debugConsole) {
-        debugConsole.remove();
     }
 }
 
@@ -544,5 +453,3 @@ if ('serviceWorker' in navigator) {
             });
     });
 }
-
-// Global variables are now properly declared at the top of the file
