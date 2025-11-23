@@ -1,21 +1,13 @@
+import audioManager, { AudioManager } from './audio.js';
+import shopManager, { ShopManager } from './shop.js';
+import uiManager, { UIManager } from './ui.js';
+import gsap from "https://cdn.skypack.dev/gsap";
+
 // DogeMiner: Community Edition - Main Game Logic
+export class GameManager {
+    constructor() {}
 
-export class DogeMinerGame {
-    static #instance = null;
-
-    static getInstance() {
-        if (!DogeMinerGame.#instance) {
-            DogeMinerGame.#instance = new DogeMinerGame();
-        }
-
-        return DogeMinerGame.#instance;
-    }
-
-    constructor() {
-        if(DogeMinerGame.#instance) {
-            throw new Error(window.ERR_MESSAGES.ERROR_SINGLETON_EXISTS);
-        }
-
+    init() {
         this.dogecoins = 0;
         this.totalMined = 0;
         this.totalClicks = 0;
@@ -260,10 +252,9 @@ export class DogeMinerGame {
         this.isSpaceDown = false;
         
         console.log('[Cutscene] Starting Moon Launch cutscene');
-        console.log('[Cutscene] Audio manager available:', !!window.audioManager);
-        if (window.audioManager) {
-            audioManager.suspendAllAudio();
-        }
+        console.log('[Cutscene] Audio manager available:', !!audioManager);
+
+        audioManager.suspendAllAudio();
         
         this.cutsceneVideo.src = '../assets/The Moon Launch.mp4';
         this.cutsceneVideo.currentTime = 0;
@@ -311,9 +302,7 @@ export class DogeMinerGame {
         }
         this.cutsceneSkipButton?.classList.add('hidden');
         
-        if (window.audioManager) {
-            audioManager.resumeAudio();
-        }
+        audioManager.resumeAudio();
         
         // After moon launch cutscene, switch to moon
         if (this.hasPlayedMoonLaunch && this.currentLevel !== 'moon') {
@@ -789,7 +778,7 @@ export class DogeMinerGame {
         console.log('Stack trace:', new Error().stack);
 
         const helperCategory = this.getHelperCategoryForLevel();
-        const helperData = window.shopManager?.shopData?.[helperCategory]?.[helperType];
+        const helperData = shopManager.shopData?.[helperCategory]?.[helperType];
         if (!helperData) {
             console.error('Helper type not found:', helperType, 'in category', helperCategory);
             return false;
@@ -846,9 +835,7 @@ export class DogeMinerGame {
 
         this.dogecoins -= cost;
 
-        if (window.audioManager) {
-            window.audioManager.playSound('ching');
-        }
+        audioManager.playSound('ching');
 
         helperArray.push({
             type: helperType,
@@ -863,21 +850,19 @@ export class DogeMinerGame {
         this.updateShopPrices();
         this.updateUI();
 
-        if (window.uiManager) {
-            const level = this.currentLevel;
-            const hasPlayedMoonLaunch = this.hasPlayedMoonLaunch;
+        const level = this.currentLevel;
+        const hasPlayedMoonLaunch = this.hasPlayedMoonLaunch;
 
-            uiManager.updateBackground?.(level);
-            uiManager.initializePlanetTabs?.();
+        uiManager.updateBackground?.(level);
+        uiManager.initializePlanetTabs?.();
 
-            if (hasPlayedMoonLaunch) {
-                uiManager.hideMoonLocked?.();
-            }
-
-            requestAnimationFrame(() => {
-                uiManager.updateShopContent?.();
-            });
+        if (hasPlayedMoonLaunch) {
+            uiManager.hideMoonLocked?.();
         }
+
+        requestAnimationFrame(() => {
+            uiManager.updateShopContent?.();
+        });
 
         return true;
     }
@@ -1516,7 +1501,7 @@ export class DogeMinerGame {
     
     // Chromatic aberration effect for buy helper buttons
     createChromaticAberrationEffect(button) {
-        const animationLib = window.gsap;
+        const animationLib = gsap;
         if (!animationLib) {
             // GSAP unavailable – bail out gracefully so purchases still work
             return null;
@@ -1572,8 +1557,8 @@ export class DogeMinerGame {
         if (!placedHelper.helper || !placedHelper.helper.icon) {
             // Try to get helper data based on current level and type
             const helperCategory = this.getHelperCategoryForLevel();
-            if (window.shopManager && window.shopManager.shopData && window.shopManager.shopData[helperCategory]) {
-                placedHelper.helper = window.shopManager.shopData[helperCategory][placedHelper.type] || this.getHelperData(placedHelper.type);
+            if (shopManager.shopData[helperCategory]) {
+                placedHelper.helper = shopManager.shopData[helperCategory][placedHelper.type] || this.getHelperData(placedHelper.type);
             } else {
                 // Fallback to generic helper data
                 placedHelper.helper = this.getHelperData(placedHelper.type);
@@ -2060,7 +2045,7 @@ export class DogeMinerGame {
     cancelHelperPlacement() {
         // Refund the cost for all helpers on cursor
         this.helpersOnCursor.forEach(helperData => {
-            const helper = window.shopManager.shopData.helpers[helperData.type];
+            const helper = shopManager.shopData.helpers[helperData.type];
             const owned = this.helpers.filter(h => h.type === helperData.type).length;
             const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned - 1));
             this.dogecoins += cost;
@@ -2125,7 +2110,7 @@ export class DogeMinerGame {
                 if (helperType) {
                     // Get the correct helper category based on current planet
                     const helperCategory = this.getHelperCategoryForLevel();
-                    const shopCategory = window.shopManager?.shopData?.[helperCategory];
+                    const shopCategory = shopManager.shopData[helperCategory];
                     const helper = shopCategory?.[helperType];
                     if (helper) {
                         const helperArray = this.getHelperArrayForLevel();
@@ -2603,10 +2588,7 @@ export class DogeMinerGame {
     }
     
     playSound(soundFile) {
-        // Use audio manager if available
-        if (window.audioManager) {
-            audioManager.playSound(soundFile);
-        }
+        audioManager.playSound(soundFile);
     }
     
     checkAchievements() {
@@ -2692,24 +2674,24 @@ export class DogeMinerGame {
     }
     
     getHelperData(helperType) {
-        // First check if we have a ShopManager available with full helper data
-        if (window.shopManager && window.shopManager.shopData) {
-            // Try earth helpers first
-            if (window.shopManager.shopData.helpers && window.shopManager.shopData.helpers[helperType]) {
-                return window.shopManager.shopData.helpers[helperType];
-            }
-            
-            // Then try moon helpers
-            if (window.shopManager.shopData.moonHelpers && window.shopManager.shopData.moonHelpers[helperType]) {
-                return window.shopManager.shopData.moonHelpers[helperType];
-            }
-            
-            // Then try mars helpers
-            if (window.shopManager.shopData.marsHelpers && window.shopManager.shopData.marsHelpers[helperType]) {
-                return window.shopManager.shopData.marsHelpers[helperType];
-            }
+
+        // TODO - shopData.helpers should be a single object so as to avoid situation like these
+        // Try earth helpers first
+        if (shopManager.shopData.helpers && shopManager.shopData.helpers[helperType]) {
+            return shopManager.shopData.helpers[helperType];
         }
         
+        // Then try moon helpers
+        if (shopManager.shopData.moonHelpers && shopManager.shopData.moonHelpers[helperType]) {
+            return shopManager.shopData.moonHelpers[helperType];
+        }
+        
+        // Then try mars helpers
+        if (shopManager.shopData.marsHelpers && shopManager.shopData.marsHelpers[helperType]) {
+            return shopManager.shopData.marsHelpers[helperType];
+        }
+
+        // TODO - it would be better to figure out why we couldn't get the data to begin with rather than rely on a fallback
         // Fallback to hardcoded helper data if not found in ShopManager
         // Return complete helper data based on type
         const earthHelpers = {
@@ -2844,3 +2826,6 @@ export class DogeMinerGame {
         existingNameTooltips.forEach(tooltip => tooltip.remove());
     }
 }
+
+const instance = new GameManager();
+export default instance;

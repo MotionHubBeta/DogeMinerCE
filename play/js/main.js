@@ -1,9 +1,32 @@
-import { DogeMinerGame } from './game.js';
-import { UIManager } from './ui.js';
-import { ShopManager } from './shop.js';
-import { SaveManager } from './save.js';
-import { AudioManager } from './audio.js';
-import { NotificationManager } from './notifications.js';
+import gameManager, { GameManager } from './game.js';
+import uiManager, { UIManager } from './ui.js';
+import shopManager, { ShopManager } from './shop.js';
+import saveManager, { SaveManager } from './save.js';
+import audioManager, { AudioManager } from './audio.js';
+import notificationManager, { NotificationManager } from './notification.js';
+
+// Loading screen functions
+function showLoadingScreen(useFade = false) {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+        loadingScreen.style.display = 'flex';
+        loadingScreen.classList.remove('hidden', 'fade-out');
+
+        if (useFade) {
+            loadingScreen.classList.remove('fade-in');
+            loadingScreen.style.opacity = '0';
+            // Force reflow to allow transition to restart
+            void loadingScreen.offsetWidth;
+            loadingScreen.classList.add('fade-in');
+            requestAnimationFrame(() => {
+                loadingScreen.style.removeProperty('opacity');
+            });
+        } else {
+            loadingScreen.classList.remove('fade-in');
+            loadingScreen.style.opacity = '1';
+        }
+    }
+}
 
 // DogeMiner: Community Edition - Main Initialization
 const startGameWhenReady = () => initializeGame();
@@ -23,53 +46,25 @@ document.addEventListener('contextmenu', (e) => {
 async function initializeGame() {
     try {
         showLoadingScreen();
+
         updateLoadingInfo('Initializing game engine...');
-        
-        // Initialize game instance
-        const game = DogeMinerGame.getInstance();
+        gameManager.init();
+
         updateLoadingInfo('Setting up shop system...');
-        
-        // Initialize shop manager first (needed by UI manager)
-        const shopManager = new ShopManager(game);
-        window.shopManager = shopManager; // Make available immediately
+        shopManager.init();
+
         updateLoadingInfo('Building user interface...');
-        
-        // Initialize UI manager (depends on shop manager)
-        const uiManager = new UIManager(game);
-        window.uiManager = uiManager; // Expose early for save/load routines
+        uiManager.init();
+
         updateLoadingInfo('Loading audio system...');
-        
-        // Initialize audio manager
-        try {
-            const audioManager = new AudioManager();
-            audioManager.init();
-            window.audioManager = audioManager; // Make available for SaveManager
-        } catch (error) {
-            console.error('Failed to initialize audio manager:', error);
-            console.warn('Game will continue without audio');
-            // Create a dummy audio manager so the game doesn't break
-            const audioManager = {
-                musicEnabled: false,
-                soundEnabled: false,
-                playSound: () => {},
-                playBackgroundMusic: () => {},
-                stopBackgroundMusic: () => {},
-                pauseBackgroundMusic: () => {},
-                resumeBackgroundMusic: () => {},
-                switchToMoonMusic: () => {},
-                switchToMarsMusic: () => {},
-                switchToJupiterMusic: () => {},
-                switchToTitanMusic: () => {},
-                switchToEarthMusic: () => {}
-            };
-            window.audioManager = audioManager;
-        }
+        audioManager.init();
+
         updateLoadingInfo('Initializing save system...');
-        
-        const saveManager = new SaveManager(game);
+        saveManager.init();
+
         updateLoadingInfo('Preparing notifications...');
-        
-        const notificationManager = new NotificationManager(game);
+        notificationManager.init();
+
         updateLoadingInfo('Loading game data...');
         
         // Try to load existing save
@@ -83,9 +78,9 @@ async function initializeGame() {
             const mainRock = document.getElementById('main-rock');
             const platform = document.getElementById('platform');
             
-            if (mainCharacter && mainRock && game) {
+            if (mainCharacter && mainRock) {
                 // Set correct character sprite
-                if (game.currentLevel === 'earth') {
+                if (gameManager.currentLevel === 'earth') {
                     mainCharacter.src = 'assets/general/character/standard.png';
                     mainRock.src = 'assets/general/rocks/earth.png';
                     if (platform) {
@@ -95,7 +90,7 @@ async function initializeGame() {
                     document.body.classList.remove('planet-mars');
                     document.body.classList.remove('planet-jupiter');
                     document.body.classList.remove('planet-titan');
-                    game.backgrounds = [
+                    gameManager.backgrounds = [
                         'backgrounds/bg1.jpg',
                         'backgrounds/bg3.jpg',
                         'backgrounds/bg4.jpg',
@@ -105,7 +100,7 @@ async function initializeGame() {
                         'backgrounds/bg9.jpg',
                         'backgrounds/bg-new.jpg'
                     ];
-                } else if (game.currentLevel === 'moon') {
+                } else if (gameManager.currentLevel === 'moon') {
                     mainCharacter.src = 'assets/general/character/spacehelmet.png';
                     mainRock.src = 'assets/general/rocks/moon.png';
                     if (platform) {
@@ -119,7 +114,7 @@ async function initializeGame() {
                     if (uiManager) {
                         uiManager.hideMoonLocked();
                     }
-                } else if (game.currentLevel === 'mars') {
+                } else if (gameManager.currentLevel === 'mars') {
                     mainCharacter.src = 'assets/general/character/party.png';
                     mainRock.src = 'assets/general/rocks/mars.png';
                     if (platform) {
@@ -129,7 +124,7 @@ async function initializeGame() {
                     document.body.classList.remove('planet-jupiter');
                     document.body.classList.remove('planet-titan');
                     document.body.classList.add('planet-mars');
-                    game.backgrounds = [
+                    gameManager.backgrounds = [
                         'backgrounds/bg6.jpg',
                         'assets/backgrounds/bg101.jpg', // Mars extras live under play/assets/backgrounds/
                         'assets/backgrounds/bg102.jpg',
@@ -138,7 +133,7 @@ async function initializeGame() {
                         'assets/backgrounds/bg105.jpg',
                         'backgrounds/bg-new.jpg'
                     ];
-                } else if (game.currentLevel === 'jupiter') {
+                } else if (gameManager.currentLevel === 'jupiter') {
                     // Jupiter reuses the space suit but swaps to the dedicated platform art.
                     mainCharacter.src = 'assets/general/character/spacehelmet.png';
                     mainRock.src = 'assets/general/rocks/jupiter.png';
@@ -149,13 +144,13 @@ async function initializeGame() {
                     document.body.classList.remove('planet-mars');
                     document.body.classList.remove('planet-titan');
                     document.body.classList.add('planet-jupiter');
-                    game.backgrounds = [
+                    gameManager.backgrounds = [
                         'assets/backgrounds/bgjup01.jpg',
                         'assets/backgrounds/bgjup02.jpg',
                         'assets/backgrounds/bgjup03.jpg',
                         'assets/backgrounds/dogewow.jpg'
                     ];
-                } else if (game.currentLevel === 'titan') {
+                } else if (gameManager.currentLevel === 'titan') {
                     // Titan uses the space helmet like Jupiter and Moon
                     mainCharacter.src = 'assets/general/character/spacehelmet.png';
                     mainRock.src = 'assets/general/rocks/titan.png';
@@ -167,7 +162,7 @@ async function initializeGame() {
                     document.body.classList.remove('planet-mars');
                     document.body.classList.remove('planet-jupiter');
                     document.body.classList.add('planet-titan');
-                    game.backgrounds = [
+                    gameManager.backgrounds = [
                         'assets/backgrounds/titan02.jpg',
                         'assets/backgrounds/titan03.jpg',
                         'assets/backgrounds/titan04.jpg',
@@ -176,10 +171,10 @@ async function initializeGame() {
                 }
 
                 // Make sure the background DOM nodes reflect the resolved pool for this load-in planet.
-                game.syncBackgroundImages?.(true);
+                gameManager.syncBackgroundImages?.(true);
                 
                 // Force update shop content and planet tabs if on Moon, Mars, Jupiter, or Titan
-                if ((game.currentLevel === 'moon' || game.currentLevel === 'mars' || game.currentLevel === 'jupiter' || game.currentLevel === 'titan') && uiManager) {
+                if ((gameManager.currentLevel === 'moon' || gameManager.currentLevel === 'mars' || gameManager.currentLevel === 'jupiter' || gameManager.currentLevel === 'titan') && uiManager) {
                     uiManager.initializePlanetTabs?.();
                     setTimeout(() => {
                         uiManager.updateShopContent();
@@ -196,24 +191,17 @@ async function initializeGame() {
         // Hide loading screen after a short delay
         setTimeout(() => {
             hideLoadingScreen();
-            game.isPlaying = true;
-            // Make game and managers globally available
-            window.game = game;
-            window.uiManager = uiManager;
-            // window.shopManager already assigned above
-            window.saveManager = saveManager;
-            window.notificationManager = notificationManager;
-            // window.audioManager already assigned above
+            gameManager.isPlaying = true;
             
             // Play doge intro animation
-            if (game.currentLevel === 'earth') {
-                game.playDogeIntro();
+            if (gameManager.currentLevel === 'earth') {
+                gameManager.playDogeIntro();
             } else {
-                game.playDogeIntro(true);
+                gameManager.playDogeIntro(true);
             }
             
             // Start background music only if enabled
-            if (audioManager && game && game.musicEnabled) {
+            if (audioManager && gameManager && gameManager.musicEnabled) {
                 audioManager.playBackgroundMusic();
             }
             
@@ -278,29 +266,6 @@ function importSave() {
 function resetGame() {
     if (saveManager) {
         saveManager.resetGame();
-    }
-}
-
-// Loading screen functions
-function showLoadingScreen(useFade = false) {
-    const loadingScreen = document.getElementById('loading-screen');
-    if (loadingScreen) {
-        loadingScreen.style.display = 'flex';
-        loadingScreen.classList.remove('hidden', 'fade-out');
-
-        if (useFade) {
-            loadingScreen.classList.remove('fade-in');
-            loadingScreen.style.opacity = '0';
-            // Force reflow to allow transition to restart
-            void loadingScreen.offsetWidth;
-            loadingScreen.classList.add('fade-in');
-            requestAnimationFrame(() => {
-                loadingScreen.style.removeProperty('opacity');
-            });
-        } else {
-            loadingScreen.classList.remove('fade-in');
-            loadingScreen.style.opacity = '1';
-        }
     }
 }
 
@@ -541,9 +506,7 @@ document.addEventListener('keydown', (e) => {
     
     // Rotate background with B
     if (e.key === 'b') {
-        if (game) {
-            game.rotateBackground();
-        }
+        gameManager.rotateBackground();
     }
 });
 

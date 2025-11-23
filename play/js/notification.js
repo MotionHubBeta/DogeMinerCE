@@ -1,7 +1,8 @@
 // DogeMiner: Community Edition - Notifications System
 export class NotificationManager {
-    constructor(game) {
-        this.game = game;
+    constructor() {}
+
+    init() {
         this.notifications = [];
         this.maxNotifications = 5;
         this.defaultDuration = 3000;
@@ -385,5 +386,5 @@ if (!document.getElementById('notification-animations')) {
     document.head.appendChild(style);
 }
 
-// Global notification manager instance
-let notificationManager;
+const instance = new NotificationManager();
+export default instance;

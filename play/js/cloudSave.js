@@ -401,52 +401,5 @@ export class CloudSaveManager {
     }
 }
 
-// Global functions for HTML onclick handlers
-let cloudSaveManager;
-
-function signInWithGoogle() {
-    if (window.cloudSaveManager) {
-        window.cloudSaveManager.signInWithGoogle();
-    } else if (cloudSaveManager) {
-        cloudSaveManager.signInWithGoogle();
-    } else {
-        console.error('CloudSaveManager not initialized');
-    }
-}
-
-function signOutUser() {
-    if (window.cloudSaveManager) {
-        window.cloudSaveManager.signOutUser();
-    } else if (cloudSaveManager) {
-        cloudSaveManager.signOutUser();
-    } else {
-        console.error('CloudSaveManager not initialized');
-    }
-}
-
-function saveToCloud() {
-    if (window.cloudSaveManager) {
-        window.cloudSaveManager.saveToCloud();
-    } else if (cloudSaveManager) {
-        cloudSaveManager.saveToCloud();
-    } else {
-        console.error('CloudSaveManager not initialized');
-    }
-}
-
-function loadFromCloud() {
-    if (window.cloudSaveManager) {
-        window.cloudSaveManager.loadFromCloud();
-    } else if (cloudSaveManager) {
-        cloudSaveManager.loadFromCloud();
-    } else {
-        console.error('CloudSaveManager not initialized');
-    }
-}
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    cloudSaveManager = new CloudSaveManager();
-    window.cloudSaveManager = cloudSaveManager;
-});
-
+const instance = new CloudSaveManager();
+export default instance;

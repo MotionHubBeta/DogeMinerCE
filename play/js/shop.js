@@ -1,21 +1,13 @@
+import uiManager, { UIManager } from './ui.js';
+import gameManager, { GameManager } from './game.js';
+
 // DogeMiner: Community Edition - Shop Management
-
 export class ShopManager {
-    static #instance = null;
     shopData = null;
-    
-    static getInstance() {
-        if (!ShopManager.#instance) {
-            ShopManager.#instance = new ShopManager();
-        }
-        return ShopManager.#instance;
-    }
 
-    constructor() {
-        if(ShopManager.#instance) {
-            throw new Error(window.ERR_MESSAGES.ERROR_SINGLETON_EXISTS);
-        }
+    constructor() {}
 
+    init() {
         this.shopData = this.initializeShopData();
     }
     
@@ -426,87 +418,87 @@ export class ShopManager {
     }
     
     canAffordHelper(helperType) {
-        const owned = this.game.helpers.filter(h => h.type === helperType).length;
+        const owned = gameManager.helpers.filter(h => h.type === helperType).length;
         const cost = this.getHelperCost(helperType, owned);
-        return this.game.dogecoins >= cost;
+        return gameManager.dogecoins >= cost;
     }
     
     canAffordPickaxe(pickaxeType) {
         const pickaxe = this.shopData.pickaxes[pickaxeType];
         if (!pickaxe) return false;
         
-        return this.game.dogecoins >= pickaxe.cost && !this.game.pickaxes.includes(pickaxeType);
+        return gameManager.dogecoins >= pickaxe.cost && !gameManager.pickaxes.includes(pickaxeType);
     }
     
     canAffordUpgrade(upgradeType) {
         const upgrade = this.shopData.upgrades[upgradeType];
         if (!upgrade) return false;
         
-        const level = this.game.upgrades[upgradeType] || 0;
+        const level = gameManager.upgrades[upgradeType] || 0;
         if (level >= upgrade.maxLevel) return false;
         
         const cost = Math.floor(upgrade.baseCost * Math.pow(1.5, level));
-        return this.game.dogecoins >= cost;
+        return gameManager.dogecoins >= cost;
     }
     
     buyHelper(helperType) {
         if (!this.canAffordHelper(helperType)) {
-            this.game.showNotification('Not enough Dogecoins!');
+            gameManager.showNotification('Not enough Dogecoins!');
             return false;
         }
         
-        const owned = this.game.helpers.filter(h => h.type === helperType).length;
+        const owned = gameManager.helpers.filter(h => h.type === helperType).length;
         const cost = this.getHelperCost(helperType, owned);
         const helper = this.shopData.helpers[helperType];
         
-        this.game.dogecoins -= cost;
-        this.game.helpers.push({
+        gameManager.dogecoins -= cost;
+        gameManager.helpers.push({
             type: helperType,
             name: helper.name,  // Store the display name from shop data
             dps: helper.baseDps,
             owned: owned + 1
         });
         
-        this.game.updateDPS();
-        this.game.showNotification(`Bought ${helper.name} for ${this.game.formatNumber(cost)} Dogecoins!`);
-        this.game.playSound('check.wav');
+        gameManager.updateDPS();
+        gameManager.showNotification(`Bought ${helper.name} for ${gameManager.formatNumber(cost)} Dogecoins!`);
+        gameManager.playSound('check.wav');
         
         return true;
     }
     
     buyPickaxe(pickaxeType) {
         if (!this.canAffordPickaxe(pickaxeType)) {
-            this.game.showNotification('Cannot buy this pickaxe!');
+            gameManager.showNotification('Cannot buy this pickaxe!');
             return false;
         }
         
         const pickaxe = this.shopData.pickaxes[pickaxeType];
         
-        this.game.dogecoins -= pickaxe.cost;
-        this.game.pickaxes.push(pickaxeType);
-        this.game.currentPickaxe = pickaxeType;
+        gameManager.dogecoins -= pickaxe.cost;
+        gameManager.pickaxes.push(pickaxeType);
+        gameManager.currentPickaxe = pickaxeType;
         
-        this.game.showNotification(`Bought ${pickaxe.name}!`);
-        this.game.playSound('check.wav');
+        gameManager.showNotification(`Bought ${pickaxe.name}!`);
+        gameManager.playSound('check.wav');
         
         return true;
     }
     
     buyUpgrade(upgradeType) {
         if (!this.canAffordUpgrade(upgradeType)) {
-            this.game.showNotification('Cannot buy this upgrade!');
+            gameManager.showNotification('Cannot buy this upgrade!');
             return false;
         }
         
         const upgrade = this.shopData.upgrades[upgradeType];
-        const level = this.game.upgrades[upgradeType] || 0;
+        const level = gameManager.upgrades[upgradeType] || 0;
         const cost = Math.floor(upgrade.baseCost * Math.pow(1.5, level));
         
-        this.game.dogecoins -= cost;
-        this.game.upgrades[upgradeType] = level + 1;
+        gameManager.dogecoins -= cost;
+        gameManager.upgrades[upgradeType] = level + 1;
         
-        this.game.showNotification(`Bought ${upgrade.name} Level ${level + 1}!`);
-        this.game.playSound('check.wav');
+        gameManager.showNotification(`Bought ${upgrade.name} Level ${level + 1}!`);
+        gameManager.playSound('check.wav');
         
         return true;
     }
@@ -551,13 +543,13 @@ export class ShopManager {
         // Unlock upgrades based on game progress
         switch (upgradeType) {
             case 'clickPower':
-                return this.game.totalMined >= 100;
+                return gameManager.totalMined >= 100;
             case 'autoClicker':
-                return this.game.totalMined >= 1000;
+                return gameManager.totalMined >= 1000;
             case 'criticalChance':
-                return this.game.totalMined >= 5000;
+                return gameManager.totalMined >= 5000;
             case 'helperEfficiency':
-                return this.game.helpers.length >= 3;
+                return gameManager.helpers.length >= 3;
             default:
                 return false;
         }
@@ -565,14 +557,14 @@ export class ShopManager {
     
     updateShopDisplay() {
         // This will be called by the UI manager to refresh shop displays
-        if (uiManager && uiManager.activePanel === 'shop-panel') {
+        if (uiManager.activePanel === 'shop-panel') {
             uiManager.updateShopContent();
         }
     }
     
     getHelperStats(helperType) {
         const helper = this.shopData.helpers[helperType];
-        const owned = this.game.helpers.filter(h => h.type === helperType).length;
+        const owned = gameManager.helpers.filter(h => h.type === helperType).length;
         const totalDps = helper.baseDps * owned;
         
         return {
@@ -584,7 +576,7 @@ export class ShopManager {
     
     getUpgradeStats(upgradeType) {
         const upgrade = this.shopData.upgrades[upgradeType];
-        const level = this.game.upgrades[upgradeType] || 0;
+        const level = gameManager.upgrades[upgradeType] || 0;
         const nextCost = Math.floor(upgrade.baseCost * Math.pow(1.5, level));
         
         return {
@@ -636,5 +628,5 @@ export class ShopManager {
     }
 }
 
-// Global shop manager instance
-let shopManager;
+const instance = new ShopManager();
+export default instance;

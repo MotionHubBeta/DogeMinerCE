@@ -1,7 +1,13 @@
+import audioManager, { AudioManager } from "./audio.js";
+import gameManager, { GameManager } from "./game.js";
+import shopManager, { ShopManager } from "./shop.js";
+import notificationManager, { NotificationManager } from "./notification.js";
+
 // DogeMiner: Community Edition - UI Management
 export class UIManager {
-    constructor(game) {
-        this.game = game;
+    constructor() {}
+
+    init() {
         this.activePanel = 'shop-tab'; // Shop tab is active by default
         this.currentShopTab = 'helpers';
         this.mobileMenuOpen = false; // Track mobile menu state
@@ -86,9 +92,7 @@ export class UIManager {
             this.activePanel = tabName + '-tab';
 
             // Play sound
-            if (window.audioManager) {
-                audioManager.playSound('swipe');
-            }
+            audioManager.playSound('swipe');
 
             // Update shop content if switching to shop
             if (tabName === 'shop') {
@@ -99,17 +103,15 @@ export class UIManager {
         // Planet tab switching with loading transition
         window.switchPlanet = (planetName) => {
             // Don't allow switching if already on this planet or if transition is in progress
-            if (this.game.currentLevel === planetName || this.game.isTransitioning) return;
+            if (gameManager.currentLevel === planetName || gameManager.isTransitioning) return;
 
             // Check if Moon is locked (no Space Rockets owned)
             if (planetName === 'moon') {
-                const spaceRocketCount = this.game.helpers.filter(h => h.type === 'spaceRocket').length;
+                const spaceRocketCount = gameManager.helpers.filter(h => h.type === 'spaceRocket').length;
 
                 if (spaceRocketCount === 0) {
                     // Play locked sound
-                    if (window.audioManager) {
-                        audioManager.playSound('uhoh');
-                    }
+                    audioManager.playSound('uhoh');
 
                     // Show locked overlay
                     this.showMoonLocked();
@@ -118,45 +120,35 @@ export class UIManager {
             }
 
             if (planetName === 'mars' && !this.isMarsUnlocked()) {
-                if (window.audioManager) {
-                    audioManager.playSound('uhoh');
-                }
-                window.notificationManager?.showWarning?.('LOCKED: Requires Lander Shibe');
+                audioManager.playSound('uhoh');
+                notificationManager.showWarning?.('LOCKED: Requires Lander Shibe');
                 return;
             }
 
             if (planetName === 'jupiter') {
                 if (!this.isMarsUnlocked()) {
-                    if (window.audioManager) {
-                        audioManager.playSound('uhoh');
-                    }
-                    window.notificationManager?.showWarning?.('LOCKED: Requires Mars');
+                    audioManager.playSound('uhoh');
+                    notificationManager.showWarning?.('LOCKED: Requires Mars');
                     return;
                 }
 
                 if (!this.isJupiterUnlocked()) {
-                    if (window.audioManager) {
-                        audioManager.playSound('uhoh');
-                    }
-                    window.notificationManager?.showWarning?.('LOCKED: Requires Jupiter Rocket');
+                    audioManager.playSound('uhoh');
+                    notificationManager.showWarning?.('LOCKED: Requires Jupiter Rocket');
                     return;
                 }
             }
 
             if (planetName === 'titan') {
                 if (!this.isJupiterUnlocked()) {
-                    if (window.audioManager) {
-                        audioManager.playSound('uhoh');
-                    }
-                    window.notificationManager?.showWarning?.('LOCKED: Requires Jupiter');
+                    audioManager.playSound('uhoh');
+                    notificationManager.showWarning?.('LOCKED: Requires Jupiter');
                     return;
                 }
 
                 if (!this.isTitanUnlocked()) {
-                    if (window.audioManager) {
-                        audioManager.playSound('uhoh');
-                    }
-                    window.notificationManager?.showWarning?.('LOCKED: Requires DogeStar');
+                    audioManager.playSound('uhoh');
+                    notificationManager.showWarning?.('LOCKED: Requires DogeStar');
                     return;
                 }
             }
@@ -173,7 +165,7 @@ export class UIManager {
             }
 
             // Set transitioning flag
-            this.game.isTransitioning = true;
+            gameManager.isTransitioning = true;
 
             // Show loading screen with appropriate message
             const loadingInfo = document.getElementById('loading-info');
@@ -199,43 +191,43 @@ export class UIManager {
             // Use timeout to ensure loading screen is visible before processing
             setTimeout(() => {
                 // First save the current state
-                if (this.game.currentLevel === 'earth') {
+                if (gameManager.currentLevel === 'earth') {
                     // Save earth placed helpers
-                    this.game.earthPlacedHelpers = [...this.game.placedHelpers];
-                } else if (this.game.currentLevel === 'moon') {
+                    gameManager.earthPlacedHelpers = [...gameManager.placedHelpers];
+                } else if (gameManager.currentLevel === 'moon') {
                     // Save moon placed helpers
-                    this.game.moonPlacedHelpers = [...this.game.placedHelpers];
-                } else if (this.game.currentLevel === 'mars') {
+                    gameManager.moonPlacedHelpers = [...gameManager.placedHelpers];
+                } else if (gameManager.currentLevel === 'mars') {
                     // Save mars placed helpers
-                    this.game.marsPlacedHelpers = [...this.game.placedHelpers];
-                } else if (this.game.currentLevel === 'jupiter') {
-                    this.game.jupiterPlacedHelpers = [...this.game.placedHelpers];
-                } else if (this.game.currentLevel === 'titan') {
+                    gameManager.marsPlacedHelpers = [...gameManager.placedHelpers];
+                } else if (gameManager.currentLevel === 'jupiter') {
+                    gameManager.jupiterPlacedHelpers = [...gameManager.placedHelpers];
+                } else if (gameManager.currentLevel === 'titan') {
                     // Save titan placed helpers when leaving Titan
-                    this.game.titanPlacedHelpers = [...this.game.placedHelpers];
+                    gameManager.titanPlacedHelpers = [...gameManager.placedHelpers];
                 }
 
                 // Clear the current helpers from the screen
-                this.game.clearAllHelperSprites();
+                gameManager.clearAllHelperSprites();
 
                 // Update game state to reflect planet change
-                this.game.currentLevel = planetName;
+                gameManager.currentLevel = planetName;
 
                 // Update mobile display
                 this.updateMobilePlanetDisplay();
 
                 // Load the appropriate placed helpers
                 if (planetName === 'earth') {
-                    this.game.placedHelpers = [...this.game.earthPlacedHelpers];
+                    gameManager.placedHelpers = [...gameManager.earthPlacedHelpers];
                 } else if (planetName === 'moon') {
-                    this.game.placedHelpers = [...this.game.moonPlacedHelpers];
+                    gameManager.placedHelpers = [...gameManager.moonPlacedHelpers];
                 } else if (planetName === 'mars') {
-                    this.game.placedHelpers = [...(this.game.marsPlacedHelpers || [])];
+                    gameManager.placedHelpers = [...(gameManager.marsPlacedHelpers || [])];
                 } else if (planetName === 'jupiter') {
-                    this.game.placedHelpers = [...(this.game.jupiterPlacedHelpers || [])];
+                    gameManager.placedHelpers = [...(gameManager.jupiterPlacedHelpers || [])];
                 } else if (planetName === 'titan') {
                     // Load titan placed helpers when switching to Titan
-                    this.game.placedHelpers = [...(this.game.titanPlacedHelpers || [])];
+                    gameManager.placedHelpers = [...(gameManager.titanPlacedHelpers || [])];
                 }
 
                 // Update the character sprite
@@ -267,9 +259,7 @@ export class UIManager {
                     document.body.classList.remove('planet-mars');
                     document.body.classList.remove('planet-jupiter');
                     document.body.classList.remove('planet-titan');
-                    if (window.audioManager) {
-                        audioManager.playBackgroundMusic();
-                    }
+                    audioManager.playBackgroundMusic();
                 } else if (planetName === 'moon') {
                     rockElement.src = 'assets/general/rocks/moon.png';
                     if (platform) {
@@ -279,9 +269,7 @@ export class UIManager {
                     document.body.classList.remove('planet-mars');
                     document.body.classList.remove('planet-jupiter');
                     document.body.classList.remove('planet-titan');
-                    if (window.audioManager) {
-                        audioManager.playBackgroundMusic();
-                    }
+                    audioManager.playBackgroundMusic();
                 } else if (planetName === 'mars') {
                     rockElement.src = 'assets/general/rocks/mars.png';
                     if (platform) {
@@ -291,9 +279,7 @@ export class UIManager {
                     document.body.classList.add('planet-mars');
                     document.body.classList.remove('planet-jupiter');
                     document.body.classList.remove('planet-titan');
-                    if (window.audioManager) {
-                        audioManager.playBackgroundMusic();
-                    }
+                    audioManager.playBackgroundMusic();
                 } else if (planetName === 'jupiter') {
                     rockElement.src = 'assets/general/rocks/jupiter.png';
                     if (platform) {
@@ -304,9 +290,7 @@ export class UIManager {
                     document.body.classList.remove('planet-mars');
                     document.body.classList.remove('planet-titan');
                     document.body.classList.add('planet-jupiter');
-                    if (window.audioManager) {
-                        audioManager.playBackgroundMusic();
-                    }
+                    audioManager.playBackgroundMusic();
                 } else if (planetName === 'titan') {
                     // Titan uses its own rock and platform
                     rockElement.src = 'assets/general/rocks/titan.png';
@@ -317,15 +301,13 @@ export class UIManager {
                     document.body.classList.remove('planet-mars');
                     document.body.classList.remove('planet-jupiter');
                     document.body.classList.add('planet-titan');
-                    if (window.audioManager) {
-                        audioManager.playBackgroundMusic();
-                    }
+                    audioManager.playBackgroundMusic();
                 }
 
                 // Update backgrounds with the correct pool
                 if (planetName === 'earth') {
                     // Earth backgrounds
-                    this.game.backgrounds = [
+                    gameManager.backgrounds = [
                         'backgrounds/bg1.jpg',
                         'backgrounds/bg3.jpg',
                         'backgrounds/bg4.jpg',
@@ -337,7 +319,7 @@ export class UIManager {
                     ];
                 } else if (planetName === 'moon') {
                     // Moon backgrounds (same as earth since DOM only has 8 background elements)
-                    this.game.backgrounds = [
+                    gameManager.backgrounds = [
                         'backgrounds/bg1.jpg',
                         'backgrounds/bg3.jpg',
                         'backgrounds/bg4.jpg',
@@ -348,7 +330,7 @@ export class UIManager {
                         'backgrounds/bg-new.jpg'
                     ];
                 } else if (planetName === 'mars') {
-                    this.game.backgrounds = [
+                    gameManager.backgrounds = [
                         'backgrounds/bg6.jpg',
                         'assets/backgrounds/bg101.jpg',
                         'assets/backgrounds/bg102.jpg',
@@ -358,7 +340,7 @@ export class UIManager {
                         'backgrounds/bg-new.jpg'
                     ];
                 } else if (planetName === 'jupiter') {
-                    this.game.backgrounds = [
+                    gameManager.backgrounds = [
                         'assets/backgrounds/bgjup01.jpg',
                         'assets/backgrounds/bgjup02.jpg',
                         'assets/backgrounds/bgjup03.jpg',
@@ -366,17 +348,17 @@ export class UIManager {
                     ];
                 } else if (planetName === 'titan') {
                     // Titan uses its own background set for atmospheric effect
-                    this.game.backgrounds = [
+                    gameManager.backgrounds = [
                         'assets/backgrounds/titan02.jpg',
                         'assets/backgrounds/titan03.jpg',
                         'assets/backgrounds/titan04.jpg',
                         'assets/backgrounds/titan05.jpg'
                     ];
                 }
-                this.game.currentBackgroundIndex = 0;
+                gameManager.currentBackgroundIndex = 0;
 
                 // Sync background image DOM nodes to match the newly selected planet.
-                this.game.syncBackgroundImages?.(true);
+                gameManager.syncBackgroundImages?.(true);
 
                 // Update the shop to show the appropriate helpers
                 this.updateShopContent();
@@ -385,13 +367,13 @@ export class UIManager {
                 // Delay a bit to simulate loading
                 setTimeout(() => {
                     // Recreate helper sprites for the current planet
-                    this.game.recreateHelperSprites();
+                    gameManager.recreateHelperSprites();
 
                     // Hide loading screen
                     window.hideLoadingScreen();
 
                     // Reset transitioning flag
-                    this.game.isTransitioning = false;
+                    gameManager.isTransitioning = false;
 
                     // Trigger landing animation depending on destination
                     const characterContainer = document.getElementById('character-container');
@@ -407,7 +389,7 @@ export class UIManager {
                         // Play drop-in intro animation for all planets to maintain consistency
                         const forceIntro = planetName === 'moon' || planetName === 'earth' || planetName === 'mars' || planetName === 'jupiter' || planetName === 'titan';
                         if (forceIntro) {
-                            this.game.playDogeIntro(true);
+                            gameManager.playDogeIntro(true);
                         }
                     }, 300);
 
@@ -461,7 +443,7 @@ export class UIManager {
     }
 
     updateShopContent() {
-        if (!this.game) {
+        if (!gameManager) {
             console.warn('updateShopContent called before game was ready');
             return;
         }
@@ -475,7 +457,7 @@ export class UIManager {
         }
 
         // Log the current planet to help debug shop issues
-        console.log(`Updating shop content for planet: ${this.game.currentLevel}`);
+        console.log(`Updating shop content for planet: ${gameManager.currentLevel}`);
 
         // Clear existing content
         shopContent.innerHTML = '';
@@ -484,30 +466,30 @@ export class UIManager {
         this.renderHelperShop(shopContent);
 
         // Update shop prices to reflect current planet's helpers
-        this.game.updateShopPrices();
+        gameManager.updateShopPrices();
     }
 
     renderHelperShop(container) {
         container.innerHTML = ''; // Clear container completely
 
-        if (!this.game) {
+        if (!gameManager) {
             console.warn('renderHelperShop called before game was ready');
             return;
         }
 
         // Choose which helpers to display based on current planet
-        const helperCategory = this.game.getHelperCategoryForLevel(this.game.currentLevel);
-        console.log(`Rendering shop with helper category: ${helperCategory} for planet: ${this.game.currentLevel}`);
+        const helperCategory = gameManager.getHelperCategoryForLevel(gameManager.currentLevel);
+        console.log(`Rendering shop with helper category: ${helperCategory} for planet: ${gameManager.currentLevel}`);
 
-        if (!window.shopManager.shopData[helperCategory]) {
+        if (!shopManager.shopData[helperCategory]) {
             console.error(`Shop data for ${helperCategory} is missing!`);
             return;
         }
 
-        const helperEntries = Object.entries(window.shopManager.shopData[helperCategory]);
-        const moonHelpers = Array.isArray(this.game.moonHelpers) ? this.game.moonHelpers : [];
-        const marsHelpers = Array.isArray(this.game.marsHelpers) ? this.game.marsHelpers : [];
-        const jupiterHelpers = Array.isArray(this.game.jupiterHelpers) ? this.game.jupiterHelpers : [];
+        const helperEntries = Object.entries(shopManager.shopData[helperCategory]);
+        const moonHelpers = Array.isArray(gameManager.moonHelpers) ? gameManager.moonHelpers : [];
+        const marsHelpers = Array.isArray(gameManager.marsHelpers) ? gameManager.marsHelpers : [];
+        const jupiterHelpers = Array.isArray(gameManager.jupiterHelpers) ? gameManager.jupiterHelpers : [];
         const moonBaseOwned = moonHelpers.some(helper => helper.type === 'moonBase');
         const marsBaseOwned = marsHelpers.some(helper => helper.type === 'marsBase');
         const jupiterBaseOwned = jupiterHelpers.some(helper => helper.type === 'cloudBase');
@@ -521,19 +503,19 @@ export class UIManager {
             if (i < helperEntries.length) {
                 const [type, helper] = helperEntries[i];
                 // Choose the correct helper array based on current planet
-                const helperArray = this.game.getHelperArrayForLevel(this.game.currentLevel);
+                const helperArray = gameManager.getHelperArrayForLevel(gameManager.currentLevel);
                 const owned = helperArray.filter(h => h.type === type).length;
                 const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned));
-                const canAfford = this.game.dogecoins >= cost;
+                const canAfford = gameManager.dogecoins >= cost;
 
                 let lockReason = null;
-                if (this.game.currentLevel === 'moon') {
+                if (gameManager.currentLevel === 'moon') {
                     if (type !== 'moonBase' && !moonBaseOwned) {
                         lockReason = 'moonBase';
                     } else if (type === 'marsRocket' && !landerShibeOwned) {
                         lockReason = 'landerShibe';
                     }
-                } else if (this.game.currentLevel === 'mars') {
+                } else if (gameManager.currentLevel === 'mars') {
                     if (type !== 'marsBase' && !marsBaseOwned) {
                         lockReason = 'marsBase';
                     }
@@ -541,7 +523,7 @@ export class UIManager {
                     if (type === 'jupiterRocket' && !spaceBassOwned) {
                         lockReason = 'spaceBass';
                     }
-                } else if (this.game.currentLevel === 'jupiter') {
+                } else if (gameManager.currentLevel === 'jupiter') {
                     if (type !== 'cloudBase' && !jupiterBaseOwned) {
                         lockReason = 'cloudBase';
                     }
@@ -550,7 +532,7 @@ export class UIManager {
 
 
                 // Calculate button width based on price length
-                const priceText = this.game.formatNumber(cost);
+                const priceText = gameManager.formatNumber(cost);
                 const priceLength = priceText.length;
                 let buttonWidth = '45%'; // Default width
 
@@ -637,22 +619,22 @@ export class UIManager {
         const button = event.currentTarget;
         const helperType = button.getAttribute('data-helper-type');
 
-        if (helperType && window.game) {
+        if (helperType) {
             // Buy the helper based on the current planet
-            const success = window.game.buyHelper(helperType);
+            const success = gameManager.buyHelper(helperType);
 
             if (success) {
                 // Trigger chromatic aberration effect on successful purchase
-                window.game.createChromaticAberrationEffect(button);
+                gameManager.createChromaticAberrationEffect(button);
 
                 // Update shop display immediately
                 this.updateShopDisplay();
 
                 // Special handling for Earth helpers
-                if (window.game.currentLevel === 'earth') {
+                if (gameManager.currentLevel === 'earth') {
                     // If this is the first Space Rocket purchase, unlock the Moon
                     if (helperType === 'spaceRocket') {
-                        const spaceRocketCount = window.game.helpers.filter(h => h.type === 'spaceRocket').length;
+                        const spaceRocketCount = gameManager.helpers.filter(h => h.type === 'spaceRocket').length;
                         if (spaceRocketCount === 1) {
                             // This is the first Space Rocket purchase
                             this.hideMoonLocked();
@@ -663,7 +645,7 @@ export class UIManager {
                 console.log('Failed to buy helper - insufficient funds');
             }
         } else {
-            console.error('Helper type or game not found:', helperType, !!window.game);
+            console.error('Helper type or game not found:', helperType, !!gameManager);
         }
     }
 
@@ -673,8 +655,8 @@ export class UIManager {
         const button = event.currentTarget;
         const helperType = button?.getAttribute('data-helper-type');
 
-        if (!helperType || !window.game) {
-            console.error('Mobile helper type or game not found:', helperType, !!window.game);
+        if (!helperType || !gameManager) {
+            console.error('Mobile helper type or game not found:', helperType, !!gameManager);
             return;
         }
 
@@ -682,10 +664,10 @@ export class UIManager {
             return;
         }
 
-        const success = window.game.buyHelper(helperType);
+        const success = gameManager.buyHelper(helperType);
 
         if (success) {
-            window.game.createChromaticAberrationEffect?.(button);
+            gameManager.createChromaticAberrationEffect?.(button);
             this.updateMobileShopContent();
             this.updateMobileStats?.();
         } else {
@@ -704,9 +686,9 @@ export class UIManager {
     }
 
     renderPickaxeShop(container) {
-        Object.entries(this.game.pickaxeTypes).forEach(([type, pickaxe]) => {
-            const owned = this.game.pickaxes.includes(type);
-            const canBuy = !owned && this.game.dogecoins >= pickaxe.cost;
+        Object.entries(gameManager.pickaxeTypes).forEach(([type, pickaxe]) => {
+            const owned = gameManager.pickaxes.includes(type);
+            const canBuy = !owned && gameManager.dogecoins >= pickaxe.cost;
 
             const item = document.createElement('div');
             item.className = 'shop-item';
@@ -714,7 +696,7 @@ export class UIManager {
             item.innerHTML = `
                 <div class="shop-item-header">
                     <div class="shop-item-title">${pickaxe.name}</div>
-                    <div class="shop-item-price">${owned ? 'Owned' : 'D ' + this.game.formatNumber(pickaxe.cost)}</div>
+                    <div class="shop-item-price">${owned ? 'Owned' : 'D ' + gameManager.formatNumber(pickaxe.cost)}</div>
                 </div>
                 <div class="shop-item-content">
                     <div class="shop-item-icon">
@@ -856,7 +838,7 @@ export class UIManager {
         const rockImage = document.getElementById('main-rock');
         if (!rockImage) return;
 
-        const level = this.game.levels[levelName];
+        const level = gameManager.levels[levelName];
         if (!level) return;
 
         const targetSrc = level.rock;
@@ -1001,7 +983,7 @@ export class UIManager {
         this.activePanel = tabName + '-tab';
 
         // Only play sound if switching to a different tab
-        if (!isTabAlreadyActive && window.audioManager) {
+        if (!isTabAlreadyActive) {
             audioManager.playSound('swipe');
         }
 
@@ -1062,7 +1044,7 @@ export class UIManager {
 
     // Initialize planet tabs based on saved state
     initializePlanetTabs() {
-        if (!this.game || !this.game.currentLevel) {
+        if (!gameManager || !gameManager.currentLevel) {
             return;
         }
 
@@ -1073,34 +1055,34 @@ export class UIManager {
             btn.classList.remove('active');
 
             const tabPlanet = btn.dataset.planet || btn.querySelector('img')?.alt?.toLowerCase() || '';
-            if (tabPlanet.toLowerCase() === this.game.currentLevel) {
+            if (tabPlanet.toLowerCase() === gameManager.currentLevel) {
                 btn.classList.add('active');
             }
         });
 
-        if (this.game.hasPlayedMoonLaunch) {
+        if (gameManager.hasPlayedMoonLaunch) {
             this.hideMoonLocked();
         }
 
         const shopPanel = document.getElementById('shop-panel');
         if (shopPanel && (this.activePanel === 'shop-panel' || shopPanel.style.display === 'block')) {
-            console.log(`Updating shop content to match current planet: ${this.game.currentLevel}`);
+            console.log(`Updating shop content to match current planet: ${gameManager.currentLevel}`);
             this.updateShopContent();
         }
 
-        console.log(`Planet tabs initialized to: ${this.game.currentLevel}`);
+        console.log(`Planet tabs initialized to: ${gameManager.currentLevel}`);
     }
 
     playerHasHelperType(helperType) {
-        if (!this.game) return false;
+        if (!gameManager) return false;
 
         const helperLists = [
-            this.game.helpers,
-            this.game.moonHelpers,
-            this.game.marsHelpers,
-            this.game.earthPlacedHelpers,
-            this.game.moonPlacedHelpers,
-            this.game.marsPlacedHelpers
+            gameManager.helpers,
+            gameManager.moonHelpers,
+            gameManager.marsHelpers,
+            gameManager.earthPlacedHelpers,
+            gameManager.moonPlacedHelpers,
+            gameManager.marsPlacedHelpers
         ];
 
         return helperLists.some(list =>
@@ -1119,11 +1101,11 @@ export class UIManager {
     isMarsUnlocked() {
         const marsRocketOwned = this.playerHasMarsRocket();
 
-        if (marsRocketOwned && this.game && !this.game.hasPlayedMoonLaunch) {
-            this.game.hasPlayedMoonLaunch = true;
+        if (marsRocketOwned && gameManager && !gameManager.hasPlayedMoonLaunch) {
+            gameManager.hasPlayedMoonLaunch = true;
         }
 
-        const moonUnlocked = this.game?.hasPlayedMoonLaunch || marsRocketOwned;
+        const moonUnlocked = gameManager?.hasPlayedMoonLaunch || marsRocketOwned;
         if (!moonUnlocked) {
             return false;
         }
@@ -1137,7 +1119,7 @@ export class UIManager {
 
     playerHasDogeStar() {
         // Check if player owns at least one DogeStar (final Jupiter helper)
-        const jupiterHelpers = this.game.jupiterHelpers || [];
+        const jupiterHelpers = gameManager.jupiterHelpers || [];
         const hasDogeStar = jupiterHelpers.some(helper => helper && helper.type === 'dogeStar');
         return hasDogeStar;
     }
@@ -1334,22 +1316,22 @@ export class UIManager {
 
     // Update mobile planet display (icon and text)
     updateMobilePlanetDisplay() {
-        if (!this.game || !this.game.currentLevel) return;
+        if (!gameManager || !gameManager.currentLevel) return;
 
         const toggleIcon = document.getElementById('mobile-current-planet-icon');
         const toggleText = document.getElementById('mobile-planet-name');
         const mobilePlanetTabs = document.querySelectorAll('.mobile-planet-tab');
 
         if (toggleIcon) {
-            toggleIcon.src = `assets/general/${this.game.currentLevel}.png`;
+            toggleIcon.src = `assets/general/${gameManager.currentLevel}.png`;
         }
         if (toggleText) {
-            toggleText.textContent = this.game.currentLevel.charAt(0).toUpperCase() + this.game.currentLevel.slice(1);
+            toggleText.textContent = gameManager.currentLevel.charAt(0).toUpperCase() + gameManager.currentLevel.slice(1);
         }
 
         // Update active state in menu
         mobilePlanetTabs.forEach(t => {
-            if (t.dataset.planet === this.game.currentLevel) {
+            if (t.dataset.planet === gameManager.currentLevel) {
                 t.classList.add('active');
             } else {
                 t.classList.remove('active');
@@ -1473,21 +1455,18 @@ export class UIManager {
             this.updateMobileSettingsContent();
         }
 
-        // Play sound
-        if (window.audioManager) {
-            audioManager.playSound('swipe');
-        }
+        audioManager.playSound('swipe');
     }
 
     // Update mobile shop content with horizontal scrolling
     updateMobileShopContent() {
-        if (!this.game) return;
+        if (!gameManager) return;
 
         const mobileShopContent = document.getElementById('mobile-shop-content');
         if (!mobileShopContent) return;
 
         // Check if shopManager is ready
-        if (!window.shopManager || !window.shopManager.shopData) {
+        if (!shopManager || !shopManager.shopData) {
             console.warn('Shop manager not ready yet, skipping mobile shop update');
             return;
         }
@@ -1496,15 +1475,15 @@ export class UIManager {
         mobileShopContent.innerHTML = '';
 
         // Get helper category for current level
-        const helperCategory = this.game.getHelperCategoryForLevel(this.game.currentLevel);
+        const helperCategory = gameManager.getHelperCategoryForLevel(gameManager.currentLevel);
 
-        if (!window.shopManager.shopData[helperCategory]) {
+        if (!shopManager.shopData[helperCategory]) {
             console.error(`Shop data for ${helperCategory} is missing!`);
             return;
         }
 
-        const helperEntries = Object.entries(window.shopManager.shopData[helperCategory]);
-        const helperArray = this.game.getHelperArrayForLevel(this.game.currentLevel);
+        const helperEntries = Object.entries(shopManager.shopData[helperCategory]);
+        const helperArray = gameManager.getHelperArrayForLevel(gameManager.currentLevel);
 
         // Create shop items (same logic as desktop but different layout)
         for (let i = 0; i < 6; i++) {
@@ -1515,25 +1494,25 @@ export class UIManager {
                 const [type, helper] = helperEntries[i];
                 const owned = helperArray.filter(h => h.type === type).length;
                 const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned));
-                const canAfford = this.game.dogecoins >= cost;
+                const canAfford = gameManager.dogecoins >= cost;
 
                 // Check if helper is locked (same logic as desktop)
                 let lockReason = null;
-                const moonHelpers = Array.isArray(this.game.moonHelpers) ? this.game.moonHelpers : [];
-                const marsHelpers = Array.isArray(this.game.marsHelpers) ? this.game.marsHelpers : [];
-                const jupiterHelpers = Array.isArray(this.game.jupiterHelpers) ? this.game.jupiterHelpers : [];
+                const moonHelpers = Array.isArray(gameManager.moonHelpers) ? gameManager.moonHelpers : [];
+                const marsHelpers = Array.isArray(gameManager.marsHelpers) ? gameManager.marsHelpers : [];
+                const jupiterHelpers = Array.isArray(gameManager.jupiterHelpers) ? gameManager.jupiterHelpers : [];
                 const moonBaseOwned = moonHelpers.some(h => h.type === 'moonBase');
                 const marsBaseOwned = marsHelpers.some(h => h.type === 'marsBase');
                 const jupiterBaseOwned = jupiterHelpers.some(h => h.type === 'cloudBase');
                 const landerShibeOwned = moonHelpers.some(h => h.type === 'landerShibe');
 
-                if (this.game.currentLevel === 'moon') {
+                if (gameManager.currentLevel === 'moon') {
                     if (type !== 'moonBase' && !moonBaseOwned) {
                         lockReason = 'moonBase';
                     } else if (type === 'marsRocket' && !landerShibeOwned) {
                         lockReason = 'landerShibe';
                     }
-                } else if (this.game.currentLevel === 'mars') {
+                } else if (gameManager.currentLevel === 'mars') {
                     if (type !== 'marsBase' && !marsBaseOwned) {
                         lockReason = 'marsBase';
                     }
@@ -1541,14 +1520,14 @@ export class UIManager {
                     if (type === 'jupiterRocket' && !spaceBassOwned) {
                         lockReason = 'spaceBass';
                     }
-                } else if (this.game.currentLevel === 'jupiter') {
+                } else if (gameManager.currentLevel === 'jupiter') {
                     if (type !== 'cloudBase' && !jupiterBaseOwned) {
                         lockReason = 'cloudBase';
                     }
                 }
                 const isLocked = lockReason !== null;
 
-                const priceText = this.game.formatNumber(cost);
+                const priceText = gameManager.formatNumber(cost);
                 const buttonDisabled = (!canAfford || isLocked) ? 'disabled' : '';
 
                 item.innerHTML = `
@@ -1649,7 +1628,7 @@ export class UIManager {
         `;
 
         // Update stat values if game exists
-        if (this.game) {
+        if (gameManager) {
             const mobileTotalMined = document.getElementById('mobile-total-mined');
             const mobileCurrentBalance = document.getElementById('mobile-current-balance');
             const mobileTotalClicks = document.getElementById('mobile-total-clicks');
@@ -1659,27 +1638,27 @@ export class UIManager {
             const mobileCurrentLevel = document.getElementById('mobile-current-level');
             const mobilePlayTime = document.getElementById('mobile-play-time');
 
-            if (mobileTotalMined) mobileTotalMined.textContent = this.game.formatNumber(Math.floor(this.game.totalMined || 0));
-            if (mobileCurrentBalance) mobileCurrentBalance.textContent = this.game.formatNumber(Math.floor(this.game.dogecoins || 0));
-            if (mobileTotalClicks) mobileTotalClicks.textContent = this.game.formatNumber(this.game.totalClicks || 0);
-            if (mobileCurrentDps) mobileCurrentDps.textContent = this.game.formatNumber(this.game.dps || 0) + ' Đ/s';
-            if (mobileHighestDps) mobileHighestDps.textContent = this.game.formatNumber(this.game.highestDps || 0) + ' Đ/s';
+            if (mobileTotalMined) mobileTotalMined.textContent = gameManager.formatNumber(Math.floor(gameManager.totalMined || 0));
+            if (mobileCurrentBalance) mobileCurrentBalance.textContent = gameManager.formatNumber(Math.floor(gameManager.dogecoins || 0));
+            if (mobileTotalClicks) mobileTotalClicks.textContent = gameManager.formatNumber(gameManager.totalClicks || 0);
+            if (mobileCurrentDps) mobileCurrentDps.textContent = gameManager.formatNumber(gameManager.dps || 0) + ' Đ/s';
+            if (mobileHighestDps) mobileHighestDps.textContent = gameManager.formatNumber(gameManager.highestDps || 0) + ' Đ/s';
 
-            const totalHelpers = (this.game.helpers?.length || 0) +
-                (this.game.moonHelpers?.length || 0) +
-                (this.game.marsHelpers?.length || 0) +
-                (this.game.jupiterHelpers?.length || 0) +
-                (this.game.titanHelpers?.length || 0);
+            const totalHelpers = (gameManager.helpers?.length || 0) +
+                (gameManager.moonHelpers?.length || 0) +
+                (gameManager.marsHelpers?.length || 0) +
+                (gameManager.jupiterHelpers?.length || 0) +
+                (gameManager.titanHelpers?.length || 0);
             if (mobileHelpersOwned) mobileHelpersOwned.textContent = totalHelpers;
 
             if (mobileCurrentLevel) {
-                const levelName = this.game.currentLevel?.charAt(0).toUpperCase() + this.game.currentLevel?.slice(1) || 'Earth';
+                const levelName = gameManager.currentLevel?.charAt(0).toUpperCase() + gameManager.currentLevel?.slice(1) || 'Earth';
                 mobileCurrentLevel.textContent = levelName;
             }
 
             if (mobilePlayTime) {
                 // Calculate current play time from session start plus total accumulated time
-                const currentPlayTime = Math.floor((Date.now() - this.game.startTime) / 1000) + this.game.totalPlayTime;
+                const currentPlayTime = Math.floor((Date.now() - gameManager.startTime) / 1000) + gameManager.totalPlayTime;
                 const hours = Math.floor(currentPlayTime / 3600);
                 const minutes = Math.floor((currentPlayTime % 3600) / 60);
                 const seconds = Math.floor(currentPlayTime % 60);
@@ -1690,7 +1669,7 @@ export class UIManager {
 
     // Update mobile stats (called regularly when achievements tab is open)
     updateMobileStats() {
-        if (!this.game || this.activeMobileTab !== 'achievements') return;
+        if (!gameManager || this.activeMobileTab !== 'achievements') return;
 
         const mobileTotalMined = document.getElementById('mobile-total-mined');
         const mobileCurrentBalance = document.getElementById('mobile-current-balance');
@@ -1700,21 +1679,21 @@ export class UIManager {
         const mobileHelpersOwned = document.getElementById('mobile-helpers-owned');
         const mobilePlayTime = document.getElementById('mobile-play-time');
 
-        if (mobileTotalMined) mobileTotalMined.textContent = this.game.formatNumber(Math.floor(this.game.totalMined || 0));
-        if (mobileCurrentBalance) mobileCurrentBalance.textContent = this.game.formatNumber(Math.floor(this.game.dogecoins || 0));
-        if (mobileTotalClicks) mobileTotalClicks.textContent = this.game.formatNumber(this.game.totalClicks || 0);
-        if (mobileCurrentDps) mobileCurrentDps.textContent = this.game.formatNumber(this.game.dps || 0) + ' Đ/s';
-        if (mobileHighestDps) mobileHighestDps.textContent = this.game.formatNumber(this.game.highestDps || 0) + ' Đ/s';
+        if (mobileTotalMined) mobileTotalMined.textContent = gameManager.formatNumber(Math.floor(gameManager.totalMined || 0));
+        if (mobileCurrentBalance) mobileCurrentBalance.textContent = gameManager.formatNumber(Math.floor(gameManager.dogecoins || 0));
+        if (mobileTotalClicks) mobileTotalClicks.textContent = gameManager.formatNumber(gameManager.totalClicks || 0);
+        if (mobileCurrentDps) mobileCurrentDps.textContent = gameManager.formatNumber(gameManager.dps || 0) + ' Đ/s';
+        if (mobileHighestDps) mobileHighestDps.textContent = gameManager.formatNumber(gameManager.highestDps || 0) + ' Đ/s';
 
-        const totalHelpers = (this.game.helpers?.length || 0) +
-            (this.game.moonHelpers?.length || 0) +
-            (this.game.marsHelpers?.length || 0) +
-            (this.game.jupiterHelpers?.length || 0) +
-            (this.game.titanHelpers?.length || 0);
+        const totalHelpers = (gameManager.helpers?.length || 0) +
+            (gameManager.moonHelpers?.length || 0) +
+            (gameManager.marsHelpers?.length || 0) +
+            (gameManager.jupiterHelpers?.length || 0) +
+            (gameManager.titanHelpers?.length || 0);
         if (mobileHelpersOwned) mobileHelpersOwned.textContent = totalHelpers;
 
         if (mobilePlayTime) {
-            const currentPlayTime = Math.floor((Date.now() - this.game.startTime) / 1000) + this.game.totalPlayTime;
+            const currentPlayTime = Math.floor((Date.now() - gameManager.startTime) / 1000) + gameManager.totalPlayTime;
             const hours = Math.floor(currentPlayTime / 3600);
             const minutes = Math.floor((currentPlayTime % 3600) / 60);
             const seconds = Math.floor(currentPlayTime % 60);
@@ -1844,5 +1823,6 @@ export class UIManager {
         }
     }
 }
-// Global UI manager instance
-let uiManager;
+
+const instance = new UIManager();
+export default instance;

@@ -1,3 +1,5 @@
+import { Howl, Howler } from 'https://cdn.jsdelivr.net/npm/howler@2.2.4/+esm'
+
 // DogeMiner: Community Edition - Audio Manager using Howler.js
 export class AudioManager {
     constructor() {
@@ -15,32 +17,37 @@ export class AudioManager {
     }
 
     init() {
-        // Check if Howler.js is loaded
-        if (typeof Howl === 'undefined') {
-            console.error('Howler.js library not loaded! Audio will be disabled.');
-            this.musicEnabled = false;
-            this.soundEnabled = false;
-            return;
-        }
-
         try {
-            // Load background music
-            this.loadLevel1Music();
-            this.loadMoonMusic();
-            this.loadMarsMusic();
-            this.loadJupiterMusic();
-            this.loadTitanMusic();
-            
-            // Load sound effects
-            this.loadSoundEffects();
-            
-            // Listen for settings changes
-            this.setupSettingsListeners();
+            // Check if Howler.js is loaded
+            if (typeof Howl === 'undefined') {
+                console.error('Howler.js library not loaded! Audio will be disabled.');
+                this.musicEnabled = false;
+                this.soundEnabled = false;
+                return;
+            }
+
+            try {
+                // Load background music
+                this.loadLevel1Music();
+                this.loadMoonMusic();
+                this.loadMarsMusic();
+                this.loadJupiterMusic();
+                this.loadTitanMusic();
+                
+                // Load sound effects
+                this.loadSoundEffects();
+                
+                // Listen for settings changes
+                this.setupSettingsListeners();
+            } catch (error) {
+                console.error('Error initializing audio:', error);
+                console.error('Audio will be disabled');
+                this.musicEnabled = false;
+                this.soundEnabled = false;
+            }
         } catch (error) {
-            console.error('Error initializing audio:', error);
-            console.error('Audio will be disabled');
-            this.musicEnabled = false;
-            this.soundEnabled = false;
+            console.error('Failed to initialize audio manager:', error);
+            console.warn('Game will continue without audio');
         }
     }
 
@@ -345,5 +352,5 @@ export class AudioManager {
     }
 }
 
-// Global audio manager instance
-let audioManager;
+const instance = new AudioManager();
+export default instance;
