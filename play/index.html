@@ -106,19 +106,19 @@
 
         <!-- Planet Tabs -->
         <div id="planet-tabs">
-            <button class="planet-tab active" data-planet="earth" onclick="switchPlanet('earth')">
+            <button class="planet-tab active" data-planet="earth">
                 <img src="assets/general/earth_tab.png" alt="Earth">
             </button>
-            <button class="planet-tab" data-planet="moon" onclick="switchPlanet('moon')">
+            <button class="planet-tab" data-planet="moon">
                 <img src="assets/general/moon_tab.png" alt="Moon">
             </button>
-            <button class="planet-tab" data-planet="mars" onclick="switchPlanet('mars')">
+            <button class="planet-tab" data-planet="mars">
                 <img src="assets/general/mars_tab.png" alt="Mars">
             </button>
-            <button class="planet-tab" data-planet="jupiter" onclick="switchPlanet('jupiter')">
+            <button class="planet-tab" data-planet="jupiter">
                 <img src="assets/general/jupiter_tab.png" alt="Jupiter">
             </button>
-            <button class="planet-tab" data-planet="titan" onclick="switchPlanet('titan')">
+            <button class="planet-tab" data-planet="titan">
                 <img src="assets/general/titan_tab.png" alt="Titan">
             </button>
         </div>
@@ -128,20 +128,20 @@
             <!-- Panel Tabs -->
             <div id="panel-tabs">
                 <div class="tabs-left">
-                    <button class="tab-btn active" onclick="switchMainTab('shop')">
+                    <button class="tab-btn active" data-tab="shop">
                         <img src="assets/quickUI/Pickaxe.png" alt="Shop" class="tab-icon">
                         <span class="tab-text">SHOP</span>
                     </button>
-                    <button class="tab-btn" onclick="switchMainTab('upgrades')">
+                    <button class="tab-btn" data-tab="upgrades">
                         <img src="assets/quickUI/ArrowUp.png" alt="Upgrades" class="tab-icon">
                         <span class="tab-text">UPGRADE</span>
                     </button>
                 </div>
                 <div class="tabs-right">
-                    <button class="tab-btn moon-tab" id="achievements-tab-btn" onclick="switchMainTab('achievements')">
+                    <button class="tab-btn moon-tab" data-tab="achievements" id="achievements-tab-btn">
                         <img src="assets/quickUI/Trophy ICON.png" alt="Achievements" class="tab-icon">
                     </button>
-                    <button class="tab-btn moon-tab" id="settings-tab-btn" onclick="switchMainTab('settings')">
+                    <button class="tab-btn moon-tab" data-tab="settings" id="settings-tab-btn">
                         <img src="assets/quickUI/settings icon.png" alt="Settings" class="tab-icon">
                     </button>
                 </div>
@@ -368,22 +368,20 @@
         <!-- Mobile Panel Tabs -->
         <div id="mobile-panel-tabs">
             <div class="mobile-tabs-left">
-                <button class="mobile-tab-btn active" data-tab="shop" onclick="switchMobileTab('shop')">
+                <button class="mobile-tab-btn active" data-tab="shop">
                     <img src="assets/quickUI/Pickaxe.png" alt="Shop" class="tab-icon">
                     <span class="tab-text">SHOP</span>
                 </button>
-                <button class="mobile-tab-btn" data-tab="upgrades" onclick="switchMobileTab('upgrades')">
+                <button class="mobile-tab-btn" data-tab="upgrades">
                     <img src="assets/quickUI/ArrowUp.png" alt="Upgrades" class="tab-icon">
                     <span class="tab-text">UPGRADE</span>
                 </button>
             </div>
             <div class="mobile-tabs-right">
-                <button class="mobile-tab-btn" id="mobile-achievements-tab-btn" data-tab="achievements"
-                    onclick="switchMobileTab('achievements')">
+                <button class="mobile-tab-btn" id="mobile-achievements-tab-btn" data-tab="achievements">
                     <img src="assets/quickUI/Trophy ICON.png" alt="Achievements" class="tab-icon">
                 </button>
-                <button class="mobile-tab-btn" id="mobile-settings-tab-btn" data-tab="settings"
-                    onclick="switchMobileTab('settings')">
+                <button class="mobile-tab-btn" id="mobile-settings-tab-btn" data-tab="settings">
                     <img src="assets/quickUI/settings icon.png" alt="Settings" class="tab-icon">
                 </button>
             </div>

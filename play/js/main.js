@@ -196,26 +196,6 @@ async function initializeGame() {
 }
 
 // Global functions for UI interactions
-function switchMainTab(tabName) {
-    if (uiManager) {
-        uiManager.switchMainTab(tabName);
-    }
-}
-
-function switchAchievementsTab(tabName) {
-    if (uiManager) {
-        uiManager.switchAchievementsTab(tabName);
-    }
-}
-
-function switchMobileTab(tabName) {
-    if (uiManager) {
-        uiManager.switchMobileTab(tabName);
-    }
-}
-
-
-
 function saveGame() {
     if (saveManager) {
         saveManager.saveGame();

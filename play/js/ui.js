@@ -125,77 +125,12 @@ export class UIManager {
         this.setupShop();
         this.setupStats();
         this.setupLoading();
+        this.setupMainTabBtns();
+        this.setupPlanetBtns();
     }
 
-    setupPanels() {
-        // Main tab switching functionality
-        window.switchMainTab = (tabName) => {
-            // Check if this tab is already active
-            const currentTab = this.activePanel.replace('-tab', '');
-            const isTabAlreadyActive = currentTab === tabName;
-
-            if (isTabAlreadyActive) return;
-
-            // Define tab order for swipe direction
-            const tabOrder = ['shop', 'upgrades', 'achievements', 'settings'];
-            const currentIndex = tabOrder.indexOf(currentTab);
-            const targetIndex = tabOrder.indexOf(tabName);
-            const isMovingRight = targetIndex > currentIndex;
-
-            // Get current and target tab elements
-            const currentTabElement = document.getElementById(currentTab + '-tab');
-            const targetTabElement = document.getElementById(tabName + '-tab');
-
-            if (!currentTabElement || !targetTabElement) return;
-
-            // Update tab buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // Add slide-out animation to current tab
-            if (isMovingRight) {
-                currentTabElement.classList.add('slide-out-left');
-            } else {
-                currentTabElement.classList.add('slide-out-right');
-            }
-
-            // After animation, switch tabs
-            setTimeout(() => {
-                // Remove all active classes and animation classes
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.remove('active', 'slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right');
-                });
-
-                // Add new active tab with slide-in animation
-                targetTabElement.classList.add('active');
-                if (isMovingRight) {
-                    targetTabElement.classList.add('slide-in-right');
-                } else {
-                    targetTabElement.classList.add('slide-in-left');
-                }
-
-                // Remove animation classes after animation completes
-                setTimeout(() => {
-                    targetTabElement.classList.remove('slide-in-right', 'slide-in-left');
-                }, 300);
-            }, 50); // Small delay to let slide-out start
-
-            // Set active panel
-            this.activePanel = tabName + '-tab';
-
-            // Play sound
-            audioManager.playSound('swipe');
-
-            // Update shop content if switching to shop
-            if (tabName === 'shop') {
-                this.updateShopContent();
-            }
-        };
-
-        // Planet tab switching with loading transition
-        window.switchPlanet = (planetName) => {
+    // Planet tab switching with loading transition
+    switchPlanet = (planetName) => {
             // Don't allow switching if already on this planet or if transition is in progress
             if (gameManager.currentLevel === planetName || gameManager.isTransitioning) return;
 
@@ -280,7 +215,7 @@ export class UIManager {
             }
 
             // Show loading screen with fade
-            this.showLoadingScreen(true);
+            UIManager.showLoadingScreen(true);
 
             // Use timeout to ensure loading screen is visible before processing
             setTimeout(() => {
@@ -308,7 +243,7 @@ export class UIManager {
                 gameManager.currentLevel = planetName;
 
                 // Update mobile display
-                this.updateMobilePlanetDisplay();
+                UIManager.updateMobilePlanetDisplay();
 
                 // Load the appropriate placed helpers
                 if (planetName === 'earth') {
@@ -327,18 +262,18 @@ export class UIManager {
                 // Update the character sprite
                 if (planetName === 'earth') {
                     // Earth character
-                    this.updateCharacter('standard');
+                    UIManager.updateCharacter('standard');
                 } else if (planetName === 'moon') {
                     // Moon character with spacesuit
-                    this.updateCharacter('spacehelmet');
+                    UIManager.updateCharacter('spacehelmet');
                 } else if (planetName === 'mars') {
-                    this.updateCharacter('party');
+                    UIManager.updateCharacter('party');
                 } else if (planetName === 'jupiter') {
                     // Use moon suit on Jupiter per requirements
-                    this.updateCharacter('spacehelmet');
+                    UIManager.updateCharacter('spacehelmet');
                 } else if (planetName === 'titan') {
                     // Titan uses space helmet like Jupiter and Moon
-                    this.updateCharacter('spacehelmet');
+                    UIManager.updateCharacter('spacehelmet');
                 }
 
                 // Update the rock image
@@ -464,7 +399,7 @@ export class UIManager {
                     gameManager.recreateHelperSprites();
 
                     // Hide loading screen
-                    window.hideLoadingScreen();
+                    UIManager.hideLoadingScreen();
 
                     // Reset transitioning flag
                     gameManager.isTransitioning = false;
@@ -491,13 +426,77 @@ export class UIManager {
             }, 500); // Short delay to ensure loading screen appears
 
             console.log(`Switched to ${planetName}`);
-        };
+        }
 
-        // Scroll wheel functionality for tab switching (shop and upgrade only)
-        this.setupScrollWheelTabs();
+    // Main tab switching functionality
+    switchMainTab(tabName) {
+        console.log('Current tab: ', this.activePanel);
+        // Check if this tab is already active
+        const currentTab = this.activePanel.replace('-tab', '');
+        const isTabAlreadyActive = currentTab === tabName;
 
-        // Shop sub-tab switching
-        window.switchShopTab = (tabName) => {
+        if (isTabAlreadyActive) return;
+
+        // Define tab order for swipe direction
+        const tabOrder = ['shop', 'upgrades', 'achievements', 'settings'];
+        const currentIndex = tabOrder.indexOf(currentTab);
+        const targetIndex = tabOrder.indexOf(tabName);
+        const isMovingRight = targetIndex > currentIndex;
+
+        // Get current and target tab elements
+        const currentTabElement = document.getElementById(currentTab + '-tab');
+        const targetTabElement = document.getElementById(tabName + '-tab');
+
+        if (!currentTabElement || !targetTabElement) return;
+
+        // Update tab buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        // Add slide-out animation to current tab
+        if (isMovingRight) {
+            currentTabElement.classList.add('slide-out-left');
+        } else {
+            currentTabElement.classList.add('slide-out-right');
+        }
+
+        // After animation, switch tabs
+        setTimeout(() => {
+            // Remove all active classes and animation classes
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active', 'slide-out-left', 'slide-out-right', 'slide-in-left', 'slide-in-right');
+            });
+
+            // Add new active tab with slide-in animation
+            targetTabElement.classList.add('active');
+            if (isMovingRight) {
+                targetTabElement.classList.add('slide-in-right');
+            } else {
+                targetTabElement.classList.add('slide-in-left');
+            }
+
+            // Remove animation classes after animation completes
+            setTimeout(() => {
+                targetTabElement.classList.remove('slide-in-right', 'slide-in-left');
+            }, 300);
+        }, 50); // Small delay to let slide-out start
+
+        // Set active panel
+        this.activePanel = tabName + '-tab';
+
+        // Play sound
+        audioManager.playSound('swipe');
+
+        // Update shop content if switching to shop
+        if (tabName === 'shop') {
+            this.updateShopContent();
+        }
+    }
+
+    // Shop sub-tab switching
+    static switchShopTab(tabName) {
             this.currentShopTab = tabName;
 
             // Update sub-tab buttons in shop
@@ -508,28 +507,59 @@ export class UIManager {
 
             // Update shop content
             this.updateShopContent();
-        };
+    }
 
-        // Achievements sub-tab switching
-        window.switchAchievementsTab = (tabName) => {
-            // Update sub-tab buttons in achievements
-            document.querySelectorAll('.achievements-tabs .sub-tab-btn').forEach(btn => {
-                btn.classList.remove('active');
+    // Achievements sub-tab switching
+    static switchAchievementsTab(tabName) {
+        // Update sub-tab buttons in achievements
+        document.querySelectorAll('.achievements-tabs .sub-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        // Update achievements content
+        document.querySelectorAll('.achievements-sub-content').forEach(content => {
+            content.classList.remove('active');
+        });
+
+        if (tabName === 'achievements') {
+            document.getElementById('achievements-content').classList.add('active');
+        } else if (tabName === 'stats') {
+            document.getElementById('stats-content').classList.add('active');
+        }
+    }
+
+    setupPlanetBtns() {
+        const tabs = document.querySelectorAll('.planet-tab');
+
+        // Setup tab buttons
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const planet = e.currentTarget.dataset.planet;
+                if (planet) {
+                    this.switchPlanet(planet);
+                }
             });
-            event.target.classList.add('active');
+        });
+    }
 
-            // Update achievements content
-            document.querySelectorAll('.achievements-sub-content').forEach(content => {
-                content.classList.remove('active');
+    setupMainTabBtns() {
+        const mainTabs = document.querySelectorAll('.tab-btn');
+
+        // Setup tab buttons
+        mainTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const tabName = e.currentTarget.dataset.tab;
+                if (tabName) {
+                    this.switchMainTab(tabName);
+                }
             });
+        });
+    }
 
-            if (tabName === 'achievements') {
-                document.getElementById('achievements-content').classList.add('active');
-            } else if (tabName === 'stats') {
-                document.getElementById('stats-content').classList.add('active');
-            }
-        };
-
+    setupPanels() {
+        // Scroll wheel functionality for tab switching (shop and upgrade only)
+        this.setupScrollWheelTabs();
     }
 
     setupShop() {
@@ -922,7 +952,7 @@ export class UIManager {
         }, 3000);
     }
 
-    updateBackground(levelName) {
+    static updateBackground(levelName) {
         const rockImage = document.getElementById('main-rock');
         if (!rockImage) return;
 
@@ -942,7 +972,7 @@ export class UIManager {
         rockImage.style.opacity = '1';
     }
 
-    updateCharacter(characterType = 'standard') {
+    static updateCharacter(characterType = 'standard') {
         const characterImage = document.getElementById('main-character');
         if (!characterImage) return;
 
@@ -1263,6 +1293,7 @@ export class UIManager {
 
     // Mobile UI Setup - Handles mobile-specific functionality
     setupMobileUI() {
+        // TODO - let's avoid large try-catches such as this, it ends up being hard to trace errors
         try {
             // Setup mobile menu toggle button
             const mobileToggleBtn = document.getElementById('mobile-menu-toggle');
@@ -1317,7 +1348,7 @@ export class UIManager {
                     if (planet && !e.currentTarget.disabled) {
                         // Use arrow function or bind to ensure 'this' refers to UIManager
                         // switchPlanet is defined on window in setupPanels
-                        window.switchPlanet(planet);
+                        this.switchPlanet(planet);
                         planetMenu.classList.remove('open');
 
                         // Update toggle icon and text
@@ -1338,11 +1369,11 @@ export class UIManager {
             });
 
             // Initialize toggle icon and text based on current planet
-            this.updateMobilePlanetDisplay();
+            UIManager.updateMobilePlanetDisplay();
 
             // Add a delayed update to ensure game state is fully loaded
             setTimeout(() => {
-                this.updateMobilePlanetDisplay();
+                UIManager.updateMobilePlanetDisplay();
             }, 500);
 
             // Update mobile stats every second
@@ -1403,7 +1434,7 @@ export class UIManager {
     }
 
     // Update mobile planet display (icon and text)
-    updateMobilePlanetDisplay() {
+    static updateMobilePlanetDisplay() {
         if (!gameManager || !gameManager.currentLevel) return;
 
         const toggleIcon = document.getElementById('mobile-current-planet-icon');
@@ -1554,15 +1585,12 @@ export class UIManager {
         // Clear existing content
         mobileShopContent.innerHTML = '';
 
-        // Get helper category for current level
-        const helperCategory = gameManager.getHelperCategoryForLevel(gameManager.currentLevel);
-
-        if (!ShopManager.shopData[helperCategory]) {
-            console.error(`Shop data for ${helperCategory} is missing!`);
+        if (!ShopManager.shopData.helpers[gameManager.currentLevel]) {
+            console.error(`Shop data for ${gameManager.currentLevel} is missing!`);
             return;
         }
 
-        const helperEntries = Object.entries(ShopManager.shopData[helperCategory]);
+        const helperEntries = Object.entries(ShopManager.shopData.helpers[gameManager.currentLevel]);
         const helperArray = gameManager.getHelperArrayForLevel(gameManager.currentLevel);
 
         // Create shop items (same logic as desktop but different layout)

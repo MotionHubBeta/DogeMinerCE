@@ -500,7 +500,7 @@ export class SaveManager {
             document.body.classList.remove('planet-jupiter');
         }
 
-        uiManager.updateBackground(gameManager.currentLevel);
+        UIManager.updateBackground(gameManager.currentLevel);
         if (gameManager.marsHelpers.length && !gameManager.moonHelpers.some(helper => helper.type === 'marsRocket')) {
             const hasMarsRocketInMarsHelpers = gameManager.marsHelpers.some(helper => helper.type === 'marsRocket');
             if (hasMarsRocketInMarsHelpers) {
