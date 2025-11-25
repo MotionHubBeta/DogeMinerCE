@@ -26,7 +26,9 @@ export default defineConfig([
       'eqeqeq': 'error',
       'guard-for-in': 'error',
       'func-names': 'error',
-      'consistent-return': 'error'
+      'consistent-return': 'error',
+      'no-unused-vars': 'error',
+      'no-implicit-globals': 'error'
     },
   }
 ]);
