@@ -2,9 +2,13 @@ import audioManager, { AudioManager } from "./audio.js";
 import gameManager, { GameManager } from "./game.js";
 import shopManager, { ShopManager } from "./shop.js";
 import notificationManager, { NotificationManager } from "./notification.js";
+import saveManager, { SaveManager } from "./save.js";
+import performanceMonitor from "./performanceMonitor.js";
 
 // DogeMiner: Community Edition - UI Management
 export class UIManager {
+    debugMode = false;
+
     constructor() {}
 
     init() {
@@ -26,14 +30,34 @@ export class UIManager {
         }
     }
 
-    static removeDebugConsole() {
+    removeDebugConsole() {
         const debugConsole = document.getElementById('debug-console');
         if (debugConsole) {
             debugConsole.remove();
         }
     }
 
-    static addDebugConsole() {
+    toggleDebugMode () {
+        this.debugMode = !this.debugMode;
+        if (this.debugMode) {
+            // Enable debug features
+            performanceMonitor.start();
+            
+            // Add debug console
+            this.addDebugConsole();
+            
+            console.log('Debug mode enabled');
+        } else {
+            // Disable debug features
+            performanceMonitor.fpsElement?.remove();
+            
+            this.removeDebugConsole();
+            
+            console.log('Debug mode disabled');
+        }
+    }
+
+    addDebugConsole() {
         const debugConsole = document.createElement('div');
         debugConsole.id = 'debug-console';
         debugConsole.style.cssText = `
@@ -50,17 +74,23 @@ export class UIManager {
             max-width: 300px;
         `;
         
-        debugConsole.innerHTML = `
-            <div>Debug Console</div>
-            <button onclick="game.dogecoins += 1000">+1000 Coins</button>
-            <button onclick="game.dogecoins += 10000">+10000 Coins</button>
-            <button onclick="game.dogecoins = 40000000000000000; game.updateUI();" style="background: #ff6b6b; color: white;">+40 Quadrillion Coins</button>
-            <button onclick="game.dps += 100">+100 DPS</button>
-            <button onclick="game.rotateBackground()">Rotate Background</button>
-            <button onclick="game.forceRickSpawn()">Spawn Rick</button>
-            <button onclick="saveManager.repairSave()">Repair Save</button>
-            <button onclick="toggleDebugMode()">Close Debug</button>
-        `;
+        const debugBtns = [
+            [() => {gameManager.dogecoins += 1000}, "+1000 coins"],
+            [() => {gameManager.dogecoins += 10000}, "+10000 coins"],
+            [() => {gameManager.dogecoins += 4e16}, "+40 Quadrillion Coins"],
+            [() => {gameManager.dps += 100}, "+100 DPS"],
+            [() => {gameManager.rotateBackground()}, "Rotate Background"],
+            [() => {gameManager.forceRickSpawn()}, "Spawn Rick"],
+            [() => {saveManager.repairSave()}, "Repair Save"],
+            [() => {console.log(this); this.toggleDebugMode()}, "Close Debug"]
+        ];
+
+        debugBtns.forEach((btn) => {
+            const btnElem = document.createElement('button');
+            btnElem.addEventListener('click', btn[0]);
+            btnElem.innerHTML = btn[1];
+            debugConsole.append(btnElem);
+        });
         
         document.body.appendChild(debugConsole);
     }
