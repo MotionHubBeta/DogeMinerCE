@@ -1,8 +1,8 @@
-import gameManager, { GameManager } from "./game.js";
-import audioManager, { AudioManager } from "./audio.js";
-import shopManager, { ShopManager } from "./shop.js";
-import uiManager, { UIManager } from "./ui.js";
-import cloudSaveManager, { CloudSaveManager } from "./cloudSave.js";
+import gameManager from "./game.js";
+import audioManager from "./audio.js";
+import shopManager from "./shop.js";
+import uiManager from "./ui.js";
+import cloudSaveManager from "./cloudSave.js";
 
 // DogeMiner: Community Edition - Save/Load System
 export class SaveManager {
@@ -285,7 +285,7 @@ export class SaveManager {
         const rebuildPlacedHelpers = (helpersArray = [], planet = 'earth') => {
             if (!Array.isArray(helpersArray)) return [];
 
-            const shopCategory = ShopManager.shopData.helpers[planet];
+            const shopCategory = shopManager.shopData.helpers[planet];
 
             return helpersArray
                 .map(savedHelper => {
@@ -386,7 +386,7 @@ export class SaveManager {
             });
 
             // Get shop category for this planet
-            const shopCategory = ShopManager.shopData.helpers[planet];
+            const shopCategory = shopManager.shopData.helpers[planet];
 
             // Spawn missing helpers in a clump (bottom-left of panel, away from rock)
             const baseX = 120; // Far left side of panel
@@ -500,7 +500,7 @@ export class SaveManager {
             document.body.classList.remove('planet-jupiter');
         }
 
-        UIManager.updateBackground(gameManager.currentLevel);
+        uiManager.updateBackground(gameManager.currentLevel);
         if (gameManager.marsHelpers.length && !gameManager.moonHelpers.some(helper => helper.type === 'marsRocket')) {
             const hasMarsRocketInMarsHelpers = gameManager.marsHelpers.some(helper => helper.type === 'marsRocket');
             if (hasMarsRocketInMarsHelpers) {

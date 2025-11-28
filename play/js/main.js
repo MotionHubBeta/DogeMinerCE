@@ -1,9 +1,9 @@
-import gameManager, { GameManager } from './game.js';
-import uiManager, { UIManager } from './ui.js';
-import shopManager, { ShopManager } from './shop.js';
-import saveManager, { SaveManager } from './save.js';
-import audioManager, { AudioManager } from './audio.js';
-import notificationManager, { NotificationManager } from './notification.js';
+import gameManager from './game.js';
+import uiManager from './ui.js';
+import shopManager from './shop.js';
+import saveManager from './save.js';
+import audioManager  from './audio.js';
+import notificationManager from './notification.js';
 
 // DogeMiner: Community Edition - Main Initialization
 const startGameWhenReady = () => initializeGame();
@@ -22,27 +22,27 @@ document.addEventListener('contextmenu', (e) => {
 
 async function initializeGame() {
     try {
-        UIManager.showLoadingScreen();
+        uiManager.showLoadingScreen();
 
-        UIManager.updateLoadingInfo('Initializing game engine...');
+        uiManager.updateLoadingInfo('Initializing game engine...');
         gameManager.init();
 
-        UIManager.updateLoadingInfo('Setting up shop system...');
+        uiManager.updateLoadingInfo('Setting up shop system...');
         shopManager.init();
 
-        UIManager.updateLoadingInfo('Building user interface...');
+        uiManager.updateLoadingInfo('Building user interface...');
         uiManager.init();
 
-        UIManager.updateLoadingInfo('Loading audio system...');
+        uiManager.updateLoadingInfo('Loading audio system...');
         audioManager.init();
 
-        UIManager.updateLoadingInfo('Initializing save system...');
+        uiManager.updateLoadingInfo('Initializing save system...');
         saveManager.init();
 
-        UIManager.updateLoadingInfo('Preparing notifications...');
+        uiManager.updateLoadingInfo('Preparing notifications...');
         notificationManager.init();
 
-        UIManager.updateLoadingInfo('Loading game data...');
+        uiManager.updateLoadingInfo('Loading game data...');
         
         // Try to load existing save
         const saveLoaded = saveManager.loadGame();
@@ -161,13 +161,13 @@ async function initializeGame() {
         }
         
         // CloudSaveManager will be initialized by cloud-save.js
-        UIManager.updateLoadingInfo('Finalizing...');
+        uiManager.updateLoadingInfo('Finalizing...');
         
-        UIManager.updateLoadingInfo('Ready!');
+        uiManager.updateLoadingInfo('Ready!');
         
         // Hide loading screen after a short delay
         setTimeout(() => {
-            UIManager.hideLoadingScreen();
+            uiManager.hideLoadingScreen();
             gameManager.isPlaying = true;
             
             // Play doge intro animation
@@ -190,7 +190,7 @@ async function initializeGame() {
         console.error('Error message:', error.message);
         console.error('Error stack:', error.stack);
         console.error('Error name:', error.name);
-        UIManager.hideLoadingScreen();
+        uiManager.hideLoadingScreen();
         alert('Error initializing game: ' + (error.message || error.toString()) + '. Please check console and refresh.');
     }
 }

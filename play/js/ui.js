@@ -1,8 +1,8 @@
-import audioManager, { AudioManager } from "./audio.js";
-import gameManager, { GameManager } from "./game.js";
-import shopManager, { ShopManager } from "./shop.js";
-import notificationManager, { NotificationManager } from "./notification.js";
-import saveManager, { SaveManager } from "./save.js";
+import audioManager from "./audio.js";
+import gameManager from "./game.js";
+import shopManager from "./shop.js";
+import notificationManager from "./notification.js";
+import saveManager from "./save.js";
 import performanceMonitor from "./performanceMonitor.js";
 
 // DogeMiner: Community Edition - UI Management
@@ -95,7 +95,7 @@ export class UIManager {
         document.body.appendChild(debugConsole);
     }
 
-    static hideLoadingScreen() {
+    hideLoadingScreen() {
         const loadingScreen = document.getElementById('loading-screen');
         if (!loadingScreen) {
             return;
@@ -119,14 +119,14 @@ export class UIManager {
         }, timeout);
     }
 
-    static updateLoadingInfo(info) {
+    updateLoadingInfo(info) {
         const loadingInfo = document.getElementById('loading-info');
         if (loadingInfo) {
             loadingInfo.textContent = info;
         }
     }
 
-    static showLoadingScreen(useFade = false) {
+    showLoadingScreen(useFade = false) {
         const loadingScreen = document.getElementById('loading-screen');
         if (!loadingScreen) {
             return;
@@ -245,7 +245,7 @@ export class UIManager {
             }
 
             // Show loading screen with fade
-            UIManager.showLoadingScreen(true);
+            this.showLoadingScreen(true);
 
             // Use timeout to ensure loading screen is visible before processing
             setTimeout(() => {
@@ -273,7 +273,7 @@ export class UIManager {
                 gameManager.currentLevel = planetName;
 
                 // Update mobile display
-                UIManager.updateMobilePlanetDisplay();
+                this.updateMobilePlanetDisplay();
 
                 // Load the appropriate placed helpers
                 if (planetName === 'earth') {
@@ -292,18 +292,18 @@ export class UIManager {
                 // Update the character sprite
                 if (planetName === 'earth') {
                     // Earth character
-                    UIManager.updateCharacter('standard');
+                    this.updateCharacter('standard');
                 } else if (planetName === 'moon') {
                     // Moon character with spacesuit
-                    UIManager.updateCharacter('spacehelmet');
+                    this.updateCharacter('spacehelmet');
                 } else if (planetName === 'mars') {
-                    UIManager.updateCharacter('party');
+                    this.updateCharacter('party');
                 } else if (planetName === 'jupiter') {
                     // Use moon suit on Jupiter per requirements
-                    UIManager.updateCharacter('spacehelmet');
+                    this.updateCharacter('spacehelmet');
                 } else if (planetName === 'titan') {
                     // Titan uses space helmet like Jupiter and Moon
-                    UIManager.updateCharacter('spacehelmet');
+                    this.updateCharacter('spacehelmet');
                 }
 
                 // Update the rock image
@@ -429,7 +429,7 @@ export class UIManager {
                     gameManager.recreateHelperSprites();
 
                     // Hide loading screen
-                    UIManager.hideLoadingScreen();
+                    this.hideLoadingScreen();
 
                     // Reset transitioning flag
                     gameManager.isTransitioning = false;
@@ -526,7 +526,7 @@ export class UIManager {
     }
 
     // Shop sub-tab switching
-    static switchShopTab(tabName) {
+    switchShopTab(tabName) {
             this.currentShopTab = tabName;
 
             // Update sub-tab buttons in shop
@@ -540,7 +540,7 @@ export class UIManager {
     }
 
     // Achievements sub-tab switching
-    static switchAchievementsTab(tabName) {
+    switchAchievementsTab(tabName) {
         // Update sub-tab buttons in achievements
         document.querySelectorAll('.achievements-tabs .sub-tab-btn').forEach(btn => {
             btn.classList.remove('active');
@@ -629,12 +629,12 @@ export class UIManager {
         // Choose which helpers to display based on current planet
         console.log(`Rendering shop with helper category: ${gameManager.currentLevel} for planet: ${gameManager.currentLevel}`);
 
-        if (!ShopManager.shopData.helpers[gameManager.currentLevel]) {
+        if (!shopManager.shopData.helpers[gameManager.currentLevel]) {
             console.error(`Shop data for ${gameManager.currentLevel} is missing!`);
             return;
         }
 
-        const helperEntries = Object.entries(ShopManager.shopData.helpers[gameManager.currentLevel]);
+        const helperEntries = Object.entries(shopManager.shopData.helpers[gameManager.currentLevel]);
         const moonHelpers = Array.isArray(gameManager.moonHelpers) ? gameManager.moonHelpers : [];
         const marsHelpers = Array.isArray(gameManager.marsHelpers) ? gameManager.marsHelpers : [];
         const jupiterHelpers = Array.isArray(gameManager.jupiterHelpers) ? gameManager.jupiterHelpers : [];
@@ -982,7 +982,7 @@ export class UIManager {
         }, 3000);
     }
 
-    static updateBackground(levelName) {
+    updateBackground(levelName) {
         const rockImage = document.getElementById('main-rock');
         if (!rockImage) return;
 
@@ -1002,7 +1002,7 @@ export class UIManager {
         rockImage.style.opacity = '1';
     }
 
-    static updateCharacter(characterType = 'standard') {
+    updateCharacter(characterType = 'standard') {
         const characterImage = document.getElementById('main-character');
         if (!characterImage) return;
 
@@ -1160,8 +1160,9 @@ export class UIManager {
     }
 
     showMoonLocked() {
+        console.log('Moon locked...');
         // Find the moon tab button
-        const moonTab = document.querySelector('.planet-tab[onclick*="moon"]');
+        const moonTab = document.querySelector('.planet-tab[data-planet="moon"]');
         if (!moonTab) return;
 
         // Check if locked overlay already exists
@@ -1377,7 +1378,6 @@ export class UIManager {
                     const planet = e.currentTarget.dataset.planet;
                     if (planet && !e.currentTarget.disabled) {
                         // Use arrow function or bind to ensure 'this' refers to UIManager
-                        // switchPlanet is defined on window in setupPanels
                         this.switchPlanet(planet);
                         planetMenu.classList.remove('open');
 
@@ -1399,11 +1399,11 @@ export class UIManager {
             });
 
             // Initialize toggle icon and text based on current planet
-            UIManager.updateMobilePlanetDisplay();
+            this.updateMobilePlanetDisplay();
 
             // Add a delayed update to ensure game state is fully loaded
             setTimeout(() => {
-                UIManager.updateMobilePlanetDisplay();
+                this.updateMobilePlanetDisplay();
             }, 500);
 
             // Update mobile stats every second
@@ -1464,7 +1464,7 @@ export class UIManager {
     }
 
     // Update mobile planet display (icon and text)
-    static updateMobilePlanetDisplay() {
+    updateMobilePlanetDisplay() {
         if (!gameManager || !gameManager.currentLevel) return;
 
         const toggleIcon = document.getElementById('mobile-current-planet-icon');
@@ -1615,12 +1615,12 @@ export class UIManager {
         // Clear existing content
         mobileShopContent.innerHTML = '';
 
-        if (!ShopManager.shopData.helpers[gameManager.currentLevel]) {
+        if (!shopManager.shopData.helpers[gameManager.currentLevel]) {
             console.error(`Shop data for ${gameManager.currentLevel} is missing!`);
             return;
         }
 
-        const helperEntries = Object.entries(ShopManager.shopData.helpers[gameManager.currentLevel]);
+        const helperEntries = Object.entries(shopManager.shopData.helpers[gameManager.currentLevel]);
         const helperArray = gameManager.getHelperArrayForLevel(gameManager.currentLevel);
 
         // Create shop items (same logic as desktop but different layout)

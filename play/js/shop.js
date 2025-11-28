@@ -1,10 +1,10 @@
-import uiManager, { UIManager } from './ui.js';
-import gameManager, { GameManager } from './game.js';
+import uiManager from './ui.js';
+import gameManager from './game.js';
 import { Utils } from './utils.js';
 
 // DogeMiner: Community Edition - Shop Management
 export class ShopManager {
-    static shopData = Utils.deepFreeze({
+    shopData = Utils.deepFreeze({
             helpers: {
                 earth: {
                     miningShibe: {

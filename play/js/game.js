@@ -1,6 +1,6 @@
-import audioManager, { AudioManager } from './audio.js';
-import shopManager, { ShopManager } from './shop.js';
-import uiManager, { UIManager } from './ui.js';
+import audioManager from './audio.js';
+import shopManager from './shop.js';
+import uiManager from './ui.js';
 import gsap from "https://cdn.skypack.dev/gsap";
 
 // DogeMiner: Community Edition - Main Game Logic
@@ -315,9 +315,7 @@ export class GameManager {
                     moonTab.click();
                 } else {
                     // Fallback if moon tab can't be found: call switchPlanet directly
-                    if (window.switchPlanet) {
-                        window.switchPlanet('moon');
-                    }
+                    uiManager.switchPlanet('moon');
                 }
             }, 500);
         }
@@ -762,7 +760,7 @@ export class GameManager {
         console.log('Current level:', this.currentLevel);
         console.log('Stack trace:', new Error().stack);
 
-        const helperData = ShopManager.shopData.helpers[this.currentLevel][helperType];
+        const helperData = shopManager.shopData.helpers[this.currentLevel][helperType];
         if (!helperData) {
             console.error('Helper type not found:', helperType, 'in category', this.currentLevel);
             return false;
@@ -1541,8 +1539,8 @@ export class GameManager {
         if (!placedHelper.helper || !placedHelper.helper.icon) {
             // Try to get helper data based on current level and type
             const helperCategory = this.getHelperCategoryForLevel();
-            if (ShopManager.shopData[helperCategory]) {
-                placedHelper.helper = ShopManager.shopData[helperCategory][placedHelper.type] || this.getHelperData(placedHelper.type);
+            if (shopManager.shopData[helperCategory]) {
+                placedHelper.helper = shopManager.shopData[helperCategory][placedHelper.type] || this.getHelperData(placedHelper.type);
             } else {
                 // Fallback to generic helper data
                 placedHelper.helper = this.getHelperData(placedHelper.type);
@@ -2029,7 +2027,7 @@ export class GameManager {
     cancelHelperPlacement() {
         // Refund the cost for all helpers on cursor
         this.helpersOnCursor.forEach(helperData => {
-            const helper = ShopManager.shopData.helpers[helperData.type];
+            const helper = shopManager.shopData.helpers[helperData.type];
             const owned = this.helpers.filter(h => h.type === helperData.type).length;
             const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned - 1));
             this.dogecoins += cost;
@@ -2093,7 +2091,7 @@ export class GameManager {
                 const helperType = buyButton.getAttribute('data-helper-type');
                 if (helperType) {
                     // Get the correct helper category based on current planet
-                    const shopCategory = ShopManager.shopData[this.currentLevel];
+                    const shopCategory = shopManager.shopData.helpers[this.currentLevel];
                     const helper = shopCategory?.[helperType];
                     if (helper) {
                         const helperArray = this.getHelperArrayForLevel();
@@ -2657,8 +2655,8 @@ export class GameManager {
     }
     
     getHelperData(helperType) {
-        for (let i = 0; i < ShopManager.shopData.helpers.length; i++) {
-            const helper = ShopManager.shopData.helpers[i][helperType];
+        for (let i = 0; i < shopManager.shopData.helpers.length; i++) {
+            const helper = shopManager.shopData.helpers[i][helperType];
 
             if (helper) {
                 return helper;
