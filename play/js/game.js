@@ -4,7 +4,7 @@ import uiManager from './ui.js';
 import gsap from "https://cdn.skypack.dev/gsap";
 
 // DogeMiner: Community Edition - Main Game Logic
-export class GameManager {
+class GameManager {
     constructor() {}
 
     init() {

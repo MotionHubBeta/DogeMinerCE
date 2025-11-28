@@ -1,5 +1,5 @@
 // Cloud Save Manager for DogeMiner CE
-export class CloudSaveManager {
+class CloudSaveManager {
     constructor() {
         this.currentUser = null;
         this.isInitialized = false;

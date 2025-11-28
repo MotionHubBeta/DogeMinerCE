@@ -5,7 +5,7 @@ import uiManager from "./ui.js";
 import cloudSaveManager from "./cloudSave.js";
 
 // DogeMiner: Community Edition - Save/Load System
-export class SaveManager {
+class SaveManager {
     constructor() {}
 
     init() {

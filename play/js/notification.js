@@ -1,5 +1,5 @@
 // DogeMiner: Community Edition - Notifications System
-export class NotificationManager {
+class NotificationManager {
     constructor() {}
 
     init() {

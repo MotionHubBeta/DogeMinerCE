@@ -1,7 +1,7 @@
 import { Howl, Howler } from 'https://cdn.jsdelivr.net/npm/howler@2.2.4/+esm'
 
 // DogeMiner: Community Edition - Audio Manager using Howler.js
-export class AudioManager {
+class AudioManager {
     constructor() {
         this.musicEnabled = true;
         this.soundEnabled = true;

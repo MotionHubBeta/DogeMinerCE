@@ -3,7 +3,7 @@ import gameManager from './game.js';
 import { Utils } from './utils.js';
 
 // DogeMiner: Community Edition - Shop Management
-export class ShopManager {
+class ShopManager {
     shopData = Utils.deepFreeze({
             helpers: {
                 earth: {

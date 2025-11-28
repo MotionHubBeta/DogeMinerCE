@@ -6,7 +6,7 @@ import saveManager from "./save.js";
 import performanceMonitor from "./performanceMonitor.js";
 
 // DogeMiner: Community Edition - UI Management
-export class UIManager {
+class UIManager {
     debugMode = false;
 
     constructor() {}
