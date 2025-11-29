@@ -1,3 +1,5 @@
+// TODO - remove all usage of window here (except for firebase), and instead import each respective class when needed
+
 // Cloud Save Manager for DogeMiner CE
 class CloudSaveManager {
     constructor() {
@@ -287,6 +289,9 @@ class CloudSaveManager {
         }
     }
 
+    /* TODO - cloudSave should use shared functions with save, perhaps a localSave.js class would be appropriate
+     (or merge cloudSave into save, although we may want to keep them separate) 
+     In any case, there's lots of shared logic between cloudSave and save */
     getGameState() {
         // Get the current game instance
         console.log('Getting game state...');

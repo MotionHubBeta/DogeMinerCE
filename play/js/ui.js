@@ -3,7 +3,7 @@ import gameManager from "./game.js";
 import shopManager from "./shop.js";
 import notificationManager from "./notification.js";
 import saveManager from "./save.js";
-import performanceMonitor from "./performanceMonitor.js";
+import performanceMonitor from "./performance-monitor.js";
 
 // DogeMiner: Community Edition - UI Management
 class UIManager {
@@ -1324,7 +1324,6 @@ class UIManager {
 
     // Mobile UI Setup - Handles mobile-specific functionality
     setupMobileUI() {
-        // TODO - let's avoid large try-catches such as this, it ends up being hard to trace errors
         try {
             // Setup mobile menu toggle button
             const mobileToggleBtn = document.getElementById('mobile-menu-toggle');
@@ -1607,6 +1606,7 @@ class UIManager {
         audioManager.playSound('swipe');
     }
 
+    // TODO - this function should be merged with updateShopContent if possible. This goes for all mobile-specific functions for that matter.
     // Update mobile shop content with horizontal scrolling
     updateMobileShopContent() {
         const mobileShopContent = document.getElementById('mobile-shop-content');
