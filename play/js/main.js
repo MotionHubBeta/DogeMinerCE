@@ -44,7 +44,11 @@ async function initializeGame() {
         notificationManager.init();
 
         uiManager.updateLoadingInfo('Setting up cloud save...');
-        cloudSaveManager.init();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {cloudSaveManager.init()});
+        } else {
+            cloudSaveManager.init();
+        }
 
         uiManager.updateLoadingInfo('Loading game data...');
         
@@ -258,8 +262,8 @@ async function preloadAssets() {
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
-    // Toggle debug mode with Ctrl+\
-    if (e.ctrlKey && e.key === 'å') {
+    // Toggle debug mode with Ctrl+\ ()
+    if (e.ctrlKey && (e.key === '\\' || e.key === 'å')) {
         e.preventDefault();
         uiManager.toggleDebugMode();
     }

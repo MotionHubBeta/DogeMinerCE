@@ -23,7 +23,7 @@ class CloudSaveManager {
         window.firebase.onAuthStateChanged(window.firebase.auth, (user) => {
             this.currentUser = user;
             this.updateUI();
-            
+
             // Automatically load from cloud when user signs in
             if (user) {
                 this.loadFromCloudSilent();
@@ -80,16 +80,16 @@ class CloudSaveManager {
             notificationManager.showInfo('Signing in with Google...');
             
             const result = await window.firebase.signInWithPopup(
-                window.firebase.auth, 
+                window.firebase.auth,
                 window.firebase.provider
             );
-            
+
             this.currentUser = result.user;
             notificationManager.showSuccess(`Welcome, ${this.currentUser.displayName}!`);
             
             // Refresh the page to ensure correct planet UI state
             window.location.reload();
-            
+
         } catch (error) {
             console.error('Sign in error:', error);
             notificationManager.showError('Failed to sign in. Please try again.');
@@ -119,12 +119,12 @@ class CloudSaveManager {
             // Get current game state
             const gameData = this.getGameState();
             console.log('Manual save - gameData:', gameData);
-            
+
             if (gameData === null) {
                 notificationManager.showError('Cannot save: Game not initialized');
                 return;
             }
-            
+
             // Save to Firestore
             const userDocRef = window.firebase.doc(window.firebase.db, 'users', this.currentUser.uid);
             await window.firebase.setDoc(userDocRef, {
@@ -150,12 +150,12 @@ class CloudSaveManager {
             // Get current game state
             const gameData = this.getGameState();
             console.log('Silent save - gameData:', gameData);
-            
+
             if (gameData === null) {
                 console.error('Cannot save to cloud: gameData is null');
                 return;
             }
-            
+
             // Save to Firestore silently
             const userDocRef = window.firebase.doc(window.firebase.db, 'users', this.currentUser.uid);
             await window.firebase.setDoc(userDocRef, {
@@ -165,7 +165,7 @@ class CloudSaveManager {
             }, { merge: true });
 
             console.log('Game auto-saved to cloud');
-            
+
         } catch (error) {
             console.error('Silent cloud save error:', error);
         }
@@ -182,7 +182,7 @@ class CloudSaveManager {
             const userDocRef = window.firebase.doc(window.firebase.db, 'users', this.currentUser.uid);
             await window.firebase.deleteDoc(userDocRef);
             console.log('Cloud save deleted successfully');
-            
+
         } catch (error) {
             console.error('Failed to delete cloud save:', error);
         }
@@ -212,7 +212,7 @@ class CloudSaveManager {
             } else {
                 notificationManager.showWarning('No save data found in cloud');
             }
-            
+
         } catch (error) {
             console.error('Cloud load error:', error);
             notificationManager.showError('Failed to load from cloud. Please try again.');
@@ -236,7 +236,7 @@ class CloudSaveManager {
                     console.log('Game auto-loaded from cloud');
                 }
             }
-            
+
         } catch (error) {
             console.error('Silent cloud load error:', error);
         }
@@ -347,3 +347,4 @@ class CloudSaveManager {
 
 const instance = new CloudSaveManager();
 export default instance;
+

@@ -1458,7 +1458,7 @@ class UIManager {
                     isUnlocked = true;
                     break;
                 case 'moon':
-                    isUnlocked = true; // Moon is always visible/accessible if unlocked
+                    isUnlocked = gameManager.unlockedLevels.has('moon');
                     break;
                 case 'mars':
                     isUnlocked = this.isMarsUnlocked();
@@ -1861,29 +1861,34 @@ class UIManager {
         const mobileSettingsContent = document.getElementById('mobile-settings-content');
         if (!mobileSettingsContent) return;
 
+        const soundChecked = gameManager.soundEnabled ? 'checked' : '';
+        const musicChecked = gameManager.musicEnabled ? 'checked' : '';
+        const notificationsChecked = gameManager.notificationsEnabled ? 'checked' : '';
+        const autoSaveChecked = gameManager.autoSaveEnabled ? 'checked' : '';
+
         // Display complete settings options matching desktop
         mobileSettingsContent.innerHTML = `
             <div class="mobile-content-wrapper">
                 <h3 class="mobile-section-header">Game Settings</h3>
                 <div class="mobile-settings-list">
                     <label class="setting-item">
-                        <input type="checkbox" id="mobile-sound-enabled" checked>
+                        <input type="checkbox" id="mobile-sound-enabled" ${soundChecked}>
                         <span class="setting-label">Sound Effects</span>
                     </label>
                     <label class="setting-item">
-                        <input type="checkbox" id="mobile-music-enabled" checked>
+                        <input type="checkbox" id="mobile-music-enabled" ${musicChecked}>
                         <span class="setting-label">Background Music</span>
                     </label>
                     <label class="setting-item">
-                        <input type="checkbox" id="mobile-notifications-enabled" checked>
+                        <input type="checkbox" id="mobile-notifications-enabled" ${notificationsChecked}>
                         <span class="setting-label">Notifications</span>
                     </label>
                     <label class="setting-item">
-                        <input type="checkbox" id="mobile-auto-save-enabled" checked>
+                        <input type="checkbox" id="mobile-auto-save-enabled" ${autoSaveChecked}>
                         <span class="setting-label">Auto Save</span>
                     </label>
                 </div>
-
+                
                 <h3 class="mobile-section-header">Cloud Save</h3>
                 <div id="mobile-cloud-save-section" style="margin-bottom: 15px;">
                     <div id="mobile-user-info" style="display: none;">
@@ -1919,39 +1924,63 @@ class UIManager {
             </div>
         `;
 
-        // Sync checkbox states with game settings
+        // Attach event listeners
         const soundCheckbox = document.getElementById('mobile-sound-enabled');
-        const musicCheckbox = document.getElementById('mobile-music-enabled');
-        const notificationsCheckbox = document.getElementById('mobile-notifications-enabled');
-        const autoSaveCheckbox = document.getElementById('mobile-auto-save-enabled');
-
         if (soundCheckbox) {
-            soundCheckbox.checked = document.getElementById('sound-enabled')?.checked ?? true;
+            soundCheckbox.checked = gameManager.soundEnabled; // Ensure initial state is correct
             soundCheckbox.addEventListener('change', (e) => {
+                gameManager.soundEnabled = e.target.checked;
+                audioManager.soundEnabled = gameManager.soundEnabled;
+                saveManager.saveGame(false);
+
+                // Sync desktop checkbox
                 const desktopCheckbox = document.getElementById('sound-enabled');
                 if (desktopCheckbox) desktopCheckbox.checked = e.target.checked;
             });
         }
 
+        const musicCheckbox = document.getElementById('mobile-music-enabled');
         if (musicCheckbox) {
-            musicCheckbox.checked = document.getElementById('music-enabled')?.checked ?? true;
+            musicCheckbox.checked = gameManager.musicEnabled; // Ensure initial state is correct
             musicCheckbox.addEventListener('change', (e) => {
+                gameManager.musicEnabled = e.target.checked;
+
+                audioManager.musicEnabled = gameManager.musicEnabled;
+                if (gameManager.musicEnabled) {
+                    audioManager.playBackgroundMusic();
+                } else {
+                    audioManager.stopMusic();
+                }
+
+                saveManager.saveGame(false);
+
+                // Sync desktop checkbox
                 const desktopCheckbox = document.getElementById('music-enabled');
                 if (desktopCheckbox) desktopCheckbox.checked = e.target.checked;
             });
         }
 
+        const notificationsCheckbox = document.getElementById('mobile-notifications-enabled');
         if (notificationsCheckbox) {
-            notificationsCheckbox.checked = document.getElementById('notifications-enabled')?.checked ?? true;
+            notificationsCheckbox.checked = gameManager.notificationsEnabled; // Ensure initial state is correct
             notificationsCheckbox.addEventListener('change', (e) => {
+                gameManager.notificationsEnabled = e.target.checked;
+                saveManager.saveGame(false);
+
+                // Sync desktop checkbox
                 const desktopCheckbox = document.getElementById('notifications-enabled');
                 if (desktopCheckbox) desktopCheckbox.checked = e.target.checked;
             });
         }
 
+        const autoSaveCheckbox = document.getElementById('mobile-auto-save-enabled');
         if (autoSaveCheckbox) {
-            autoSaveCheckbox.checked = document.getElementById('auto-save-enabled')?.checked ?? true;
+            autoSaveCheckbox.checked = gameManager.autoSaveEnabled; // Ensure initial state is correct
             autoSaveCheckbox.addEventListener('change', (e) => {
+                gameManager.autoSaveEnabled = e.target.checked;
+                saveManager.saveGame(false);
+
+                // Sync desktop checkbox
                 const desktopCheckbox = document.getElementById('auto-save-enabled');
                 if (desktopCheckbox) desktopCheckbox.checked = e.target.checked;
             });

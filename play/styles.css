@@ -3013,7 +3013,7 @@ body.planet-mars #main-rock {
         background: linear-gradient(to bottom, rgba(240, 235, 220, 0.98) 20%, rgba(255, 240, 180, 0.98) 80%);
         border-top: 2px solid #d4af37;
         border-radius: 0;
-        z-index: 999;
+        z-index: 2100;
         display: flex;
         flex-direction: column;
         transform: translateY(100%);
@@ -3851,7 +3851,7 @@ body.planet-mars #main-rock {
     }
 
     #mobile-menu-toggle.menu-open {
-        bottom: calc(40vh - 33px + env(safe-area-inset-bottom));
+        bottom: calc(40vh - 33px);
     }
 
     /* Mobile Planet Menu */
