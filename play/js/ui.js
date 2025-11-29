@@ -4,6 +4,7 @@ import shopManager from "./shop.js";
 import notificationManager from "./notification.js";
 import saveManager from "./save.js";
 import performanceMonitor from "./performance-monitor.js";
+import cloudSaveManager from "./cloud-save.js";
 
 // DogeMiner: Community Edition - UI Management
 class UIManager {
@@ -82,7 +83,7 @@ class UIManager {
             [() => {gameManager.rotateBackground()}, "Rotate Background"],
             [() => {gameManager.forceRickSpawn()}, "Spawn Rick"],
             [() => {saveManager.repairSave()}, "Repair Save"],
-            [() => {console.log(this); this.toggleDebugMode()}, "Close Debug"]
+            [() => {this.toggleDebugMode()}, "Close Debug"]
         ];
 
         debugBtns.forEach((btn) => {
@@ -157,6 +158,22 @@ class UIManager {
         this.setupLoading();
         this.setupMainTabBtns();
         this.setupPlanetBtns();
+        this.setupSettings();
+    }
+
+    setupSettings() {
+        // Local save
+        document.getElementById('setting-btn-save').addEventListener('click', () => {saveManager.saveGame();});
+        document.getElementById('setting-btn-load').addEventListener('click', () => {saveManager.loadGame();});
+        document.getElementById('setting-btn-export').addEventListener('click', () => {saveManager.exportSave();});
+        document.getElementById('setting-btn-import').addEventListener('click', () => {saveManager.importSave();});
+        document.getElementById('setting-btn-reset').addEventListener('click', () => {saveManager.resetGame();});
+
+        // Cloud save
+        document.getElementById('setting-btn-save-cloud').addEventListener('click', () => {cloudSaveManager.saveToCloud();});
+        document.getElementById('setting-btn-load-cloud').addEventListener('click', () => {cloudSaveManager.loadFromCloud();});
+        document.getElementById('setting-btn-signout-cloud').addEventListener('click', () => {cloudSaveManager.signOutUser();});
+        document.getElementById('setting-btn-signin-cloud').addEventListener('click', () => {cloudSaveManager.signInWithGoogle();});
     }
 
     // Planet tab switching with loading transition

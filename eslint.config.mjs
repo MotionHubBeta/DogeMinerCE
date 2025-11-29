@@ -13,7 +13,7 @@ export default defineConfig([
       'no-unassigned-vars': 'error',
       'no-unmodified-loop-condition': 'error',
       'no-unreachable-loop': 'error',
-      'no-use-before-define': 'error',
+      'no-use-before-define': 'warn',
       'no-useless-assignment': 'warn',
       'require-atomic-updates': 'error',
       'camelcase': 'error',

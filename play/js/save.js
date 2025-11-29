@@ -2,7 +2,7 @@ import gameManager from "./game.js";
 import audioManager from "./audio.js";
 import shopManager from "./shop.js";
 import uiManager from "./ui.js";
-import cloudSaveManager from "./cloudSave.js";
+import cloudSaveManager from "./cloud-save.js";
 
 // DogeMiner: Community Edition - Save/Load System
 class SaveManager {

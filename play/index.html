@@ -275,15 +275,15 @@
                                     <div id="user-info" style="display: none;">
                                         <p id="user-name">Signed in as: </p>
                                         <div class="setting-buttons" id="cloud-save-buttons">
-                                            <button class="setting-btn" onclick="saveToCloud()">Save to Cloud</button>
-                                            <button class="setting-btn" onclick="loadFromCloud()">Load from
+                                            <button class="setting-btn" id="setting-btn-save-cloud">Save to Cloud</button>
+                                            <button class="setting-btn" id="setting-btn-load-cloud">Load from
                                                 Cloud</button>
-                                            <button class="setting-btn" onclick="signOutUser()">Sign Out</button>
+                                            <button class="setting-btn" id="setting-btn-signout-cloud">Sign Out</button>
                                         </div>
                                         <div id="cloud-local-actions"></div>
                                     </div>
                                     <div id="sign-in-section">
-                                        <button class="google-signin-btn" onclick="signInWithGoogle()">
+                                        <button class="google-signin-btn" id="setting-btn-signin-cloud">
                                             <svg class="google-icon" viewBox="0 0 24 24">
                                                 <path fill="#4285F4"
                                                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -304,11 +304,11 @@
                             <div class="settings-section" id="local-save-section">
                                 <h3>Local Save/Load</h3>
                                 <div class="setting-buttons" id="local-save-buttons">
-                                    <button class="setting-btn" onclick="saveGame()">Save Game</button>
-                                    <button class="setting-btn" onclick="loadGame()">Load Game</button>
-                                    <button class="setting-btn" onclick="exportSave()">Export Save</button>
-                                    <button class="setting-btn" onclick="importSave()">Import Save</button>
-                                    <button class="setting-btn danger" onclick="resetGame()">Reset Game</button>
+                                    <button class="setting-btn" id="setting-btn-save">Save Game</button>
+                                    <button class="setting-btn" id="setting-btn-load">Load Game</button>
+                                    <button class="setting-btn" id="setting-btn-export">Export Save</button>
+                                    <button class="setting-btn" id="setting-btn-import">Import Save</button>
+                                    <button class="setting-btn danger" id="setting-btn-reset">Reset Game</button>
                                 </div>
                             </div>
                         </div>

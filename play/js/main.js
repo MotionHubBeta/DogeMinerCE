@@ -4,6 +4,7 @@ import shopManager from './shop.js';
 import saveManager from './save.js';
 import audioManager  from './audio.js';
 import notificationManager from './notification.js';
+import cloudSaveManager from './cloud-save.js';
 
 // DogeMiner: Community Edition - Main Initialization
 const startGameWhenReady = () => initializeGame();
@@ -42,8 +43,14 @@ async function initializeGame() {
         uiManager.updateLoadingInfo('Preparing notifications...');
         notificationManager.init();
 
+        uiManager.updateLoadingInfo('Setting up cloud save...');
+        cloudSaveManager.init();
+
         uiManager.updateLoadingInfo('Loading game data...');
         
+        /* TODO - does this play nicely with cloud-save?
+        I think we should fetch local save (since fetching from localstore is essentially instant), then attempt to load from cloud save
+        */
         // Try to load existing save
         const saveLoaded = saveManager.loadGame();
         if (!saveLoaded) {
@@ -88,9 +95,7 @@ async function initializeGame() {
                     document.body.classList.remove('planet-titan');
                     
                     // Make sure moon is unlocked in UI
-                    if (uiManager) {
-                        uiManager.hideMoonLocked();
-                    }
+                    uiManager.hideMoonLocked();
                 } else if (gameManager.currentLevel === 'mars') {
                     mainCharacter.src = 'assets/general/character/party.png';
                     mainRock.src = 'assets/general/rocks/mars.png';
@@ -195,37 +200,6 @@ async function initializeGame() {
     }
 }
 
-// Global functions for UI interactions
-function saveGame() {
-    if (saveManager) {
-        saveManager.saveGame();
-    }
-}
-
-function loadGame() {
-    if (saveManager) {
-        saveManager.loadGame();
-    }
-}
-
-function exportSave() {
-    if (saveManager) {
-        saveManager.exportSave();
-    }
-}
-
-function importSave() {
-    if (saveManager) {
-        saveManager.importSave();
-    }
-}
-
-function resetGame() {
-    if (saveManager) {
-        saveManager.resetGame();
-    }
-}
-
 // Asset preloading
 async function preloadAssets() {
     const assets = [
@@ -293,28 +267,28 @@ document.addEventListener('keydown', (e) => {
     // Quick save with Ctrl+S
     if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
-        saveGame();
+        saveManager.saveGame();
     }
     
     // Quick load with Ctrl+L
     if (e.ctrlKey && e.key === 'l') {
         e.preventDefault();
-        loadGame();
+        saveManager.loadGame();
     }
     
     // Toggle shop with S
     if (e.key === 's' && !e.ctrlKey) {
-        switchMainTab('shop');
+        uiManager.switchMainTab('shop');
     }
     
     // Toggle upgrades with U
     if (e.key === 'u') {
-        switchMainTab('upgrades');
+        uiManager.switchMainTab('upgrades');
     }
     
     // Toggle achievements with A
     if (e.key === 'a') {
-        switchMainTab('achievements');
+        uiManager.switchMainTab('achievements');
     }
     
     // Rotate background with B
