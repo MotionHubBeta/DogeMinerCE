@@ -1,4 +1,6 @@
 import { Howl, Howler } from 'https://cdn.jsdelivr.net/npm/howler@2.2.4/+esm'
+import gameManager from './game.js';
+import saveManager from './save.js';
 
 // DogeMiner: Community Edition - Audio Manager using Howler.js
 class AudioManager {
@@ -93,9 +95,7 @@ class AudioManager {
             musicCheckbox.addEventListener('change', (e) => {
                 this.musicEnabled = e.target.checked;
                 // Sync with game settings
-                if (window.game) {
-                    window.game.musicEnabled = e.target.checked;
-                }
+                gameManager.musicEnabled = e.target.checked;
                 if (!this.musicEnabled) {
                     this.stopMusic();
                 } else {
@@ -104,9 +104,7 @@ class AudioManager {
                 // Play check sound
                 this.playSound('check');
                 // Trigger auto-save to save settings (don't show notification)
-                if (window.saveManager) {
-                    window.saveManager.saveGame(false);
-                }
+                saveManager.saveManager.saveGame(false);
             });
         }
 
@@ -116,15 +114,11 @@ class AudioManager {
             soundCheckbox.addEventListener('change', (e) => {
                 this.soundEnabled = e.target.checked;
                 // Sync with game settings
-                if (window.game) {
-                    window.game.soundEnabled = e.target.checked;
-                }
+                gameManager.soundEnabled = e.target.checked;
                 // Play check sound
                 this.playSound('check');
                 // Trigger auto-save to save settings (don't show notification)
-                if (window.saveManager) {
-                    window.saveManager.saveGame(false);
-                }
+                saveManager.saveGame(false);
             });
         }
     }
@@ -198,7 +192,7 @@ class AudioManager {
     playBackgroundMusic() {
         if (!this.musicEnabled) return;
         
-        const currentLevel = window.game?.currentLevel || 'earth';
+        const currentLevel = gameManager.currentLevel || 'earth';
 
         if (this.currentMusicPlanet === currentLevel) {
             if (currentLevel === 'moon' && this.isPlaying(this.moonLoop)) {
