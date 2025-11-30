@@ -17,19 +17,16 @@ A modern, open-source Dogecoin mining simulator built with JavaScript and HTML5.
 ### Play Online
 Visit [https://dogeminerce.com](https://dogeminerce.com) to play instantly in your browser.
 
-### Run Locally (Cloud Saves will not work)
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/DogeMinerCE/DogeMinerCE.git
-   cd DogeMinerCE
-   ```
+### Run locally
+Start a localhost server with python! (Just clicking the index.html file will not work!)
+Will be resolved in an easier way soon™️
 
-2. Open `play/index.html` in your web browser
-3. Start mining Dogecoins!
+*Note: you can also go to the MobileTest branch and download the code from there, as at the moment that branch is NOT using ES Modules, and it can be played directly from the index.html*
 
 ### Code License
 This projects code is licensed under the Apache 2.0 License - see the [Code License](LICENSE) file for details.
 
 ### Asset License
 The assets have different licensing terms. Please check the [Asset License](Asset%20License) file for details.
+
 
