@@ -1,6 +1,13 @@
+import audioManager from './audio.js';
+import shopManager from './shop.js';
+import uiManager from './ui.js';
+import gsap from "https://cdn.skypack.dev/gsap";
+
 // DogeMiner: Community Edition - Main Game Logic
-class DogeMinerGame {
-    constructor() {
+class GameManager {
+    constructor() {}
+
+    init() {
         this.dogecoins = 0;
         this.totalMined = 0;
         this.totalClicks = 0;
@@ -245,10 +252,9 @@ class DogeMinerGame {
         this.isSpaceDown = false;
         
         console.log('[Cutscene] Starting Moon Launch cutscene');
-        console.log('[Cutscene] Audio manager available:', !!window.audioManager);
-        if (window.audioManager) {
-            audioManager.suspendAllAudio();
-        }
+        console.log('[Cutscene] Audio manager available:', !!audioManager);
+
+        audioManager.suspendAllAudio();
         
         this.cutsceneVideo.src = '../assets/The Moon Launch.mp4';
         this.cutsceneVideo.currentTime = 0;
@@ -296,9 +302,7 @@ class DogeMinerGame {
         }
         this.cutsceneSkipButton?.classList.add('hidden');
         
-        if (window.audioManager) {
-            audioManager.resumeAudio();
-        }
+        audioManager.resumeAudio();
         
         // After moon launch cutscene, switch to moon
         if (this.hasPlayedMoonLaunch && this.currentLevel !== 'moon') {
@@ -311,9 +315,7 @@ class DogeMinerGame {
                     moonTab.click();
                 } else {
                     // Fallback if moon tab can't be found: call switchPlanet directly
-                    if (window.switchPlanet) {
-                        window.switchPlanet('moon');
-                    }
+                    uiManager.switchPlanet('moon');
                 }
             }, 500);
         }
@@ -327,6 +329,15 @@ class DogeMinerGame {
             this.mouseX = e.clientX;
             this.mouseY = e.clientY;
         });
+        
+        // Track touch position for mobile devices
+        document.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                this.mouseX = touch.clientX;
+                this.mouseY = touch.clientY;
+            }
+        }, { passive: true });
     }
     
     initializeGameData() {
@@ -722,21 +733,6 @@ class DogeMinerGame {
             if (text.parentNode) text.parentNode.removeChild(text);
         }, 1500);
     }
-    
-    getHelperCategoryForLevel(level = this.currentLevel) {
-        switch (level) {
-            case 'moon':
-                return 'moonHelpers';
-            case 'mars':
-                return 'marsHelpers';
-            case 'jupiter':
-                return 'jupiterHelpers';
-            case 'titan':
-                return 'titanHelpers';
-            default:
-                return 'helpers';
-        }
-    }
 
     getHelperArrayForLevel(level = this.currentLevel) {
         switch (level) {
@@ -764,10 +760,9 @@ class DogeMinerGame {
         console.log('Current level:', this.currentLevel);
         console.log('Stack trace:', new Error().stack);
 
-        const helperCategory = this.getHelperCategoryForLevel();
-        const helperData = window.shopManager?.shopData?.[helperCategory]?.[helperType];
+        const helperData = shopManager.shopData.helpers[this.currentLevel][helperType];
         if (!helperData) {
-            console.error('Helper type not found:', helperType, 'in category', helperCategory);
+            console.error('Helper type not found:', helperType, 'in category', this.currentLevel);
             return false;
         }
 
@@ -822,9 +817,7 @@ class DogeMinerGame {
 
         this.dogecoins -= cost;
 
-        if (window.audioManager) {
-            window.audioManager.playSound('ching');
-        }
+        audioManager.playSound('ching');
 
         helperArray.push({
             type: helperType,
@@ -839,21 +832,19 @@ class DogeMinerGame {
         this.updateShopPrices();
         this.updateUI();
 
-        if (window.uiManager) {
-            const level = this.currentLevel;
-            const hasPlayedMoonLaunch = this.hasPlayedMoonLaunch;
+        const level = this.currentLevel;
+        const hasPlayedMoonLaunch = this.hasPlayedMoonLaunch;
 
-            uiManager.updateBackground?.(level);
-            uiManager.initializePlanetTabs?.();
+        uiManager.updateBackground?.(level);
+        uiManager.initializePlanetTabs?.();
 
-            if (hasPlayedMoonLaunch) {
-                uiManager.hideMoonLocked?.();
-            }
-
-            requestAnimationFrame(() => {
-                uiManager.updateShopContent?.();
-            });
+        if (hasPlayedMoonLaunch) {
+            uiManager.hideMoonLocked?.();
         }
+
+        requestAnimationFrame(() => {
+            uiManager.updateShopContent?.();
+        });
 
         return true;
     }
@@ -1098,16 +1089,35 @@ class DogeMinerGame {
             this.cancelHelperPlacement();
         };
         
-        // Add listeners
+        // Touch event handlers for mobile support
+        const handleTouchMove = (e) => {
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                handleMouseMove({ clientX: touch.clientX, clientY: touch.clientY });
+            }
+        };
+        
+        const handleTouchEnd = (e) => {
+            if (e.changedTouches.length > 0) {
+                const touch = e.changedTouches[0];
+                handleClick({ clientX: touch.clientX, clientY: touch.clientY });
+            }
+        };
+        
+        // Add listeners (both mouse and touch)
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('click', handleClick);
         document.addEventListener('contextmenu', handleRightClick);
+        document.addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.addEventListener('touchend', handleTouchEnd);
         
         // Store references for cleanup
         this.placementListeners = {
             mousemove: handleMouseMove,
             click: handleClick,
-            contextmenu: handleRightClick
+            contextmenu: handleRightClick,
+            touchmove: handleTouchMove,
+            touchend: handleTouchEnd
         };
     }
     
@@ -1473,8 +1483,13 @@ class DogeMinerGame {
     
     // Chromatic aberration effect for buy helper buttons
     createChromaticAberrationEffect(button) {
+        const animationLib = gsap;
+        if (!animationLib) {
+            // GSAP unavailable – bail out gracefully so purchases still work
+            return null;
+        }
         // Simple and compatible chromatic aberration effect
-        const tl = gsap.timeline();
+        const tl = animationLib.timeline();
         
         // Get all elements within the button (including dogecoin logo and price text)
         const buttonElements = [button, ...button.querySelectorAll('*')];
@@ -1524,8 +1539,8 @@ class DogeMinerGame {
         if (!placedHelper.helper || !placedHelper.helper.icon) {
             // Try to get helper data based on current level and type
             const helperCategory = this.getHelperCategoryForLevel();
-            if (window.shopManager && window.shopManager.shopData && window.shopManager.shopData[helperCategory]) {
-                placedHelper.helper = window.shopManager.shopData[helperCategory][placedHelper.type] || this.getHelperData(placedHelper.type);
+            if (shopManager.shopData[helperCategory]) {
+                placedHelper.helper = shopManager.shopData[helperCategory][placedHelper.type] || this.getHelperData(placedHelper.type);
             } else {
                 // Fallback to generic helper data
                 placedHelper.helper = this.getHelperData(placedHelper.type);
@@ -1684,10 +1699,11 @@ class DogeMinerGame {
         // Make helper draggable
         helperSprite.style.cursor = 'grab';
         
-        helperSprite.addEventListener('mousedown', (e) => {
+        // Helper function to start drag (used by both mouse and touch)
+        const startDrag = (e) => {
             // Prevent drag-and-drop ONLY during helper placement (buy mode)
             // Don't block during normal drag-and-drop (helpers can be on cursor for dragging)
-            console.log('Drag mousedown - isPlacingHelpers:', this.isPlacingHelpers);
+            console.log('Drag start - isPlacingHelpers:', this.isPlacingHelpers);
             if (this.isPlacingHelpers) {
                 console.log('BLOCKED: Drag attempt during placement');
                 e.preventDefault();
@@ -1704,28 +1720,30 @@ class DogeMinerGame {
             
             // Stop mining animation
             this.stopHelperMining(placedHelper);
-        });
+        };
         
-        document.addEventListener('mousemove', (e) => {
+        // Helper function to handle move (used by both mouse and touch)
+        const handleMove = () => {
             if (isDragging && !hasMoved) {
                 // First movement - pick up the helper immediately
                 hasMoved = true;
                 pickedUpHelper = this.pickupHelper(placedHelper, helperSprite, nameTooltip);
             }
-        });
+        };
         
-        document.addEventListener('mouseup', (e) => {
+        // Helper function to end drag (used by both mouse and touch)
+        const endDrag = (clientX, clientY) => {
             if (isDragging && pickedUpHelper) {
-                // Drop the helper at current mouse position, centered on cursor
+                // Drop the helper at current position, centered on cursor/touch
                 const leftPanel = document.getElementById('left-panel');
                 const panelRect = leftPanel.getBoundingClientRect();
                 
                 // Calculate centered position
                 const helperSize = pickedUpHelper.type === 'miningShibe' ? 30 : 60;
-                const offset = helperSize / 2; // Center the helper on cursor
+                const offset = helperSize / 2; // Center the helper on cursor/touch
                 
-                const x = e.clientX - panelRect.left - offset;
-                const y = e.clientY - panelRect.top - offset;
+                const x = clientX - panelRect.left - offset;
+                const y = clientY - panelRect.top - offset;
                 
                 this.dropPickedUpHelper(pickedUpHelper, x, y);
             }
@@ -1734,6 +1752,45 @@ class DogeMinerGame {
             hasMoved = false;
             pickedUpHelper = null;
             helperSprite.style.cursor = 'grab';
+        };
+        
+        // Mouse events
+        helperSprite.addEventListener('mousedown', startDrag);
+        
+        document.addEventListener('mousemove', (e) => {
+            handleMove();
+        });
+        
+        document.addEventListener('mouseup', (e) => {
+            endDrag(e.clientX, e.clientY);
+        });
+        
+        // Touch events for mobile support
+        helperSprite.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                const touch = e.touches[0];
+                // Update mouse position for touch
+                this.mouseX = touch.clientX;
+                this.mouseY = touch.clientY;
+                startDrag(e);
+            }
+        }, { passive: false });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (isDragging && e.touches.length > 0) {
+                const touch = e.touches[0];
+                // Update mouse position for touch
+                this.mouseX = touch.clientX;
+                this.mouseY = touch.clientY;
+                handleMove();
+            }
+        }, { passive: false });
+        
+        document.addEventListener('touchend', (e) => {
+            if (e.changedTouches.length > 0) {
+                const touch = e.changedTouches[0];
+                endDrag(touch.clientX, touch.clientY);
+            }
         });
     }
     
@@ -1941,11 +1998,13 @@ class DogeMinerGame {
             this.helperSpriteBeingPlaced = null;
         }
         
-        // Remove event listeners
+        // Remove event listeners (both mouse and touch)
         if (this.placementListeners) {
             document.removeEventListener('mousemove', this.placementListeners.mousemove);
             document.removeEventListener('click', this.placementListeners.click);
             document.removeEventListener('contextmenu', this.placementListeners.contextmenu);
+            document.removeEventListener('touchmove', this.placementListeners.touchmove);
+            document.removeEventListener('touchend', this.placementListeners.touchend);
             this.placementListeners = null;
         }
         
@@ -1968,7 +2027,7 @@ class DogeMinerGame {
     cancelHelperPlacement() {
         // Refund the cost for all helpers on cursor
         this.helpersOnCursor.forEach(helperData => {
-            const helper = window.shopManager.shopData.helpers[helperData.type];
+            const helper = shopManager.shopData.helpers[helperData.type];
             const owned = this.helpers.filter(h => h.type === helperData.type).length;
             const cost = Math.floor(helper.baseCost * Math.pow(1.15, owned - 1));
             this.dogecoins += cost;
@@ -2032,8 +2091,7 @@ class DogeMinerGame {
                 const helperType = buyButton.getAttribute('data-helper-type');
                 if (helperType) {
                     // Get the correct helper category based on current planet
-                    const helperCategory = this.getHelperCategoryForLevel();
-                    const shopCategory = window.shopManager?.shopData?.[helperCategory];
+                    const shopCategory = shopManager.shopData.helpers[this.currentLevel];
                     const helper = shopCategory?.[helperType];
                     if (helper) {
                         const helperArray = this.getHelperArrayForLevel();
@@ -2511,10 +2569,7 @@ class DogeMinerGame {
     }
     
     playSound(soundFile) {
-        // Use audio manager if available
-        if (window.audioManager) {
-            audioManager.playSound(soundFile);
-        }
+        audioManager.playSound(soundFile);
     }
     
     checkAchievements() {
@@ -2600,115 +2655,15 @@ class DogeMinerGame {
     }
     
     getHelperData(helperType) {
-        // First check if we have a ShopManager available with full helper data
-        if (window.shopManager && window.shopManager.shopData) {
-            // Try earth helpers first
-            if (window.shopManager.shopData.helpers && window.shopManager.shopData.helpers[helperType]) {
-                return window.shopManager.shopData.helpers[helperType];
-            }
-            
-            // Then try moon helpers
-            if (window.shopManager.shopData.moonHelpers && window.shopManager.shopData.moonHelpers[helperType]) {
-                return window.shopManager.shopData.moonHelpers[helperType];
-            }
-            
-            // Then try mars helpers
-            if (window.shopManager.shopData.marsHelpers && window.shopManager.shopData.marsHelpers[helperType]) {
-                return window.shopManager.shopData.marsHelpers[helperType];
+        for (let i = 0; i < shopManager.shopData.helpers.length; i++) {
+            const helper = shopManager.shopData.helpers[i][helperType];
+
+            if (helper) {
+                return helper;
             }
         }
-        
-        // Fallback to hardcoded helper data if not found in ShopManager
-        // Return complete helper data based on type
-        const earthHelpers = {
-            'miningShibe': { 
-                baseDps: 0.2, 
-                icon: 'assets/helpers/shibes/shibes-idle-0.png',
-                miningSprite: 'assets/helpers/shibes/shibes-mine-0.png',
-                name: 'Mining Shibe'
-            },
-            'dogeKennels': { 
-                baseDps: 2, 
-                icon: 'assets/helpers/kennels/kennels-idle-0.png',
-                miningSprite: 'assets/helpers/kennels/kennels-mine-0.png',
-                name: 'Doge Kennels'
-            },
-            'streamerKittens': { 
-                baseDps: 4, 
-                icon: 'assets/helpers/kittens/kittens-idle-0.png',
-                miningSprite: 'assets/helpers/kittens/kittens-mine-0.png',
-                name: 'Streamer Kittens'
-            },
-            'spaceRocket': { 
-                baseDps: 9, 
-                icon: 'assets/helpers/rockets/rockets-idle-0.png',
-                miningSprite: 'assets/helpers/rockets/rockets-mine-0.png',
-                name: 'Space Rocket'
-            },
-            'timeMachineRig': { 
-                baseDps: 20, 
-                icon: 'assets/helpers/rigs/rigs-idle-0.png',
-                miningSprite: 'assets/helpers/rigs/rigs-mine-0.png',
-                name: 'Time Machine Mining Rig'
-            },
-            'infiniteDogebility': { 
-                baseDps: 50, 
-                icon: 'assets/helpers/dogebility/dogebility-idle-0.png',
-                miningSprite: 'assets/helpers/dogebility/dogebility-mine-0.png',
-                name: 'Infinite Dogebility'
-            }
-        };
-        
-        const moonHelpers = {
-            'moonBase': {
-                baseDps: 12,
-                icon: 'assets/helpers/bases/bases-idle-0.png',
-                miningSprite: 'assets/helpers/bases/bases-mine-0.png',
-                name: 'Moon Base'
-            },
-            'moonShibe': {
-                baseDps: 9,
-                icon: 'assets/helpers/moonshibe/moonshibe-idle-0.png',
-                miningSprite: 'assets/helpers/moonshibe/moonshibe-mine-0.png',
-                name: 'Moon Shibe'
-            },
-            'dogeCar': {
-                baseDps: 12,
-                icon: 'assets/helpers/dogecar/dogecar-idle-0.png',
-                miningSprite: 'assets/helpers/dogecar/dogecar-mine-0.png',
-                name: 'Doge Car'
-            },
-            'landerShibe': {
-                baseDps: 20,
-                icon: 'assets/helpers/landershibe/landershibe-idle-0.png',
-                miningSprite: 'assets/helpers/landershibe/landershibe-mine-0.png',
-                name: 'Lander Shibe'
-            },
-            'marsRocket': {
-                baseDps: 50,
-                icon: 'assets/helpers/marsrocket/marsrocket-idle-0.png',
-                miningSprite: 'assets/helpers/marsrocket/marsrocket-mine-0.png',
-                name: 'Mars Rocket'
-            },
-            'dogeGate': {
-                baseDps: 155,
-                icon: 'assets/helpers/dogegate/dogegate-idle-0.png',
-                miningSprite: 'assets/helpers/dogegate/dogegate-mine-0.png',
-                name: 'Doge Gate'
-            }
-        };
-        
-        // Check both helper types
-        if (earthHelpers[helperType]) {
-            return earthHelpers[helperType];
-        }
-        
-        if (moonHelpers[helperType]) {
-            return moonHelpers[helperType];
-        }
-        
-        // Default fallback
-        return earthHelpers['miningShibe'];
+
+        return undefined;
     }
     
     recreateHelperSprites() {
@@ -2753,5 +2708,5 @@ class DogeMinerGame {
     }
 }
 
-// Global game instance
-let game;
+const instance = new GameManager();
+export default instance;
